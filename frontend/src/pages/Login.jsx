@@ -5,6 +5,7 @@ import { useCartStore } from '../store/cartStore';
 import { useToastStore } from '../store/toastStore';
 import { useI18n } from '../i18n';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import AuthAside from '../components/AuthAside';
 
 const DEMO = [
   { labelKey: 'auth.demoCustomer', email: 'john@example.com', password: 'Password@123' },
@@ -43,7 +44,8 @@ export default function Login() {
 
   return (
     <div className="auth-page">
-      <div className="auth-card">
+      <div className="auth-shell">
+        <div className="auth-card">
         <div className="row between gap-12 mb-24">
           <div className="row gap-12">
             <span className="brand-mark">A</span>
@@ -112,6 +114,8 @@ export default function Login() {
         <p className="small muted mt-24" style={{ textAlign: 'center' }}>
           {t('auth.newHere')} <Link to="/register" className="link">{t('auth.createAnAccount')}</Link>
         </p>
+        </div>
+        <AuthAside />
       </div>
     </div>
   );

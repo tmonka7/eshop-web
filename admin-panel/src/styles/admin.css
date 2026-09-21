@@ -677,3 +677,67 @@ table.data th { transition: color var(--t-fast); }
   }
   [data-reveal] { opacity: 1; transform: none; }
 }
+
+/* ==========================================================================
+   Design-reference polish
+   Brings the panel closer to the ShopWorld reference: accented headings, a
+   tinted table header, softer surfaces and a stat icon that reads as a tile.
+   Presentation only - no layout is changed.
+   ========================================================================== */
+
+/* A short brand rule beside the page title, matching the storefront. */
+.page-head h1 { position: relative; padding-left: 14px; }
+.page-head h1::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.16em;
+  bottom: 0.16em;
+  width: 4px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, var(--green-500), var(--green-700));
+}
+
+/* Card headers get the same treatment, one step quieter. */
+.card-title { position: relative; padding-left: 11px; }
+.card-title::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.22em;
+  bottom: 0.22em;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--green-400);
+}
+
+/* The reference shows a tinted, quiet header rather than a plain white one. */
+table.data thead th {
+  background: var(--ink-50);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-600);
+}
+table.data thead th:first-child { border-top-left-radius: var(--radius); }
+table.data thead th:last-child { border-top-right-radius: var(--radius); }
+
+/* Rounder, softer KPI icon tiles. */
+.stat-icon { width: 40px; height: 40px; border-radius: 12px; }
+.stat-card .label { letter-spacing: 0.01em; }
+.stat-card .value { font-size: 1.8rem; }
+
+/* Surfaces sit a touch softer, so the workspace reads as layered rather than
+   as a grid of outlined boxes. */
+.card { box-shadow: 0 1px 2px rgba(11, 31, 20, 0.05), 0 6px 18px -12px rgba(11, 31, 20, 0.18); }
+.modal { box-shadow: 0 32px 70px -28px rgba(11, 31, 20, 0.55); }
+
+.avatar-circle { background: linear-gradient(135deg, var(--green-100), var(--green-50)); }
+
+/* The rail's own scrollbar, so a long nav does not show the OS default over
+   the dark background. */
+.sidebar-nav { scrollbar-width: thin; scrollbar-color: var(--ink-700) transparent; }
+.sidebar-nav::-webkit-scrollbar { width: 6px; }
+.sidebar-nav::-webkit-scrollbar-thumb { background: var(--ink-700); border-radius: 3px; }
+.sidebar-nav::-webkit-scrollbar-track { background: transparent; }

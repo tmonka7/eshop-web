@@ -7,6 +7,10 @@
     <color name="primary_dark">#166534</color>
     <color name="primary_light">#DCFCE7</color>
     <color name="primary_surface">#F0FDF4</color>
+    <!-- Only for large fills such as the splash gradient: white sits at
+         3.30:1 on this step, which clears the 3:1 for a graphic but not the
+         4.5:1 that any label would need. -->
+    <color name="primary_bright">#16A34A</color>
 
     <!-- A deeper teal, so an "ok" badge never looks like a primary button. -->
     <color name="success">#0D9488</color>

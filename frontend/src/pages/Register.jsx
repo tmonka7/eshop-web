@@ -5,6 +5,7 @@ import { useCartStore } from '../store/cartStore';
 import { useToastStore } from '../store/toastStore';
 import { useI18n } from '../i18n';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import AuthAside from '../components/AuthAside';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -51,7 +52,8 @@ export default function Register() {
 
   return (
     <div className="auth-page">
-      <div className="auth-card">
+      <div className="auth-shell">
+        <div className="auth-card">
         <div className="row between gap-12 mb-24">
           <div className="row gap-12">
             <span className="brand-mark">A</span>
@@ -144,6 +146,8 @@ export default function Register() {
         <p className="small muted mt-24" style={{ textAlign: 'center' }}>
           {t('auth.alreadyHaveAccount')} <Link to="/login" className="link">{t('auth.signIn')}</Link>
         </p>
+        </div>
+        <AuthAside />
       </div>
     </div>
   );

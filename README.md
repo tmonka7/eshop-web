@@ -178,6 +178,22 @@ than cycling hues, and the revenue-by-category bars use a single colour because
 they are revenue-sorted, where colouring by index would encode rank instead of
 identity.
 
+### Modules from the reference design
+
+Pieces the reference layout has that the base sheet had no equivalent for:
+
+| Module | Where |
+|---|---|
+| Department rail beside the hero | `.dept-rail` — hidden under 1024px, where the nav bar and the category grid already reach every department |
+| Hot Deals row + promo tiles | `.deal-layout`, `.promo-tile` — the discount headline is read off the catalogue, so it can't advertise an offer that isn't there |
+| Accented section headings | `.head-accent`, and the panel's `.page-head h1` |
+| Split sign-in panel | `.auth-shell` + [AuthAside.jsx](frontend/src/components/AuthAside.jsx) — decorative and `aria-hidden`, dropped under 860px |
+
+The deal tiles link to `/products?onSale=true`, which is a real filter
+(`$expr: { $gt: ['$comparePrice', '$price'] }` in the product controller) with
+its own checkbox and removable chip on the listing page — rather than a link
+that quietly lands on an unfiltered list.
+
 ### Motion
 
 Each web project ends its stylesheet with a self-contained **motion layer** that

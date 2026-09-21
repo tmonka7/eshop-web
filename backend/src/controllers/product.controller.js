@@ -71,6 +71,9 @@ async function buildFilter(query, { adminView = false } = {}) {
   if (Number.isFinite(rating)) filter.rating = { $gte: rating };
 
   if (query.featured === 'true') filter.isFeatured = true;
+  // "On sale" is a relationship between two fields rather than a stored flag,
+  // so it needs $expr. Kept off filter.$or, which the search branch owns.
+  if (query.onSale === 'true') filter.$expr = { $gt: ['$comparePrice', '$price'] };
   if (query.inStock === 'true') filter.stock = { $gt: 0 };
   if (query.stock === 'out') filter.stock = { $lte: 0 };
   if (query.stock === 'low') filter.stock = { $gt: 0, $lte: 10 };

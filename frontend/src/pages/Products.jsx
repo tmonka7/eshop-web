@@ -107,6 +107,9 @@ export default function Products() {
       label: t('products.ratingAndUp', { rating: query.minRating }),
     });
   }
+  // Arriving from a Hot Deals tile sets this, so it needs a chip - otherwise
+  // the list stays filtered with nothing on screen saying why.
+  if (query.onSale === 'true') activeChips.push({ key: 'onSale', label: t('products.onSaleOnly') });
 
   function clearChip(chip) {
     if (chip.key === 'price') patchParams({ minPrice: '', maxPrice: '' });
@@ -270,6 +273,14 @@ export default function Products() {
                   onChange={(e) => patchParams({ featured: e.target.checked ? 'true' : '' })}
                 />
                 {t('products.featuredOnly')}
+              </label>
+              <label className="filter-option">
+                <input
+                  type="checkbox"
+                  checked={query.onSale === 'true'}
+                  onChange={(e) => patchParams({ onSale: e.target.checked ? 'true' : '' })}
+                />
+                {t('products.onSaleOnly')}
               </label>
             </div>
           </div>
