@@ -27,6 +27,10 @@ export const compactNumber = (value) =>
 
 export const formatNumber = (value) => new Intl.NumberFormat(intlTag()).format(Number(value) || 0);
 
+// For KPI tiles that count up to a plain integer: the intermediate frames are
+// fractional, so they have to be rounded before they are grouped.
+export const wholeNumber = (value) => formatNumber(Math.round(Number(value) || 0));
+
 export const formatDate = (value, opts = {}) => {
   if (!value) return '-';
   return new Date(value).toLocaleDateString(intlTag(), {

@@ -19,6 +19,17 @@
         <item name="android:navigationBarColor">@color/white</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
+
+        <!-- Every activity push/pop runs the shared slide, so navigation feels
+             continuous instead of cutting between screens. -->
+        <item name="android:windowAnimationStyle">@style/Animation.AuraMart.Activity</item>
+    </style>
+
+    <style name="Animation.AuraMart.Activity" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/slide_in_right</item>
+        <item name="android:activityOpenExitAnimation">@anim/slide_out_left</item>
+        <item name="android:activityCloseEnterAnimation">@anim/slide_in_left</item>
+        <item name="android:activityCloseExitAnimation">@anim/slide_out_right</item>
     </style>
 
     <style name="Theme.AuraMart.Splash" parent="Theme.AuraMart">
@@ -39,7 +50,7 @@
     </style>
 
     <style name="Widget.AuraMart.Button.Success" parent="Widget.AuraMart.Button">
-        <item name="backgroundTint">@color/success</item>
+        <item name="backgroundTint">@color/success_dark</item>
     </style>
 
     <style name="Widget.AuraMart.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
@@ -68,6 +79,8 @@
         <item name="cardCornerRadius">@dimen/radius_md</item>
         <item name="cardElevation">1dp</item>
         <item name="cardBackgroundColor">@color/surface</item>
+        <!-- Presses dip and lift the card; see animator/card_press.xml. -->
+        <item name="android:stateListAnimator">@animator/card_press</item>
     </style>
 
     <style name="Text.Title" parent="">

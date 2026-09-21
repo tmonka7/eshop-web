@@ -91,30 +91,40 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-4 mb-24">
+        {/* Each tile counts up to its figure; `format` runs per frame so the
+            currency symbol and the compact suffix stay attached throughout.
+            Revenue reads green rather than red - red is the destructive and
+            discount colour here, and money coming in is not either. */}
         <StatCard
           label={t('dashboard.totalRevenue')}
-          value={currency(stats.totalRevenue.value)}
+          count={stats.totalRevenue.value}
+          format={currency}
           delta={stats.totalRevenue.change}
           icon={<Dollar size={18} />}
-          tone="red"
+          tone="green"
         />
         <StatCard
           label={t('dashboard.totalOrders')}
-          value={compactNumber(stats.totalOrders.value)}
+          count={stats.totalOrders.value}
+          format={compactNumber}
           delta={stats.totalOrders.change}
           icon={<Package size={18} />}
           tone="blue"
         />
         <StatCard
           label={t('dashboard.totalCustomers')}
-          value={compactNumber(stats.totalCustomers.value)}
+          count={stats.totalCustomers.value}
+          format={compactNumber}
           delta={stats.totalCustomers.change}
           icon={<Users size={18} />}
-          tone="green"
+          tone="amber"
         />
         <StatCard
           label={t('dashboard.conversionRate')}
-          value={`${stats.conversionRate.value}%`}
+          count={stats.conversionRate.value}
+          // The API rounds to 2dp; Number() drops the trailing zero so the
+          // figure it settles on is the one the tile showed before.
+          format={(v) => `${Number(v.toFixed(2))}%`}
           delta={stats.conversionRate.change}
           icon={<TrendUp size={18} />}
           tone="purple"

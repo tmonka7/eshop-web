@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 
 import Header from './components/Header';
@@ -26,11 +26,13 @@ import { useAuthStore } from './store/authStore';
 import { useCartStore } from './store/cartStore';
 import { useToastStore } from './store/toastStore';
 import { useI18n } from './i18n';
+import { replayPageEnter, startMotion } from './utils/motion';
 
 const AUTH_ROUTES = ['/login', '/register'];
 
 export default function App() {
   const location = useLocation();
+  const mainRef = useRef(null);
   const { t, locale } = useI18n();
   const bootstrap = useAuthStore((s) => s.bootstrap);
   const user = useAuthStore((s) => s.user);
@@ -41,6 +43,15 @@ export default function App() {
   useEffect(() => {
     bootstrap();
   }, [bootstrap]);
+
+  // Scroll-reveal and the header's scrolled state. Started once for the whole
+  // app; it watches for nodes added by later navigations itself.
+  useEffect(() => startMotion(), []);
+
+  // Every navigation replays the page-level entrance.
+  useEffect(() => {
+    replayPageEnter(mainRef.current);
+  }, [location.pathname]);
 
   // Load the right cart once we know whether anyone is signed in. Re-runs on a
   // language change so cart lines carry the newly translated product names.
@@ -66,7 +77,7 @@ export default function App() {
       <ScrollToTop />
       {!isAuthPage ? <Header /> : null}
 
-      <main className="app-main">
+      <main className="app-main" ref={mainRef}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />

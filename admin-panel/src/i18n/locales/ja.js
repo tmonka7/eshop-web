@@ -119,6 +119,7 @@ export default {
     newCustomersPerMonth: '月別の新規顧客数',
     unitsSold: '販売数',
     otherCategories: 'その他',
+    vsPrevious: '前期比',
     noSalesInRange: 'この期間の売上はまだありません。',
     restockList: '補充リスト',
     stockLeft: '残り在庫',

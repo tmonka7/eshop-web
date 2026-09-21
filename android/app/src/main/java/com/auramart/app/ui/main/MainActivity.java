@@ -89,6 +89,9 @@ public class MainActivity extends AppCompatActivity {
 
         getSupportFragmentManager()
                 .beginTransaction()
+                // Tabs sit alongside each other rather than in a stack, so the
+                // swap cross-fades instead of sliding in a direction.
+                .setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
                 .replace(R.id.fragmentContainer, fragment)
                 .commit();
     }

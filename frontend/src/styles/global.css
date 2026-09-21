@@ -657,3 +657,385 @@ ul { margin: 0; padding: 0; list-style: none; }
    allowed to wrap rather than overflow their buttons and chips. */
 :root:lang(zh) .btn, :root:lang(ja) .btn,
 html[lang='zh'] .btn, html[lang='ja'] .btn { white-space: normal; }
+
+/* ==========================================================================
+   Motion layer
+   Everything below is presentation-only: it restyles and animates rules
+   defined earlier rather than introducing new layout, so the whole dynamic
+   treatment can be read - or reverted - in one block.
+
+   Two rules hold throughout:
+   - Nothing animated carries meaning on its own. Entrance transitions start
+     from opacity 0 but are applied by JS, so content stays visible when the
+     script never runs, and no state is signalled by motion alone.
+   - Every gradient that sits under white text runs between stops that each
+     clear 4.5:1, so the sweep cannot dip below the contrast floor mid-way.
+   ========================================================================== */
+
+:root {
+  /* Decelerating for entrances, overshooting for anything the user pressed. */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --t-fast: 140ms;
+  --t-base: 260ms;
+  --t-slow: 560ms;
+
+  /* Tinted shadows: a green glow reads as lift on the tinted canvas in a way
+     a neutral gray shadow does not. */
+  --glow: 0 14px 30px -14px rgba(21, 128, 61, 0.55);
+  --glow-strong: 0 20px 44px -14px rgba(21, 128, 61, 0.72);
+  --lift: 0 22px 44px -20px rgba(11, 31, 20, 0.38);
+}
+
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes pop { from { opacity: 0; transform: scale(0.82); } to { opacity: 1; transform: scale(1); } }
+@keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.32); } 100% { transform: scale(1); } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+@keyframes pan { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+@keyframes sheen { from { transform: translateX(-130%) skewX(-18deg); } to { transform: translateX(230%) skewX(-18deg); } }
+@keyframes halo {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(21, 128, 61, 0.45); }
+  70% { box-shadow: 0 0 0 10px rgba(21, 128, 61, 0); }
+}
+@keyframes flare {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+  50% { transform: scale(1.06); box-shadow: 0 0 0 7px rgba(239, 68, 68, 0); }
+}
+@keyframes blob-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(34px, -26px) scale(1.16); }
+}
+@keyframes blob-b {
+  0%, 100% { transform: translate(0, 0) scale(1.1); }
+  50% { transform: translate(-30px, 22px) scale(0.92); }
+}
+@keyframes toast-pop {
+  from { opacity: 0; transform: translateX(46px) scale(0.92); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ------------------------- scroll-triggered entrances ---------------------
+   utils/motion.js stamps data-reveal on the elements it observes and flips it
+   to "in" when they cross the viewport. The hidden state lives on the
+   attribute the script sets - never in the base rule - so a failed or blocked
+   script leaves the page fully readable instead of blank. */
+
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity var(--t-slow) var(--ease-out),
+    transform var(--t-slow) var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+/* will-change is dropped once the entrance is done: left in place it would
+   keep creating a containing block, which breaks position:sticky panels and
+   fixed descendants long after the animation has finished. */
+[data-reveal="in"] { opacity: 1; transform: none; will-change: auto; }
+
+/* Route changes replay the entrance for the whole page body. */
+.app-main[data-enter] { animation: rise 420ms var(--ease-out) both; }
+
+/* --------------------------------- header --------------------------------- */
+
+.header { transition: box-shadow var(--t-base) var(--ease-out); }
+body[data-scrolled="1"] .header { box-shadow: 0 14px 30px -18px rgba(11, 31, 20, 0.5); }
+body[data-scrolled="1"] .header-main {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+}
+
+/* Slow drift across the announcement bar. Both stops clear 4.5:1 with white. */
+.header-top {
+  background: linear-gradient(90deg, var(--green-800), var(--green-700) 50%, var(--green-800));
+  background-size: 200% 100%;
+  animation: pan 14s linear infinite;
+}
+
+.brand-mark { transition: transform var(--t-base) var(--ease-spring), box-shadow var(--t-base); }
+.brand:hover .brand-mark { transform: rotate(-8deg) scale(1.08); box-shadow: var(--glow); }
+
+.icon-btn { transition: background var(--t-fast), color var(--t-fast), transform var(--t-fast) var(--ease-spring); }
+.icon-btn:hover { transform: translateY(-2px); }
+/* Header.jsx keys this element on the count, so React remounts it and the
+   animation replays every time the badge number actually changes. */
+.icon-btn .count { animation: bump 420ms var(--ease-spring); }
+
+/* A sliding rule under the nav, rather than a background swap. */
+.nav-link { position: relative; }
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 13px;
+  right: 13px;
+  bottom: 3px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--t-base) var(--ease-out);
+}
+.nav-link:hover::after, .nav-link.active::after { transform: scaleX(1); }
+
+.user-dropdown, .lang-menu, .search-suggest { animation: pop 180ms var(--ease-out); transform-origin: top right; }
+.search input { transition: background var(--t-fast), border-color var(--t-fast), box-shadow var(--t-base); }
+.search button { transition: transform var(--t-fast) var(--ease-spring), background var(--t-fast); }
+.search button:hover { transform: scale(1.08); background: var(--primary-dark); }
+
+/* --------------------------------- buttons -------------------------------- */
+
+.btn {
+  position: relative;
+  overflow: hidden;
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast),
+    color var(--t-fast),
+    box-shadow var(--t-base) var(--ease-out),
+    transform var(--t-fast) var(--ease-spring);
+}
+/* A highlight sweeping across on hover. Kept faint so it reads as a sheen
+   rather than washing out the label underneath it. */
+.btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 42%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+  transform: translateX(-130%) skewX(-18deg);
+  pointer-events: none;
+}
+.btn:hover:not(:disabled)::after { animation: sheen 720ms var(--ease-out); }
+.btn:hover:not(:disabled) { transform: translateY(-2px); }
+.btn:active:not(:disabled) { transform: translateY(0) scale(0.97); }
+.btn:disabled::after { content: none; }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--green-700), var(--green-800));
+  box-shadow: var(--glow);
+}
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--green-800), var(--green-700));
+  box-shadow: var(--glow-strong);
+}
+/* teal-600 is only 3.74:1 with white, which is under the floor for a 14px
+   label, so the success button runs between the two darker teal steps. */
+.btn-success { background: linear-gradient(135deg, #0f766e, #115e59); }
+.btn-success:hover:not(:disabled) { background: linear-gradient(135deg, #115e59, #0f766e); }
+.btn-dark { background: linear-gradient(135deg, var(--ink-900), var(--ink-700)); }
+.btn-dark:hover:not(:disabled) { background: linear-gradient(135deg, var(--ink-800), var(--ink-900)); }
+.btn-outline:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); box-shadow: var(--glow); }
+
+/* ---------------------------------- hero ---------------------------------- */
+
+.hero {
+  position: relative;
+  background: linear-gradient(120deg, var(--green-200) 0%, var(--green-50) 38%, #ffffff 62%, var(--green-100) 100%);
+  background-size: 220% 220%;
+  animation: pan 22s ease-in-out infinite alternate;
+}
+/* Two soft colour fields drifting behind the copy. */
+.hero::before, .hero::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(46px);
+  pointer-events: none;
+}
+.hero::before {
+  width: 320px;
+  height: 320px;
+  top: -110px;
+  right: -60px;
+  background: rgba(74, 222, 128, 0.42);
+  animation: blob-a 16s ease-in-out infinite;
+}
+.hero::after {
+  width: 260px;
+  height: 260px;
+  bottom: -120px;
+  left: 18%;
+  background: rgba(13, 148, 136, 0.28);
+  animation: blob-b 20s ease-in-out infinite;
+}
+.hero > * { position: relative; z-index: 1; }
+
+/* The sweep shifts hue, green to teal, rather than just lightness: the pale
+   end of the hero gradient is green-200, and green-600 only reaches 2.72:1
+   against it - under the 3:1 floor even for a 2.6rem headline. The two stops
+   used here are 5.88:1 and 4.52:1 on that tint, so the headline stays legible
+   wherever the panning background happens to be. */
+@supports (-webkit-background-clip: text) or (background-clip: text) {
+  .hero h1 {
+    background: linear-gradient(100deg, var(--green-800), #0f766e 45%, var(--green-800));
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: pan 9s linear infinite;
+  }
+}
+
+.hero-art img { animation: float 7s ease-in-out infinite; transition: transform var(--t-base) var(--ease-out); }
+.hero-art img:hover { transform: scale(1.04) rotate(1deg); }
+
+.feature-item { transition: transform var(--t-base) var(--ease-out), box-shadow var(--t-base), border-color var(--t-base); }
+.feature-item:hover { transform: translateY(-4px); box-shadow: var(--glow); border-color: var(--green-300); }
+.feature-icon { transition: transform var(--t-base) var(--ease-spring); }
+.feature-item:hover .feature-icon { transform: scale(1.14) rotate(-6deg); }
+
+/* -------------------------------- products -------------------------------- */
+
+.category-chip { transition: transform var(--t-base) var(--ease-out), box-shadow var(--t-base), border-color var(--t-base); }
+.category-chip:hover { transform: translateY(-6px) scale(1.04); box-shadow: var(--glow); border-color: var(--green-400); }
+.category-chip .avatar { transition: transform var(--t-base) var(--ease-spring); }
+.category-chip:hover .avatar { transform: scale(1.12) rotate(-6deg); }
+
+.product-card { transition: transform var(--t-base) var(--ease-out), box-shadow var(--t-base), border-color var(--t-base); }
+.product-card:hover { transform: translateY(-7px); box-shadow: var(--lift); border-color: var(--green-300); }
+.product-card:hover .product-media img { transform: scale(1.09); }
+/* A diagonal glint across the photo on hover. */
+.product-media::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 46%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+  transform: translateX(-140%) skewX(-18deg);
+  pointer-events: none;
+}
+.product-card:hover .product-media::after { animation: sheen 900ms var(--ease-out); }
+
+/* Discounts pulse; the out-of-stock flag deliberately does not, so an
+   unavailable item never draws the eye like an offer. */
+.product-flag { animation: flare 2.8s ease-in-out infinite; }
+.product-flag.out { animation: none; }
+
+.wish-btn { transition: transform var(--t-fast) var(--ease-spring), color var(--t-fast), background var(--t-fast); }
+.wish-btn:hover { transform: scale(1.16); background: #fff; }
+.wish-btn.on { animation: bump 420ms var(--ease-spring); }
+
+.product-name { transition: color var(--t-fast); }
+.rating svg { transition: transform var(--t-base) var(--ease-spring); }
+.rating:hover .star-on { transform: scale(1.22); }
+
+.gallery-thumb { transition: transform var(--t-fast) var(--ease-spring), border-color var(--t-fast); }
+.gallery-thumb:hover { transform: translateY(-3px); border-color: var(--green-300); }
+.gallery-main img { transition: transform var(--t-slow) var(--ease-out); }
+.gallery-main:hover img { transform: scale(1.06); }
+.swatch, .size-chip { transition: transform var(--t-fast) var(--ease-spring), border-color var(--t-fast), background var(--t-fast); }
+.swatch:hover:not(:disabled), .size-chip:hover:not(:disabled) { transform: translateY(-2px) scale(1.05); }
+
+/* The active tab's rule wipes in from the left instead of appearing. The base
+   rule draws the same bar as a static border, which would otherwise sit
+   underneath this one and read as double thickness. */
+.tab { position: relative; transition: color var(--t-fast); }
+.tab.active { border-bottom-color: transparent; }
+.tab::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--t-base) var(--ease-out);
+}
+.tab.active::after { transform: scaleX(1); }
+
+.trust-item { transition: transform var(--t-base) var(--ease-out), box-shadow var(--t-base); }
+.trust-item:hover { transform: translateY(-3px); box-shadow: var(--glow); }
+
+/* ------------------------------ cart & checkout ---------------------------- */
+
+.cart-line { transition: background var(--t-fast); }
+.cart-line:hover { background: var(--green-50); }
+.free-ship-bar .fill {
+  background: linear-gradient(90deg, var(--success), var(--green-500), var(--success));
+  background-size: 200% 100%;
+  animation: pan 3.5s linear infinite;
+}
+.step .num { transition: background var(--t-base), transform var(--t-base) var(--ease-spring); }
+.step.active .num { animation: halo 2.2s ease-out infinite; }
+.pay-option, .address-option { transition: border-color var(--t-fast), background var(--t-fast), transform var(--t-fast) var(--ease-out); }
+.pay-option:hover, .address-option:hover { transform: translateX(3px); }
+.timeline-item.current::before { animation: halo 2.2s ease-out infinite; }
+
+/* --------------------------------- surfaces -------------------------------- */
+
+.card { transition: box-shadow var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out); }
+.order-card { transition: box-shadow var(--t-base), transform var(--t-base) var(--ease-out); }
+.order-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+.account-nav a, .lang-menu button, .user-dropdown a, .user-dropdown button { transition: background var(--t-fast), color var(--t-fast), transform var(--t-fast) var(--ease-out); }
+.account-nav a:hover, .lang-menu button:hover, .user-dropdown a:hover, .user-dropdown button:hover { transform: translateX(3px); }
+.chip { transition: transform var(--t-fast) var(--ease-spring), background var(--t-fast); }
+.chip:hover { transform: scale(1.06); }
+.badge { transition: transform var(--t-fast) var(--ease-spring); }
+.badge:hover { transform: translateY(-1px) scale(1.04); }
+.pagination button { transition: transform var(--t-fast) var(--ease-spring), border-color var(--t-fast), color var(--t-fast), background var(--t-fast); }
+.pagination button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--glow); }
+
+.auth-page {
+  background:
+    radial-gradient(900px 480px at 12% -10%, var(--green-200), transparent 62%),
+    radial-gradient(760px 420px at 96% 110%, rgba(13, 148, 136, 0.28), transparent 60%),
+    linear-gradient(140deg, var(--green-100), var(--green-50) 45%, #ffffff 78%);
+  background-size: 160% 160%;
+  animation: pan 26s ease-in-out infinite alternate;
+}
+.auth-card { animation: pop 420ms var(--ease-out) both; }
+
+/* -------------------------------- feedback --------------------------------- */
+
+.toast { animation: toast-pop 420ms var(--ease-spring); }
+
+/* A second ring turning the other way, so the spinner reads as motion rather
+   than a rotating dash. */
+.spinner { position: relative; }
+.spinner::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-bottom-color: var(--green-400);
+  animation: spin 1.1s linear infinite reverse;
+}
+.empty-state .ico { animation: float 5s ease-in-out infinite; }
+.alert { animation: rise 320ms var(--ease-out) both; }
+
+/* ---------------------------- reduced motion ------------------------------ */
+/* One switch for the whole layer. Entrances collapse to their finished state
+   rather than being skipped, so nothing is left invisible. */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  [data-reveal] { opacity: 1; transform: none; }
+  .hero::before, .hero::after { display: none; }
+}
+
+/* ---------------------------- forced colours ------------------------------ */
+/* Windows high-contrast mode drops background images, which would leave the
+   clipped headline painted in transparent - that is, invisible. Everything
+   decorative is stood down here. */
+
+@media (forced-colors: active) {
+  .hero h1 {
+    background: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+  }
+  .hero::before, .hero::after,
+  .btn::after, .product-media::after { display: none; }
+}

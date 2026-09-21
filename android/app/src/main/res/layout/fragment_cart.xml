@@ -62,6 +62,7 @@
                     android:visibility="gone" />
 
                 <androidx.recyclerview.widget.RecyclerView
+                    android:layoutAnimation="@anim/layout_animation_rise"
                     android:id="@+id/cartList"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

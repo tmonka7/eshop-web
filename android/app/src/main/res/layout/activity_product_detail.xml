@@ -380,6 +380,7 @@
                 </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
+                    android:layoutAnimation="@anim/layout_animation_rise"
                     android:id="@+id/reviewList"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -417,6 +418,7 @@
                     android:textSize="@dimen/text_body" />
 
                 <androidx.recyclerview.widget.RecyclerView
+                    android:layoutAnimation="@anim/layout_animation_rise"
                     android:id="@+id/relatedList"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

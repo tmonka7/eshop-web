@@ -119,6 +119,7 @@ export default {
     newCustomersPerMonth: '每月新增客户',
     unitsSold: '销量',
     otherCategories: '其他',
+    vsPrevious: '较上一周期',
     noSalesInRange: '该时间范围内暂无销售记录。',
     restockList: '补货清单',
     stockLeft: '剩余库存',

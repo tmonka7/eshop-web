@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { X, TrendUp, TrendDown } from './Icons';
 import { useToastStore } from '../store';
 import { useI18n } from '../i18n';
+import { useCountUp } from '../utils/motion';
 
 export function Spinner({ label }) {
   return (
@@ -29,7 +30,18 @@ export function Empty({ icon, title, message, action }) {
   );
 }
 
-export function StatCard({ label, value, delta, icon, tone = 'red' }) {
+/**
+ * A KPI tile.
+ *
+ * Pass `value` for a figure that should just be printed. Pass `count` (a
+ * number) with `format` instead and the tile counts up to it - `format` runs
+ * on every frame, so currency, compact and percent tiles all animate the same
+ * way and the units never disappear mid-count.
+ */
+export function StatCard({ label, value, count, format, delta, icon, tone = 'red' }) {
+  const { t } = useI18n();
+  const counted = useCountUp(count ?? 0);
+  const shown = count === undefined || count === null ? value : format(counted);
   const tones = {
     red: { bg: 'var(--red-50)', fg: 'var(--red-500)' },
     green: { bg: 'var(--green-50)', fg: 'var(--green-600)' },
@@ -48,12 +60,12 @@ export function StatCard({ label, value, delta, icon, tone = 'red' }) {
           <span className="stat-icon" style={{ background: t.bg, color: t.fg }}>{icon}</span>
         ) : null}
       </div>
-      <span className="value">{value}</span>
+      <span className="value">{shown}</span>
       {delta !== undefined && delta !== null ? (
         <span className={`delta ${up ? 'up' : 'down'}`}>
           {up ? <TrendUp size={13} /> : <TrendDown size={13} />}
           {up ? '+' : ''}{Number(delta).toFixed(1)}%
-          <span className="muted" style={{ fontWeight: 500 }}>vs previous period</span>
+          <span className="muted" style={{ fontWeight: 500 }}>{t('dashboard.vsPrevious')}</span>
         </span>
       ) : null}
     </div>

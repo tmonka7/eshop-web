@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Cascades item_rise down a list. The 12% delay is a fraction of the item
+     duration, so a long list finishes arriving quickly rather than crawling. -->
+<layoutAnimation xmlns:android="http://schemas.android.com/apk/res/android"
+    android:animation="@anim/item_rise"
+    android:animationOrder="normal"
+    android:delay="12%" />

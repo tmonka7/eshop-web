@@ -99,6 +99,9 @@ public class ProductDetailActivity extends AppCompatActivity implements ProductA
                 b.progress.setVisibility(View.GONE);
                 product = data;
                 bind();
+                // The page arrives all at once, so it fades up rather than
+                // snapping in where the spinner was.
+                Ui.revealUp(b.contentScroll);
             }
 
             @Override
@@ -279,6 +282,7 @@ public class ProductDetailActivity extends AppCompatActivity implements ProductA
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             startActivity(intent);
                         } else {
+                            Ui.bounce(b.addToCartButton);
                             Ui.snack(b.getRoot(), message);
                         }
                     }
@@ -302,6 +306,7 @@ public class ProductDetailActivity extends AppCompatActivity implements ProductA
             public void onSuccess(WishlistToggle data, String message) {
                 SessionManager.get().setWishlisted(product.id, data.inWishlist);
                 updateWishlistIcon();
+                Ui.bounce(b.wishlistButton);
                 Ui.snack(b.getRoot(), message);
             }
 

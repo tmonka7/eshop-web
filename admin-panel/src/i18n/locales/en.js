@@ -119,6 +119,7 @@ export default {
     newCustomersPerMonth: 'New customers per month',
     unitsSold: 'Units sold',
     otherCategories: 'Other',
+    vsPrevious: 'vs previous period',
     noSalesInRange: 'No sales in this range yet.',
     restockList: 'Restock list',
     stockLeft: 'Stock left',

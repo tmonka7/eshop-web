@@ -102,6 +102,7 @@
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
+                android:layoutAnimation="@anim/layout_animation_rise"
                 android:id="@+id/categoryList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -140,6 +141,7 @@
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
+                android:layoutAnimation="@anim/layout_animation_rise"
                 android:id="@+id/featuredList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -178,6 +180,7 @@
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
+                android:layoutAnimation="@anim/layout_animation_rise"
                 android:id="@+id/bestSellerList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -2,6 +2,8 @@ package com.auramart.app.ui.home;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +45,21 @@ public class HomeFragment extends Fragment implements ProductAdapter.Listener {
 
     private int pendingRequests;
 
+    private static final long BANNER_INTERVAL_MS = 5000L;
+    private final Handler bannerHandler = new Handler(Looper.getMainLooper());
+    private final Runnable bannerAdvance = new Runnable() {
+        @Override
+        public void run() {
+            if (b == null) return;
+            int count = bannerAdapter.getItemCount();
+            if (count > 1) {
+                int next = (b.bannerPager.getCurrentItem() + 1) % count;
+                b.bannerPager.setCurrentItem(next, true);
+                bannerHandler.postDelayed(this, BANNER_INTERVAL_MS);
+            }
+        }
+    };
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -61,6 +78,13 @@ public class HomeFragment extends Fragment implements ProductAdapter.Listener {
         bestSellerAdapter = new ProductAdapter(this);
 
         b.bannerPager.setAdapter(bannerAdapter);
+        // Neighbouring banners sit back a little and fade, so the swipe reads
+        // as a stack of cards rather than a flat strip.
+        b.bannerPager.setPageTransformer((page, position) -> {
+            float scale = Math.max(0.86f, 1f - Math.abs(position) * 0.14f);
+            page.setScaleY(scale);
+            page.setAlpha(Math.max(0.4f, 1f - Math.abs(position) * 0.6f));
+        });
         b.categoryList.setAdapter(categoryAdapter);
         b.featuredList.setAdapter(featuredAdapter);
         b.bestSellerList.setAdapter(bestSellerAdapter);
@@ -82,6 +106,26 @@ public class HomeFragment extends Fragment implements ProductAdapter.Listener {
         // Wishlist hearts may have changed on the product screen.
         featuredAdapter.notifyDataSetChanged();
         bestSellerAdapter.notifyDataSetChanged();
+        scheduleBannerAdvance();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Nothing should keep animating behind another screen.
+        bannerHandler.removeCallbacks(bannerAdvance);
+    }
+
+    /**
+     * Advances the hero carousel on its own, wrapping at the end. Each tick
+     * re-posts the next one, so a user swipe simply resets the timer rather
+     * than fighting it, and a single banner never animates at all.
+     */
+    private void scheduleBannerAdvance() {
+        bannerHandler.removeCallbacks(bannerAdvance);
+        if (b != null && bannerAdapter.getItemCount() > 1) {
+            bannerHandler.postDelayed(bannerAdvance, BANNER_INTERVAL_MS);
+        }
     }
 
     private void load() {
@@ -94,6 +138,9 @@ public class HomeFragment extends Fragment implements ProductAdapter.Listener {
                 if (b == null) return;
                 bannerAdapter.submit(data);
                 b.bannerPager.setVisibility(data.isEmpty() ? View.GONE : View.VISIBLE);
+                // onResume has usually already run by the time the banners
+                // land, and it cannot start the carousel on an empty adapter.
+                scheduleBannerAdvance();
                 done();
             }
 
@@ -250,6 +297,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.Listener {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        bannerHandler.removeCallbacks(bannerAdvance);
         b = null;
     }
 }

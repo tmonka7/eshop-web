@@ -136,12 +136,16 @@ export default function Header() {
 
             <Link to="/wishlist" className="icon-btn" aria-label={t('header.wishlist')}>
               <Heart size={19} />
-              {wishCount > 0 ? <span className="count">{wishCount}</span> : null}
+              {wishCount > 0 ? (
+                // Keyed on the value so React remounts the badge and its
+                // pop animation replays whenever the count actually changes.
+                <span className="count" key={wishCount}>{wishCount}</span>
+              ) : null}
             </Link>
 
             <Link to="/cart" className="icon-btn" aria-label={t('header.cart')}>
               <Cart size={19} />
-              {cartCount > 0 ? <span className="count">{cartCount}</span> : null}
+              {cartCount > 0 ? <span className="count" key={cartCount}>{cartCount}</span> : null}
             </Link>
 
             {user ? (

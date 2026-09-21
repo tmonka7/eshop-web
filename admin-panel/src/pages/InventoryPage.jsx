@@ -3,7 +3,7 @@ import { inventoryApi, productApi } from '../api';
 import { Badge, Empty, Pagination, Spinner, StatCard } from '../components/ui';
 import { AlertTriangle, Boxes, Check, Package } from '../components/Icons';
 import { useToastStore } from '../store';
-import { currency } from '../utils/format';
+import { currency, wholeNumber } from '../utils/format';
 import { useI18n } from '../i18n';
 
 export default function InventoryPage() {
@@ -65,19 +65,22 @@ export default function InventoryPage() {
       <div className="grid grid-3 mb-24">
         <StatCard
           label={t('inventory.outOfStock')}
-          value={summary.outOfStock}
+          count={summary.outOfStock}
+          format={wholeNumber}
           icon={<AlertTriangle size={18} />}
           tone="red"
         />
         <StatCard
           label={t('inventory.lowStock')}
-          value={summary.lowStock}
+          count={summary.lowStock}
+          format={wholeNumber}
           icon={<Boxes size={18} />}
           tone="amber"
         />
         <StatCard
           label={t('inventory.needsAttention')}
-          value={pagination.total}
+          count={pagination.total}
+          format={wholeNumber}
           icon={<Package size={18} />}
           tone="blue"
         />

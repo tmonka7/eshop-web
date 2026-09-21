@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   Dashboard, Boxes, Package, Users, Layers, Megaphone, Star2, Image, Chart, Settings,
@@ -7,6 +8,7 @@ import { Toasts } from './ui';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useAuthStore, useUiStore } from '../store';
 import { useI18n } from '../i18n';
+import { replayPageEnter, startMotion } from '../utils/motion';
 
 // Section and item labels are catalogue keys, resolved at render time so the
 // sidebar follows a language switch without a reload.
@@ -63,6 +65,7 @@ const TITLE_KEYS = {
 
 export default function Layout() {
   const { pathname } = useLocation();
+  const pageRef = useRef(null);
   const navigate = useNavigate();
   const { t } = useI18n();
   const user = useAuthStore((s) => s.user);
@@ -73,6 +76,15 @@ export default function Layout() {
 
   const titleKey = TITLE_KEYS[pathname] || TITLE_KEYS[`/${pathname.split('/')[1]}`];
   const title = titleKey ? t(titleKey) : t('app.panel');
+
+  // Scroll-reveal plus the topbar's scrolled state. Started once for the whole
+  // shell; it picks up nodes added by later navigations itself.
+  useEffect(() => startMotion(), []);
+
+  // Every navigation replays the page-level entrance.
+  useEffect(() => {
+    replayPageEnter(pageRef.current);
+  }, [pathname]);
 
   async function handleLogout() {
     await logout();
@@ -149,7 +161,7 @@ export default function Layout() {
           </div>
         </header>
 
-        <main className="page">
+        <main className="page" ref={pageRef}>
           <Outlet />
         </main>
       </div>

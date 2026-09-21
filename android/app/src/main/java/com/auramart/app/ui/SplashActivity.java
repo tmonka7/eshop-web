@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.auramart.app.R;
 import com.auramart.app.data.local.SessionManager;
 import com.auramart.app.data.model.Models.ApiResponse;
 import com.auramart.app.data.model.Models.User;
@@ -51,10 +52,14 @@ public class SplashActivity extends AppCompatActivity {
         finish();
     }
 
-    /** Suppress the default open animation so the splash feels instant. */
+    /**
+     * The shared activity animation is a lateral slide, which reads wrong for
+     * the hand-off out of the splash screen: the app has not navigated
+     * anywhere yet. A cross-fade is used instead.
+     */
     @Override
     public void finish() {
         super.finish();
-        overridePendingTransition(0, 0);
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
 }

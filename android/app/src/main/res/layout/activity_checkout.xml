@@ -244,6 +244,7 @@
                         android:textSize="@dimen/text_body" />
 
                     <androidx.recyclerview.widget.RecyclerView
+                        android:layoutAnimation="@anim/layout_animation_rise"
                         android:id="@+id/itemList"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

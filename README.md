@@ -178,6 +178,39 @@ than cycling hues, and the revenue-by-category bars use a single colour because
 they are revenue-sorted, where colouring by index would encode rank instead of
 identity.
 
+### Motion
+
+Each web project ends its stylesheet with a self-contained **motion layer** that
+restyles the rules above it — gradients, glows, hover lifts, sheen sweeps,
+scroll-triggered entrances, a drifting hero and an animated sign-in backdrop.
+It changes no layout, so it can be read, tuned or deleted in one block.
+
+| Piece | Where |
+|---|---|
+| Storefront motion CSS | end of [frontend/src/styles/global.css](frontend/src/styles/global.css) |
+| Storefront runtime | [frontend/src/utils/motion.js](frontend/src/utils/motion.js) |
+| Panel motion CSS | end of [admin-panel/src/styles/admin.css](admin-panel/src/styles/admin.css) |
+| Panel runtime + KPI count-up | [admin-panel/src/utils/motion.js](admin-panel/src/utils/motion.js) |
+| App transitions & list entrances | [android/app/src/main/res/anim/](android/app/src/main/res/anim/), [animator/](android/app/src/main/res/animator/) |
+
+Three constraints hold across all of it:
+
+- **Nothing is communicated by motion alone.** An entrance only ever changes
+  opacity and position; every animated confirmation (a cart bump, a wishlist
+  heart) also updates a label or shows a message.
+- **The hidden starting state is applied by JavaScript, never by CSS.** If the
+  script fails to load or `IntersectionObserver` is missing, the page renders
+  in full with no animation — it never renders blank.
+- **`prefers-reduced-motion: reduce` stands the whole layer down**, and
+  `forced-colors: active` restores the hero headline to a flat system colour,
+  since high-contrast mode drops the background image it is clipped from.
+
+Gradients under white text are constrained the same way flat fills are: both
+stops have to clear 4.5:1 on their own. That is why the primary button runs
+green-700→green-800 rather than into the brighter green-600, and why the hero
+headline's sweep shifts green→teal instead of green→light-green — green-600 is
+only 2.7:1 against the hero's own pale green backdrop.
+
 ---
 
 ## Languages

@@ -5,7 +5,7 @@ import {
 import { dashboardApi } from '../api';
 import { Empty, Spinner, StatCard } from '../components/ui';
 import { Dollar, Package, Chart, TrendUp } from '../components/Icons';
-import { currency, compactNumber } from '../utils/format';
+import { currency, compactNumber, wholeNumber } from '../utils/format';
 import { CHART_COLORS, RANGE_OPTIONS } from '../utils/constants';
 import { useI18n } from '../i18n';
 
@@ -73,10 +73,10 @@ export default function ReportsPage() {
       </div>
 
       <div className="grid grid-4 mb-24">
-        <StatCard label={t('dashboard.revenue')} value={currency(stats.totalRevenue.value)} delta={stats.totalRevenue.change} icon={<Dollar size={18} />} tone="red" />
-        <StatCard label={t('dashboard.orders')} value={compactNumber(stats.totalOrders.value)} delta={stats.totalOrders.change} icon={<Package size={18} />} tone="blue" />
-        <StatCard label={t('dashboard.avgOrderValue')} value={currency(stats.averageOrderValue)} icon={<Chart size={18} />} tone="green" />
-        <StatCard label={t('dashboard.activeProducts')} value={stats.activeProducts} icon={<TrendUp size={18} />} tone="purple" />
+        <StatCard label={t('dashboard.revenue')} count={stats.totalRevenue.value} format={currency} delta={stats.totalRevenue.change} icon={<Dollar size={18} />} tone="green" />
+        <StatCard label={t('dashboard.orders')} count={stats.totalOrders.value} format={compactNumber} delta={stats.totalOrders.change} icon={<Package size={18} />} tone="blue" />
+        <StatCard label={t('dashboard.avgOrderValue')} count={stats.averageOrderValue} format={currency} icon={<Chart size={18} />} tone="green" />
+        <StatCard label={t('dashboard.activeProducts')} count={stats.activeProducts} format={wholeNumber} icon={<TrendUp size={18} />} tone="purple" />
       </div>
 
       <div className="card mb-24">
