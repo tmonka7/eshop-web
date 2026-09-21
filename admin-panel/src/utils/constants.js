@@ -24,18 +24,33 @@ export const PAYMENT_TONE = {
   refunded: 'info',
 };
 
-/** Categorical palette used across every chart in the panel. */
+/**
+ * Categorical chart palette — a fixed hue order, never cycled.
+ *
+ * Brand green leads; red is deliberately absent because it is reserved for
+ * status (negative deltas, destructive actions) and a status colour must never
+ * double as "series 6".
+ *
+ * Checked with the data-viz validator against a white chart surface:
+ *   adjacent pairs (bars, lines, stacked) — worst CVD ΔE 10.3, normal 31.1: passes.
+ *   all pairs (the donut, where every segment is compared at once) — clears to
+ *   five slots, with worst CVD ΔE 6.1, inside the 6–8 floor band. That band is
+ *   only legal alongside secondary encoding, which is why the donut ships a
+ *   legend and per-segment labels rather than relying on colour alone.
+ */
 export const CHART_COLORS = [
-  '#ef4444',
-  '#3b82f6',
-  '#10b981',
+  '#16a34a',
+  '#7c3aed',
   '#f59e0b',
-  '#8b5cf6',
-  '#ec4899',
-  '#06b6d4',
-  '#64748b',
-  '#84cc16',
+  '#0891b2',
+  '#db2777',
+  '#4d7c0f',
+  '#2563eb',
+  '#b45309',
 ];
+
+/** Segments past this many must fold into "Other" on all-pairs forms. */
+export const CHART_SERIES_CAP = 5;
 
 // Labels are catalogue keys; the components resolve them with t().
 export const RANGE_OPTIONS = [

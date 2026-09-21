@@ -6,8 +6,8 @@
     "intlLocale": "zh-CN"
   },
   "app": {
-    "name": "AuraMart 接口服务",
-    "healthy": "AuraMart 接口服务运行中"
+    "name": "ShopWorld 接口服务",
+    "healthy": "ShopWorld 接口服务运行中"
   },
   "error": {
     "badRequest": "请求无效",

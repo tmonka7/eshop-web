@@ -44,7 +44,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/space_md"
                     android:background="@drawable/bg_badge_red"
-                    android:backgroundTint="@color/primary"
+                    android:backgroundTint="@color/danger"
                     android:paddingStart="@dimen/space_md"
                     android:paddingEnd="@dimen/space_md"
                     android:paddingTop="4dp"

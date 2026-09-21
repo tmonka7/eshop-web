@@ -2,7 +2,7 @@
   "name": "auramart-backend",
   "version": "1.0.0",
   "private": true,
-  "description": "AuraMart e-commerce REST API (Node 18.19 + Express + MongoDB 6.0)",
+  "description": "ShopWorld e-commerce REST API (Node 18.19 + Express + MongoDB 6.0)",
   "main": "src/server.js",
   "engines": {
     "node": ">=18.19.0 <19"

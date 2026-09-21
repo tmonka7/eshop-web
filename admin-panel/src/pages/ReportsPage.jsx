@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
-  Bar, BarChart, CartesianGrid, Cell, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
+  Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
 import { dashboardApi } from '../api';
 import { Empty, Spinner, StatCard } from '../components/ui';
@@ -87,18 +87,18 @@ export default function ReportsPage() {
         <div className="card-pad" style={{ height: 260 }}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={sales} margin={{ top: 6, right: 8, left: -18, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2ece6" vertical={false} />
               <XAxis
                 dataKey="date"
-                tick={{ fontSize: 11, fill: '#94a3b8' }}
+                tick={{ fontSize: 11, fill: "#9ab0a3" }}
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(d) => (d.length > 7 ? d.slice(5) : d)}
                 minTickGap={24}
               />
-              <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} allowDecimals={false} />
-              <Tooltip contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 12 }} />
-              <Line type="monotone" dataKey="orders" stroke="#3b82f6" strokeWidth={2} dot={false} />
+              <YAxis tick={{ fontSize: 11, fill: "#9ab0a3" }} tickLine={false} axisLine={false} allowDecimals={false} />
+              <Tooltip contentStyle={{ borderRadius: 10, border: "1px solid #e2ece6", fontSize: 12 }} />
+              <Line type="monotone" dataKey="orders" stroke="#16a34a" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -119,10 +119,10 @@ export default function ReportsPage() {
                   layout="vertical"
                   margin={{ top: 4, right: 16, left: 16, bottom: 0 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2ece6" horizontal={false} />
                   <XAxis
                     type="number"
-                    tick={{ fontSize: 11, fill: '#94a3b8' }}
+                    tick={{ fontSize: 11, fill: "#9ab0a3" }}
                     tickLine={false}
                     axisLine={false}
                     tickFormatter={(v) => compactNumber(v)}
@@ -130,20 +130,20 @@ export default function ReportsPage() {
                   <YAxis
                     type="category"
                     dataKey="category"
-                    tick={{ fontSize: 11, fill: '#475569' }}
+                    tick={{ fontSize: 11, fill: "#4b6557" }}
                     tickLine={false}
                     axisLine={false}
                     width={110}
                   />
                   <Tooltip
                     formatter={(value) => currency(value)}
-                    contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 12 }}
+                    contentStyle={{ borderRadius: 10, border: "1px solid #e2ece6", fontSize: 12 }}
                   />
-                  <Bar dataKey="revenue" radius={[0, 5, 5, 0]} barSize={18}>
-                    {byCategory.segments.map((seg, i) => (
-                      <Cell key={seg.category} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                    ))}
-                  </Bar>
+                  {/* One series, one colour. These bars are revenue-sorted, so
+                      colouring them by index would encode rank rather than
+                      category — and repaint every bar when the range changes.
+                      The y-axis labels already carry identity. */}
+                  <Bar dataKey="revenue" radius={[0, 5, 5, 0]} barSize={18} fill={CHART_COLORS[0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -158,11 +158,11 @@ export default function ReportsPage() {
           <div className="card-pad" style={{ height: 300 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={growth.series} margin={{ top: 4, right: 8, left: -18, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} allowDecimals={false} />
-                <Tooltip contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 12 }} />
-                <Bar dataKey="count" fill="#10b981" radius={[5, 5, 0, 0]} barSize={22} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2ece6" vertical={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#9ab0a3" }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: "#9ab0a3" }} tickLine={false} axisLine={false} allowDecimals={false} />
+                <Tooltip contentStyle={{ borderRadius: 10, border: "1px solid #e2ece6", fontSize: 12 }} />
+                <Bar dataKey="count" fill="#16a34a" radius={[5, 5, 0, 0]} barSize={22} />
               </BarChart>
             </ResponsiveContainer>
           </div>

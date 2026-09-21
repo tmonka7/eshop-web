@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Mirrors the storefront's design tokens so the app and the web store read as
+     one brand: green primary, red kept back for sale flags and destructive
+     actions, and neutrals carrying a trace of green. -->
 <resources>
-    <color name="primary">#EF4444</color>
-    <color name="primary_dark">#DC2626</color>
-    <color name="primary_light">#FEE2E2</color>
-    <color name="primary_surface">#FEF2F2</color>
+    <color name="primary">#15803D</color>
+    <color name="primary_dark">#166534</color>
+    <color name="primary_light">#DCFCE7</color>
+    <color name="primary_surface">#F0FDF4</color>
 
-    <color name="success">#10B981</color>
-    <color name="success_dark">#059669</color>
-    <color name="success_light">#D1FAE5</color>
-    <color name="success_surface">#ECFDF5</color>
+    <!-- A deeper teal, so an "ok" badge never looks like a primary button. -->
+    <color name="success">#0D9488</color>
+    <color name="success_dark">#0F766E</color>
+    <color name="success_light">#CCFBF1</color>
+    <color name="success_surface">#F0FDFA</color>
 
     <color name="warning">#F59E0B</color>
     <color name="warning_dark">#D97706</color>
@@ -21,23 +25,29 @@
     <color name="purple">#8B5CF6</color>
     <color name="purple_surface">#F5F3FF</color>
 
-    <color name="ink_900">#0F172A</color>
-    <color name="ink_800">#1E293B</color>
-    <color name="ink_700">#334155</color>
-    <color name="ink_600">#475569</color>
-    <color name="ink_500">#64748B</color>
-    <color name="ink_400">#94A3B8</color>
-    <color name="ink_300">#CBD5E1</color>
-    <color name="ink_200">#E2E8F0</color>
-    <color name="ink_100">#F1F5F9</color>
-    <color name="ink_50">#F8FAFC</color>
+    <!-- Accent scale: discount flags, errors, destructive actions. -->
+    <color name="danger">#EF4444</color>
+    <color name="danger_dark">#DC2626</color>
+    <color name="danger_light">#FEE2E2</color>
+    <color name="danger_surface">#FEF2F2</color>
+
+    <color name="ink_900">#0B1F14</color>
+    <color name="ink_800">#14341F</color>
+    <color name="ink_700">#2F4A3A</color>
+    <color name="ink_600">#4B6557</color>
+    <color name="ink_500">#5A7566</color>
+    <color name="ink_400">#9AB0A3</color>
+    <color name="ink_300">#C7D8CD</color>
+    <color name="ink_200">#E2ECE6</color>
+    <color name="ink_100">#EFF6F1</color>
+    <color name="ink_50">#F7FBF8</color>
 
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
 
-    <color name="text_primary">#0F172A</color>
-    <color name="text_secondary">#64748B</color>
-    <color name="divider">#E2E8F0</color>
+    <color name="text_primary">#0B1F14</color>
+    <color name="text_secondary">#5A7566</color>
+    <color name="divider">#E2ECE6</color>
     <color name="surface">#FFFFFF</color>
-    <color name="background">#F8FAFC</color>
+    <color name="background">#F2FAF5</color>
 </resources>

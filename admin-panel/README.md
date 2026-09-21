@@ -1,4 +1,4 @@
-# AuraMart — Admin Panel
+# ShopWorld — Admin Panel
 
 Staff dashboard. React 18 + Vite 5, Recharts, Zustand, Axios.
 

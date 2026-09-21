@@ -165,7 +165,7 @@ public class ProductDetailActivity extends AppCompatActivity implements ProductA
         if (product.stock <= 0) {
             b.stockBadge.setText(R.string.out_of_stock);
             b.stockBadge.setBackgroundResource(R.drawable.bg_badge_red);
-            b.stockBadge.setTextColor(getColor(R.color.primary_dark));
+            b.stockBadge.setTextColor(getColor(R.color.danger_dark));
         } else if (product.stock <= 10) {
             b.stockBadge.setText(getString(R.string.only_n_left, product.stock));
             b.stockBadge.setBackgroundResource(R.drawable.bg_badge_amber);

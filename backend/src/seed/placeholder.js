@@ -128,7 +128,7 @@ function renderTile(size, fromHex, toHex, seed = 0) {
  * Writes uploads/<folder>/<filename> and returns the path to store on the
  * document (the caller prefixes it with PUBLIC_URL).
  */
-function writePlaceholder(folder, filename, { from = '#EF4444', to = '#F97316', seed = 0 } = {}) {
+function writePlaceholder(folder, filename, { from = '#22C55E', to = '#15803D', seed = 0 } = {}) {
   const dir = path.join(ROOT, folder);
   fs.mkdirSync(dir, { recursive: true });
 

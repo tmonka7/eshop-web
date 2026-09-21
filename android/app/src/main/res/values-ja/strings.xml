@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">AuraMart</string>
-    <string name="app_tagline">良いモノで、毎日をもっと明るく</string>
+    <string name="app_name">ShopWorld</string>
+    <string name="app_tagline">良いモノで、暮らしをもっと豊かに</string>
 
     <!-- auth -->
     <string name="sign_in">ログイン</string>
@@ -173,7 +173,7 @@
     <string name="save_changes">変更を保存</string>
     <string name="wishlist_empty">ほしい物リストは空です</string>
     <string name="wishlist_empty_hint">商品のハートをタップすると保存できます。</string>
-    <string name="app_version">AuraMart v%1$s</string>
+    <string name="app_version">ShopWorld v%1$s</string>
 
     <!-- language -->
     <string name="language">言語</string>

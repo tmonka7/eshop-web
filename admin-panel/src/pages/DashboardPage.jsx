@@ -9,6 +9,7 @@ import { Badge, Spinner, StatCard, Empty } from '../components/ui';
 import { Dollar, Package, Users, TrendUp } from '../components/Icons';
 import { currency, compactNumber, formatDate } from '../utils/format';
 import { CHART_COLORS, RANGE_OPTIONS, STATUS_TONE } from '../utils/constants';
+import { foldSegments, OTHER_COLOR } from '../utils/chart';
 import { useI18n } from '../i18n';
 
 export default function DashboardPage() {
@@ -60,6 +61,13 @@ export default function DashboardPage() {
   }
 
   const { stats, sales, byCategory, recent, top, growth } = data;
+
+  // Past the palette's cap the remainder becomes one "Other" slice, so no two
+  // segments ever share a hue and every segment can carry a legend entry.
+  const segments = foldSegments(byCategory.segments, t('dashboard.otherCategories'));
+  const segmentColor = (seg, i) => (seg.category === t('dashboard.otherCategories')
+    ? OTHER_COLOR
+    : CHART_COLORS[i]);
 
   return (
     <>
@@ -127,21 +135,21 @@ export default function DashboardPage() {
               <AreaChart data={sales} margin={{ top: 6, right: 8, left: -12, bottom: 0 }}>
                 <defs>
                   <linearGradient id="revFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#ef4444" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="#ef4444" stopOpacity={0.02} />
+                    <stop offset="0%" stopColor="#16a34a" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#16a34a" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2ece6" vertical={false} />
                 <XAxis
                   dataKey="date"
-                  tick={{ fontSize: 11, fill: '#94a3b8' }}
+                  tick={{ fontSize: 11, fill: "#9ab0a3" }}
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(d) => (d.length > 7 ? d.slice(5) : d)}
                   minTickGap={22}
                 />
                 <YAxis
-                  tick={{ fontSize: 11, fill: '#94a3b8' }}
+                  tick={{ fontSize: 11, fill: "#9ab0a3" }}
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(v) => compactNumber(v)}
@@ -149,12 +157,12 @@ export default function DashboardPage() {
                 <Tooltip
                   formatter={(value, name) => (name === 'revenue' ? currency(value) : value)}
                   labelFormatter={(l) => `Date: ${l}`}
-                  contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 12 }}
+                  contentStyle={{ borderRadius: 10, border: "1px solid #e2ece6", fontSize: 12 }}
                 />
                 <Area
                   type="monotone"
                   dataKey="revenue"
-                  stroke="#ef4444"
+                  stroke="#16a34a"
                   strokeWidth={2}
                   fill="url(#revFill)"
                 />
@@ -171,7 +179,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="card-pad">
-            {byCategory.segments.length === 0 ? (
+            {segments.length === 0 ? (
               <p className="muted small">{t('dashboard.noSalesInRange')}</p>
             ) : (
               <>
@@ -179,7 +187,7 @@ export default function DashboardPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
-                        data={byCategory.segments}
+                        data={segments}
                         dataKey="revenue"
                         nameKey="category"
                         innerRadius={52}
@@ -187,13 +195,13 @@ export default function DashboardPage() {
                         paddingAngle={2}
                         stroke="none"
                       >
-                        {byCategory.segments.map((seg, i) => (
-                          <Cell key={seg.category} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                        {segments.map((seg, i) => (
+                          <Cell key={seg.category} fill={segmentColor(seg, i)} />
                         ))}
                       </Pie>
                       <Tooltip
                         formatter={(value) => currency(value)}
-                        contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 12 }}
+                        contentStyle={{ borderRadius: 10, border: "1px solid #e2ece6", fontSize: 12 }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
@@ -203,13 +211,12 @@ export default function DashboardPage() {
                   {currency(byCategory.total)}
                 </div>
 
+                {/* Every segment is listed: the palette's separation at this
+                    size is only legal alongside labels, not colour alone. */}
                 <div className="legend">
-                  {byCategory.segments.slice(0, 6).map((seg, i) => (
+                  {segments.map((seg, i) => (
                     <div key={seg.category} className="legend-item">
-                      <span
-                        className="legend-dot"
-                        style={{ background: CHART_COLORS[i % CHART_COLORS.length] }}
-                      />
+                      <span className="legend-dot" style={{ background: segmentColor(seg, i) }} />
                       <span className="grow truncate">{seg.category}</span>
                       <span className="muted">{seg.percent}%</span>
                     </div>
@@ -264,11 +271,11 @@ export default function DashboardPage() {
             <div className="card-pad" style={{ height: 170 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={growth.series} margin={{ top: 4, right: 4, left: -22, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                  <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} allowDecimals={false} />
-                  <Tooltip contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 12 }} />
-                  <Area type="monotone" dataKey="count" stroke="#10b981" strokeWidth={2} fill="#d1fae5" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2ece6" vertical={false} />
+                  <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#9ab0a3" }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fontSize: 11, fill: "#9ab0a3" }} tickLine={false} axisLine={false} allowDecimals={false} />
+                  <Tooltip contentStyle={{ borderRadius: 10, border: "1px solid #e2ece6", fontSize: 12 }} />
+                  <Area type="monotone" dataKey="count" stroke="#16a34a" strokeWidth={2} fill="#dcfce7" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>

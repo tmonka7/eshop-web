@@ -41,7 +41,7 @@ export default function LoginPage() {
               width: 42,
               height: 42,
               borderRadius: 11,
-              background: 'linear-gradient(135deg, #ef4444, #f97316)',
+              background: 'linear-gradient(135deg, #22c55e, #15803d)',
               display: 'grid',
               placeItems: 'center',
               color: '#fff',

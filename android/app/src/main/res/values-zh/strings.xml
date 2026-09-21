@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">AuraMart</string>
-    <string name="app_tagline">好物相伴，生活更亮</string>
+    <string name="app_name">ShopWorld</string>
+    <string name="app_tagline">好物相伴，生活更好</string>
 
     <!-- auth -->
     <string name="sign_in">登录</string>
@@ -173,7 +173,7 @@
     <string name="save_changes">保存修改</string>
     <string name="wishlist_empty">心愿单是空的</string>
     <string name="wishlist_empty_hint">点击商品上的爱心即可收藏。</string>
-    <string name="app_version">AuraMart v%1$s</string>
+    <string name="app_version">ShopWorld v%1$s</string>
 
     <!-- language -->
     <string name="language">语言</string>

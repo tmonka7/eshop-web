@@ -6,8 +6,8 @@
     "intlLocale": "en-US"
   },
   "app": {
-    "name": "AuraMart API",
-    "healthy": "AuraMart API is running"
+    "name": "ShopWorld API",
+    "healthy": "ShopWorld API is running"
   },
   "error": {
     "badRequest": "Bad request",

@@ -1,6 +1,6 @@
-# AuraMart — Backend API
+# ShopWorld — Backend API
 
-REST API for the AuraMart storefront, admin panel and Android app.
+REST API for the ShopWorld storefront, admin panel and Android app.
 
 - **Node** 18.19 (`engines` pins `>=18.19.0 <19`)
 - **Express** 4 + **Mongoose** 8

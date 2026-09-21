@@ -7,8 +7,8 @@ export default {
   },
 
   brand: {
-    name: 'AuraMart',
-    tagline: '良いモノで、毎日をもっと明るく',
+    name: 'ShopWorld',
+    tagline: '良いモノで、暮らしをもっと豊かに',
   },
 
   common: {
@@ -79,7 +79,7 @@ export default {
     myAccount: 'アカウント',
     shoppingCart: 'カート',
     wishlist: 'ほしい物リスト',
-    copyright: '© {{year}} AuraMart デモプロジェクト',
+    copyright: '© {{year}} ShopWorld デモプロジェクト',
     builtWith: 'React・Express・MongoDB で構築',
   },
 
@@ -424,7 +424,7 @@ export default {
     password: 'パスワード',
     signIn: 'ログイン',
     signingIn: 'ログイン中…',
-    newHere: 'AuraMart は初めてですか？',
+    newHere: 'ShopWorld は初めてですか？',
     createAnAccount: 'アカウントを作成',
     registerTitle: 'アカウントを作成',
     registerSubtitle: '1 分もかかりません。',
@@ -437,7 +437,7 @@ export default {
     alreadyHaveAccount: 'すでにアカウントをお持ちですか？',
     passwordsDoNotMatch: 'パスワードが一致しません',
     welcomeBackName: 'おかえりなさい、{{name}} さん',
-    welcomeToStore: 'AuraMart へようこそ、{{name}} さん',
+    welcomeToStore: 'ShopWorld へようこそ、{{name}} さん',
     checkingSession: 'ログイン状態を確認しています…',
     sessionExpired: 'セッションの有効期限が切れました。再度ログインしてください。',
   },

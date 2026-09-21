@@ -460,7 +460,7 @@ public final class Adapters {
                 case "processing" -> R.color.info_dark;
                 case "shipped" -> R.color.purple;
                 case "delivered" -> R.color.success_dark;
-                case "cancelled" -> R.color.primary_dark;
+                case "cancelled" -> R.color.danger_dark;
                 default -> R.color.ink_600;
             };
         }

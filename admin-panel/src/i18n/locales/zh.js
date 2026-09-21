@@ -7,7 +7,7 @@ export default {
   },
 
   app: {
-    brand: 'AuraMart',
+    brand: 'ShopWorld',
     panel: '管理后台',
   },
 
@@ -118,6 +118,7 @@ export default {
     customerGrowth: '客户增长',
     newCustomersPerMonth: '每月新增客户',
     unitsSold: '销量',
+    otherCategories: '其他',
     noSalesInRange: '该时间范围内暂无销售记录。',
     restockList: '补货清单',
     stockLeft: '剩余库存',

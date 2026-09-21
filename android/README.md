@@ -1,6 +1,6 @@
-# AuraMart — Android App
+# ShopWorld — Android App
 
-Native customer app for the AuraMart store.
+Native customer app for the ShopWorld store.
 
 - **Language:** Java (no Kotlin anywhere in the project)
 - **Gradle:** 8.13 · **Android Gradle Plugin:** 8.9.1 · **JDK:** 17
@@ -68,7 +68,7 @@ Sign in with `john@example.com` / `Password@123`, or tap **Browse as guest**.
 
 ```
 app/src/main/java/com/auramart/app/
-  AuraMartApp.java            Application: session bootstrap + expiry handling
+  ShopWorldApp.java            Application: session bootstrap + expiry handling
   data/
     model/Models.java         every API DTO in one file
     remote/ApiService.java    Retrofit interface (all endpoints)

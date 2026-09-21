@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">AuraMart</string>
-    <string name="app_tagline">Better Products, Brighter Life</string>
+    <string name="app_name">ShopWorld</string>
+    <string name="app_tagline">Better Products, Better Life</string>
 
     <!-- auth -->
     <string name="sign_in">Sign In</string>
@@ -173,7 +173,7 @@
     <string name="save_changes">Save changes</string>
     <string name="wishlist_empty">Your wishlist is empty</string>
     <string name="wishlist_empty_hint">Tap the heart on any product to save it for later.</string>
-    <string name="app_version">AuraMart v%1$s</string>
+    <string name="app_version">ShopWorld v%1$s</string>
 
     <!-- language -->
     <string name="language">Language</string>

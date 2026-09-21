@@ -16,7 +16,7 @@ async function start() {
 
   server = app.listen(env.port, () => {
     console.log('');
-    console.log('  AuraMart API');
+    console.log('  ShopWorld API');
     console.log('  env      : ' + env.nodeEnv);
     console.log('  listening: http://localhost:' + env.port);
     console.log('  health   : http://localhost:' + env.port + env.apiPrefix + '/health');

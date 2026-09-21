@@ -1,4 +1,4 @@
-# AuraMart — Storefront
+# ShopWorld — Storefront
 
 Customer-facing shop. React 18 + Vite 5, React Router 6, Zustand, Axios.
 

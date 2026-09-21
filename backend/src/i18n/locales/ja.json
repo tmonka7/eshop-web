@@ -6,8 +6,8 @@
     "intlLocale": "ja-JP"
   },
   "app": {
-    "name": "AuraMart API",
-    "healthy": "AuraMart API は正常に稼働しています"
+    "name": "ShopWorld API",
+    "healthy": "ShopWorld API は正常に稼働しています"
   },
   "error": {
     "badRequest": "リクエストが不正です",

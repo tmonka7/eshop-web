@@ -388,7 +388,9 @@ const banners = [
     ctaLink: '/products',
     placement: 'hero',
     order: 1,
-    gradient: ['#EF4444', '#F97316'],
+    /* The homepage hero is brand surface, so it carries the brand green.
+       The other banners stay warm — they are promos, not chrome. */
+    gradient: ['#22C55E', '#15803D'],
   },
   {
     title: 'Big Sale Up to 50% OFF',

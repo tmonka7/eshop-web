@@ -7,7 +7,7 @@ export default {
   },
 
   app: {
-    brand: 'AuraMart',
+    brand: 'ShopWorld',
     panel: '管理パネル',
   },
 
@@ -118,6 +118,7 @@ export default {
     customerGrowth: '顧客の推移',
     newCustomersPerMonth: '月別の新規顧客数',
     unitsSold: '販売数',
+    otherCategories: 'その他',
     noSalesInRange: 'この期間の売上はまだありません。',
     restockList: '補充リスト',
     stockLeft: '残り在庫',

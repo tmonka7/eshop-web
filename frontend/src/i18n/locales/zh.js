@@ -7,8 +7,8 @@ export default {
   },
 
   brand: {
-    name: 'AuraMart',
-    tagline: '好物相伴，生活更亮',
+    name: 'ShopWorld',
+    tagline: '好物相伴，生活更好',
   },
 
   common: {
@@ -78,7 +78,7 @@ export default {
     myAccount: '我的账户',
     shoppingCart: '购物车',
     wishlist: '心愿单',
-    copyright: '© {{year}} AuraMart 演示项目。',
+    copyright: '© {{year}} ShopWorld 演示项目。',
     builtWith: '基于 React、Express 与 MongoDB 构建。',
   },
 
@@ -423,7 +423,7 @@ export default {
     password: '密码',
     signIn: '登录',
     signingIn: '正在登录…',
-    newHere: '还没有 AuraMart 账号？',
+    newHere: '还没有 ShopWorld 账号？',
     createAnAccount: '注册新账号',
     registerTitle: '创建账号',
     registerSubtitle: '用时不到一分钟。',
@@ -436,7 +436,7 @@ export default {
     alreadyHaveAccount: '已有账号？',
     passwordsDoNotMatch: '两次输入的密码不一致',
     welcomeBackName: '欢迎回来，{{name}}',
-    welcomeToStore: '欢迎来到 AuraMart，{{name}}',
+    welcomeToStore: '欢迎来到 ShopWorld，{{name}}',
     checkingSession: '正在验证登录状态…',
     sessionExpired: '登录已过期，请重新登录。',
   },

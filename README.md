@@ -1,4 +1,4 @@
-# AuraMart — Full E-Commerce Platform
+# ShopWorld — Full E-Commerce Platform
 
 Four projects on one API: a REST backend, a customer storefront, an admin panel and a
 native Android app.
@@ -141,6 +141,42 @@ All three clients speak the same REST API and the same JSON envelope:
 
 Order maths lives in exactly one place — `backend/src/services/pricing.service.js` — so the
 cart, the checkout preview and the saved order can never disagree.
+
+---
+
+## Design system
+
+A light theme built on a green primary, shared by all four projects so the
+storefront, the panel and the app read as one brand.
+
+Everything is driven by tokens — `:root` in
+[frontend/src/styles/global.css](frontend/src/styles/global.css) and
+[admin-panel/src/styles/admin.css](admin-panel/src/styles/admin.css), mirrored
+as `@color` resources in
+[android/app/src/main/res/values/colors.xml](android/app/src/main/res/values/colors.xml).
+Restyling means editing those three blocks, not hunting hex values.
+
+| Role | Value | Why |
+|---|---|---|
+| `--primary` | `#15803d` (green-700) | 5.0:1 against white **both ways**, so it works as a button fill *and* as price/link text. The brighter `#16a34a` is only 3.3:1 — fine for a chart mark, too weak for 12–15px text. |
+| `--bg-soft` | `#f2faf5` | The tinted page canvas white cards sit on. |
+| red scale | `#ef4444`–`#b91c1c` | **Not** a brand colour. Reserved for sale flags, destructive buttons and errors, so it still reads as an accent against all the green. |
+| `--success` | `#0d9488` teal | Deliberately not green, so an "ok" badge never looks like a primary button. |
+
+**Contrast is checked, not eyeballed.** Every text-on-colour pairing clears
+WCAG AA (4.5:1 for body and badge text, 3:1 for marks). That pass also caught
+three badge styles — warn, purple and danger — that had been sitting at
+3.0–4.0:1 since before the restyle; they now use `-700` text steps.
+
+**Chart colour** follows the data-viz rules: a fixed categorical order that
+leads with brand green and excludes red (a reserved status colour must never
+double as a series). The order in
+[admin-panel/src/utils/constants.js](admin-panel/src/utils/constants.js) was run
+through the palette validator — worst adjacent CVD ΔE 10.3, normal-vision 31.1.
+The donut folds everything past five categories into one "Other" slice rather
+than cycling hues, and the revenue-by-category bars use a single colour because
+they are revenue-sorted, where colouring by index would encode rank instead of
+identity.
 
 ---
 

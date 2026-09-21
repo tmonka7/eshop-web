@@ -33,7 +33,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/space_sm"
                 android:background="@drawable/bg_badge_red"
-                android:backgroundTint="@color/primary"
+                android:backgroundTint="@color/danger"
                 android:paddingStart="@dimen/space_sm"
                 android:paddingEnd="@dimen/space_sm"
                 android:paddingTop="2dp"
