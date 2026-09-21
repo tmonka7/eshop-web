@@ -32,7 +32,7 @@ const STAGGER_CAP = 8; // a 40-card grid should not take 2.4s to finish arriving
 const MARKED = 'data-reveal';
 
 let observer = null;
-const staggerSeen = new WeakMap();
+let staggerSeen = new WeakMap();
 
 function prefersReducedMotion() {
   return (
@@ -127,7 +127,25 @@ export function startMotion() {
     mutations.disconnect();
     if (observer) observer.disconnect();
     observer = null;
+    release();
   };
+}
+
+/**
+ * Un-marks anything still waiting to be revealed.
+ *
+ * Without this, a teardown followed by a restart leaves those elements
+ * carrying data-reveal - so the new observer skips them as already handled and
+ * they stay at opacity 0 for good. React 18's StrictMode does exactly that
+ * mount/unmount/mount cycle in development, so the page would come up blank
+ * there. Elements that already finished (data-reveal="in") keep their mark.
+ */
+function release() {
+  staggerSeen = new WeakMap();
+  for (const el of document.querySelectorAll(`[${MARKED}=""]`)) {
+    el.style.removeProperty('--reveal-delay');
+    el.removeAttribute(MARKED);
+  }
 }
 
 /**

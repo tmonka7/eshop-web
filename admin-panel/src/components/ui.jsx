@@ -49,7 +49,8 @@ export function StatCard({ label, value, count, format, delta, icon, tone = 'red
     purple: { bg: 'var(--purple-50)', fg: 'var(--purple-500)' },
     amber: { bg: 'var(--amber-50)', fg: 'var(--amber-600)' },
   };
-  const t = tones[tone] || tones.red;
+  // Named for what it is: `t` is the translator everywhere else in this app.
+  const swatch = tones[tone] || tones.red;
   const up = Number(delta) >= 0;
 
   return (
@@ -57,7 +58,7 @@ export function StatCard({ label, value, count, format, delta, icon, tone = 'red
       <div className="row between">
         <span className="label">{label}</span>
         {icon ? (
-          <span className="stat-icon" style={{ background: t.bg, color: t.fg }}>{icon}</span>
+          <span className="stat-icon" style={{ background: swatch.bg, color: swatch.fg }}>{icon}</span>
         ) : null}
       </div>
       <span className="value">{shown}</span>
