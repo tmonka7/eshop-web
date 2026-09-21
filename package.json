@@ -1,0 +1,39 @@
+{
+  "name": "auramart",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AuraMart monorepo: REST API, customer storefront and admin panel installed from one root",
+  "engines": {
+    "node": ">=18.19.0 <19"
+  },
+  "workspaces": [
+    "backend",
+    "frontend",
+    "admin-panel"
+  ],
+  "scripts": {
+    "postinstall": "node -e \"process.stdout.write('AuraMart deps installed into ./node_modules\\n')\"",
+
+    "dev": "concurrently -n api,shop,admin -c green,cyan,magenta \"npm:dev:backend\" \"npm:dev:frontend\" \"npm:dev:admin\"",
+    "dev:backend": "npm run dev --workspace=auramart-backend",
+    "dev:frontend": "npm run dev --workspace=auramart-frontend",
+    "dev:admin": "npm run dev --workspace=auramart-admin",
+
+    "start": "npm run start --workspace=auramart-backend",
+    "seed": "npm run seed --workspace=auramart-backend",
+    "lint": "npm run lint --workspace=auramart-backend",
+
+    "build": "npm run build --workspace=auramart-frontend && npm run build --workspace=auramart-admin",
+    "build:frontend": "npm run build --workspace=auramart-frontend",
+    "build:admin": "npm run build --workspace=auramart-admin",
+
+    "preview": "concurrently -n shop,admin -c cyan,magenta \"npm:preview:frontend\" \"npm:preview:admin\"",
+    "preview:frontend": "npm run preview --workspace=auramart-frontend",
+    "preview:admin": "npm run preview --workspace=auramart-admin",
+
+    "clean": "node -e \"const {rmSync}=require('fs');for(const d of ['node_modules','backend/node_modules','frontend/node_modules','admin-panel/node_modules','frontend/dist','admin-panel/dist'])rmSync(d,{recursive:true,force:true})\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
