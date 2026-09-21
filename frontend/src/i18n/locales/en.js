@@ -47,6 +47,9 @@ export default {
 
   header: {
     trackOrder: 'Track Order',
+    register: 'Register',
+    support247: '24/7 customer support',
+    moneyBack: '30-day money back guarantee',
     freeShippingOver: 'Free shipping over {{amount}}',
     searchPlaceholder: 'Search for products, brands and more...',
     searchAria: 'Search products',
@@ -94,8 +97,9 @@ export default {
 
   home: {
     newSeason: 'New season',
-    heroTitle: 'Discover Premium Products',
-    heroSubtitle: 'Top brands. Better prices. Faster delivery.',
+    heroTitle: 'Smarter Tech for a Brighter Life',
+    promoSub: 'Handpicked pieces, ready to ship.',
+    heroSubtitle: 'Top brands. Better prices. Fast delivery.',
     shopNow: 'Shop Now',
     newArrivals: 'New Arrivals',
     allCategories: 'All Categories',
@@ -112,6 +116,10 @@ export default {
       paymentText: '100% protected',
       returnsTitle: 'Easy Returns',
       returnsText: 'Within 30 days',
+      deliveryTitle: 'Fast Delivery',
+      deliveryText: 'Get your order in 2-5 days',
+      qualityTitle: 'Quality Guarantee',
+      qualityText: 'Top brands and authentic products',
     },
     shopByCategory: 'Shop by Category',
     shopByCategorySub: 'Browse our most popular departments',

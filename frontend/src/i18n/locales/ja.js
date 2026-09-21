@@ -47,6 +47,9 @@ export default {
 
   header: {
     trackOrder: '配送状況',
+    register: '新規登録',
+    support247: '24 時間 365 日サポート',
+    moneyBack: '30 日間返金保証',
     freeShippingOver: '{{amount}} 以上で送料無料',
     searchPlaceholder: '商品名やブランド名で検索…',
     searchAria: '商品を検索',
@@ -94,7 +97,8 @@ export default {
 
   home: {
     newSeason: '新シーズン',
-    heroTitle: 'プレミアムな商品を見つけよう',
+    heroTitle: 'スマートなテックで、明るい毎日を',
+    promoSub: '厳選アイテムを、すぐにお届け。',
     heroSubtitle: '人気ブランドを、より良い価格で、より早くお届け。',
     shopNow: '今すぐ購入',
     newArrivals: '新着商品',
@@ -112,6 +116,10 @@ export default {
       paymentText: '100% 保護',
       returnsTitle: 'かんたん返品',
       returnsText: '30 日以内',
+      deliveryTitle: 'スピード配送',
+      deliveryText: '2〜5 日でお届け',
+      qualityTitle: '品質保証',
+      qualityText: '人気ブランドの正規品',
     },
     shopByCategory: 'カテゴリーから探す',
     shopByCategorySub: '人気のカテゴリーをチェック',

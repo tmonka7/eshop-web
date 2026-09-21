@@ -47,6 +47,9 @@ export default {
 
   header: {
     trackOrder: '订单查询',
+    register: '注册',
+    support247: '7×24 小时客服',
+    moneyBack: '30 天无理由退款',
     freeShippingOver: '满 {{amount}} 免运费',
     searchPlaceholder: '搜索商品、品牌等…',
     searchAria: '搜索商品',
@@ -93,7 +96,8 @@ export default {
 
   home: {
     newSeason: '新季上市',
-    heroTitle: '发现优质好物',
+    heroTitle: '智慧科技，点亮生活',
+    promoSub: '精选好物，现货速发。',
     heroSubtitle: '一线品牌 · 更优价格 · 更快送达',
     shopNow: '立即选购',
     newArrivals: '新品上架',
@@ -111,6 +115,10 @@ export default {
       paymentText: '100% 保障',
       returnsTitle: '轻松退货',
       returnsText: '30 天内可退',
+      deliveryTitle: '极速送达',
+      deliveryText: '2-5 天送达',
+      qualityTitle: '品质保证',
+      qualityText: '一线品牌，正品保障',
     },
     shopByCategory: '按分类选购',
     shopByCategorySub: '浏览最受欢迎的商品分类',

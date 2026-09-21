@@ -1,14 +1,14 @@
 import { Link } from 'react-router-dom';
 import { Heart, HeartFilled, Cart } from './Icons';
 import { Rating } from './ui';
-import { currency, discountPercent, imageUrl } from '../utils/format';
+import { compactNumber, currency, discountPercent, imageUrl } from '../utils/format';
 import { useAuthStore } from '../store/authStore';
 import { useCartStore } from '../store/cartStore';
 import { useToastStore } from '../store/toastStore';
 import { userApi } from '../api';
 import { useI18n } from '../i18n';
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, isNew = false }) {
   const { t } = useI18n();
   const user = useAuthStore((s) => s.user);
   const toggleLocal = useAuthStore((s) => s.toggleWishlistLocal);
@@ -57,10 +57,13 @@ export default function ProductCard({ product }) {
             e.currentTarget.style.visibility = 'hidden';
           }}
         />
+        {/* The design puts the discount beside the price rather than over the
+            photo, so the only flag left here is availability - and the "New"
+            marker, which has no other place to live. */}
         {outOfStock ? (
           <span className="product-flag out">{t('common.outOfStock')}</span>
-        ) : off > 0 ? (
-          <span className="product-flag">{t('common.percentOff', { percent: off })}</span>
+        ) : isNew ? (
+          <span className="product-flag new">{t('home.newSeason')}</span>
         ) : null}
       </Link>
 
@@ -82,13 +85,19 @@ export default function ProductCard({ product }) {
           {product.name}
         </Link>
 
-        <Rating value={product.rating} count={product.reviewCount} />
+        <div className="product-meta">
+          <Rating value={product.rating} size={12} showValue />
+          {product.soldCount > 0 ? (
+            <span className="truncate">{t('product.soldCount', { count: compactNumber(product.soldCount) })}</span>
+          ) : null}
+        </div>
 
         <div className="product-price-row">
           <span className="price">{currency(product.price)}</span>
           {product.comparePrice > product.price ? (
             <span className="price-old">{currency(product.comparePrice)}</span>
           ) : null}
+          {off > 0 ? <span className="off-pill">-{off}%</span> : null}
         </div>
 
         <button

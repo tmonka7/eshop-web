@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Search, Cart, Heart, User, Package, LogOut, Settings, MapPin, Phone, Mail, ChevronDown,
+  Search, Cart, Heart, User, Package, LogOut, Settings, MapPin, ChevronDown,
+  Truck, Shield, Headset, Tag, Grid,
 } from './Icons';
 import { useAuthStore } from '../store/authStore';
 import { useCartStore } from '../store/cartStore';
@@ -74,15 +75,18 @@ export default function Header() {
 
   return (
     <header className="header">
+      {/* Benefit bar. The currency is a label, not a control: prices are USD
+          everywhere by design, so a picker here would be a menu of one. */}
       <div className="header-top">
         <div className="container">
-          <div className="row gap-16">
-            <span className="row gap-6"><Phone size={13} /> +358 40 000 0000</span>
-            <span className="row gap-6"><Mail size={13} /> help@auramart.com</span>
+          <div className="promise-bar">
+            <span><Truck size={14} /> {t('header.freeShippingOver', { amount: currency(50) })}</span>
+            <span><Shield size={14} /> {t('header.moneyBack')}</span>
+            <span><Headset size={14} /> {t('header.support247')}</span>
           </div>
           <div className="row gap-16">
-            <Link to="/orders">{t('header.trackOrder')}</Link>
-            <span>{t('header.freeShippingOver', { amount: currency(50) })}</span>
+            <LanguageSwitcher compact />
+            <span className="row gap-6 currency-tag"><Tag size={13} /> USD</span>
           </div>
         </div>
       </div>
@@ -132,20 +136,37 @@ export default function Header() {
           </form>
 
           <div className="header-actions">
-            <LanguageSwitcher />
+            {/* Signed-out visitors get the two-line Sign In / Register block
+                from the design; signed-in ones keep the account menu, which
+                that block has no room for. */}
+            {!user ? (
+              <div className="action-item action-auth">
+                <User size={20} />
+                <span className="action-label">
+                  <Link to="/login">{t('header.signIn')}</Link>
+                  <Link to="/register">{t('header.register')}</Link>
+                </span>
+              </div>
+            ) : null}
 
-            <Link to="/wishlist" className="icon-btn" aria-label={t('header.wishlist')}>
-              <Heart size={19} />
-              {wishCount > 0 ? (
-                // Keyed on the value so React remounts the badge and its
-                // pop animation replays whenever the count actually changes.
-                <span className="count" key={wishCount}>{wishCount}</span>
-              ) : null}
+            <Link to="/wishlist" className="action-item" aria-label={t('header.wishlist')}>
+              <span className="action-icon">
+                <Heart size={20} />
+                {wishCount > 0 ? (
+                  // Keyed on the value so React remounts the badge and its
+                  // pop animation replays whenever the count actually changes.
+                  <span className="count" key={wishCount}>{wishCount}</span>
+                ) : null}
+              </span>
+              <span className="action-label">{t('header.wishlist')}</span>
             </Link>
 
-            <Link to="/cart" className="icon-btn" aria-label={t('header.cart')}>
-              <Cart size={19} />
-              {cartCount > 0 ? <span className="count" key={cartCount}>{cartCount}</span> : null}
+            <Link to="/cart" className="action-item" aria-label={t('header.cart')}>
+              <span className="action-icon">
+                <Cart size={20} />
+                {cartCount > 0 ? <span className="count" key={cartCount}>{cartCount}</span> : null}
+              </span>
+              <span className="action-label">{t('header.cart')}</span>
             </Link>
 
             {user ? (
@@ -175,18 +196,18 @@ export default function Header() {
                   </div>
                 ) : null}
               </div>
-            ) : (
-              <Link to="/login" className="btn btn-primary btn-sm" style={{ marginLeft: 6 }}>
-                {t('header.signIn')}
-              </Link>
-            )}
+            ) : null}
           </div>
         </div>
       </div>
 
       <nav className="header-nav">
         <div className="container">
-          <NavLink to="/products" end className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+          {/* The filled pill from the design. It is a link rather than a
+              dropdown: every department it would list is already in the row
+              beside it, so a menu would only duplicate them. */}
+          <NavLink to="/products" end className="cat-pill">
+            <Grid size={15} />
             {t('header.allCategories')}
           </NavLink>
           {categories.map((c) => (

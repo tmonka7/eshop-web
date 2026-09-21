@@ -39,7 +39,7 @@ export default function Footer() {
             <div className="stack gap-8 mt-16 small">
               <span className="row gap-8"><MapPin size={14} /> Mannerheimintie 1, Helsinki</span>
               <span className="row gap-8"><Phone size={14} /> +358 40 000 0000</span>
-              <span className="row gap-8"><Mail size={14} /> help@auramart.com</span>
+              <span className="row gap-8"><Mail size={14} /> help@shopworld.com</span>
             </div>
           </div>
 

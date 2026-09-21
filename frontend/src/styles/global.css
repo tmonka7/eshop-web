@@ -1047,54 +1047,6 @@ body[data-scrolled="1"] .header-main {
    its promo tiles, accented section headings, and the split auth panel.
    ========================================================================== */
 
-/* ------------------------- department rail + hero ------------------------- */
-
-.home-top {
-  display: grid;
-  grid-template-columns: 228px 1fr;
-  gap: 20px;
-  align-items: stretch;
-  margin-top: 28px;
-}
-/* The hero owns its own top margin in the base sheet; inside this row the
-   grid supplies the spacing instead. */
-.home-top .hero { margin-top: 0; }
-
-.dept-rail {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-.dept-rail-head {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 14px 16px;
-  background: linear-gradient(135deg, var(--green-700), var(--green-800));
-  color: #fff;
-  font-size: 0.86rem;
-  font-weight: 700;
-}
-.dept-rail ul { padding: 6px; flex: 1; }
-.dept-rail a {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 11px;
-  border-radius: var(--radius-sm);
-  font-size: 0.84rem;
-  font-weight: 500;
-  color: var(--ink-700);
-  transition: background var(--t-fast), color var(--t-fast), transform var(--t-fast) var(--ease-out);
-}
-.dept-rail a svg { margin-left: auto; flex-shrink: 0; color: var(--ink-400); transition: transform var(--t-fast) var(--ease-out); }
-.dept-rail a:hover { background: var(--green-50); color: var(--primary); transform: translateX(3px); }
-.dept-rail a:hover svg { color: var(--primary); transform: translateX(2px); }
-
 /* ---------------------------- section headings ---------------------------- */
 /* A short brand rule to the left of the title, as in the reference. */
 
@@ -1110,19 +1062,9 @@ body[data-scrolled="1"] .header-main {
   background: linear-gradient(180deg, var(--green-500), var(--green-700));
 }
 
-/* ------------------------------- hot deals -------------------------------- */
-
-.deal-layout {
-  display: grid;
-  grid-template-columns: 1fr 268px;
-  gap: 18px;
-  align-items: start;
-}
 /* Four across, so the row lines up with the promo stack beside it rather than
    reflowing to whatever the auto-fill grid decides. */
 .deal-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-
-.promo-stack { display: grid; gap: 18px; align-content: start; }
 
 .promo-tile {
   position: relative;
@@ -1154,7 +1096,6 @@ body[data-scrolled="1"] .header-main {
 
 /* Both scales run dark enough that the white copy clears 4.5:1 across the
    whole gradient, not just at one end. */
-.promo-tile-sale { background: linear-gradient(140deg, var(--red-600), #991b1b); }
 .promo-tile-ship { background: linear-gradient(140deg, var(--green-700), var(--green-800)); }
 
 /* No opacity on either of these. CSS opacity composites against the tile, so
@@ -1264,25 +1205,326 @@ body[data-scrolled="1"] .header-main {
 
 /* -------------------------------- responsive ------------------------------ */
 
-@media (max-width: 1100px) {
-  .deal-layout { grid-template-columns: 1fr; }
-  .promo-stack { grid-template-columns: 1fr 1fr; }
-  .promo-tile { min-height: 140px; }
-}
-
-@media (max-width: 1024px) {
-  /* The nav bar and the category grid already reach every department. */
-  .home-top { grid-template-columns: 1fr; }
-  .dept-rail { display: none; }
-  .deal-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
 @media (max-width: 860px) {
   .auth-shell { grid-template-columns: 1fr; max-width: 420px; }
   .auth-aside { display: none; }
 }
 
-@media (max-width: 560px) {
-  .promo-stack { grid-template-columns: 1fr; }
-  .promo-tile strong { font-size: 1.3rem; }
+
+/* ==========================================================================
+   Homepage, built to the ShopWorld reference
+   This block supersedes the earlier "design-reference modules" section: the
+   department rail moved into the nav bar, and the hero's right-hand column
+   became the three promise cards.
+   ========================================================================== */
+
+/* ------------------------------ header chrome ----------------------------- */
+/* The reference's top bar is a pale green band with dark text, not the dark
+   green one the base sheet draws. */
+
+.header-top {
+  background: var(--green-50);
+  border-bottom: 1px solid var(--green-100);
+  color: var(--ink-700);
+  animation: none;
+}
+.header-top .container { height: 38px; }
+.header-top a { color: var(--ink-700); }
+.header-top a:hover { color: var(--primary); }
+
+.promise-bar { display: flex; align-items: center; gap: 28px; min-width: 0; }
+.promise-bar span { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.promise-bar svg { color: var(--primary); flex-shrink: 0; }
+.currency-tag { color: var(--ink-700); font-weight: 600; }
+
+/* Brand block: name over tagline, as in the reference. */
+.brand-mark { border-radius: 13px; }
+.brand-name { line-height: 1.1; }
+
+/* Search: pill field with a filled square button at the trailing edge. */
+.search input { border-radius: var(--radius-sm); background: #fff; padding-right: 58px; }
+.search button {
+  top: 4px;
+  right: 4px;
+  width: 44px;
+  height: 36px;
+  border-radius: 7px;
+}
+
+/* Action cluster: icon over/next to a label, with a red count badge. */
+.header-actions { gap: 4px; }
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  color: var(--ink-700);
+  transition: background var(--t-fast), color var(--t-fast), transform var(--t-fast) var(--ease-out);
+}
+.action-item:hover { background: var(--ink-50); color: var(--primary); transform: translateY(-1px); }
+.action-icon { position: relative; display: grid; place-items: center; }
+.action-label { display: flex; flex-direction: column; font-size: 0.78rem; font-weight: 600; line-height: 1.25; }
+.action-auth .action-label a { color: var(--ink-700); }
+.action-auth .action-label a:hover { color: var(--primary); }
+.action-auth .action-label a:last-child { color: var(--text-muted); font-weight: 500; }
+
+/* The badge is red so a count reads as a notification rather than as another
+   piece of brand green. White on red-600 is 4.83:1. */
+.icon-btn .count, .action-icon .count {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: var(--radius-full);
+  background: var(--red-600);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  border: 2px solid #fff;
+  box-sizing: content-box;
+}
+
+/* The filled "All Categories" pill that opens the nav row. */
+.header-nav .container { gap: 8px; height: 54px; }
+.cat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  flex-shrink: 0;
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--green-700), var(--green-800));
+  color: #fff;
+  font-size: 0.86rem;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: var(--glow);
+  transition: transform var(--t-fast) var(--ease-spring), box-shadow var(--t-base);
+}
+.cat-pill:hover { transform: translateY(-2px); box-shadow: var(--glow-strong); color: #fff; }
+.header-nav .nav-link { margin-left: 4px; }
+
+/* --------------------------------- hero row ------------------------------- */
+
+.home-top {
+  display: grid;
+  grid-template-columns: 1fr 296px;
+  gap: 18px;
+  align-items: stretch;
+  margin-top: 22px;
+}
+.home-top .hero { margin-top: 0; padding: 44px 46px; }
+
+/* green-800, not --primary: this sits on the hero, whose pale end is
+   green-200, where green-700 reaches only 4.14:1 - short of the 4.5:1 a
+   0.8rem label needs. green-800 clears it at 5.88:1. */
+.hero-eyebrow {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--green-800);
+}
+.hero h1 { font-size: 3rem; letter-spacing: -0.03em; }
+.btn-pill { border-radius: var(--radius-full); padding-left: 26px; padding-right: 22px; }
+
+.hero-aside { display: grid; grid-template-rows: repeat(3, 1fr); gap: 18px; }
+.promise-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--t-base) var(--ease-out), box-shadow var(--t-base), border-color var(--t-base);
+}
+.promise-card:hover { transform: translateY(-3px); box-shadow: var(--glow); border-color: var(--green-300); }
+.promise-card strong { display: block; font-size: 0.92rem; }
+.promise-card .tiny { display: block; }
+.promise-card > svg { color: var(--ink-400); flex-shrink: 0; transition: transform var(--t-fast) var(--ease-out); }
+.promise-card:hover > svg { color: var(--primary); transform: translateX(3px); }
+
+.promise-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--green-50);
+  color: var(--primary);
+  flex-shrink: 0;
+  transition: transform var(--t-base) var(--ease-spring), background var(--t-base);
+}
+.promise-card:hover .promise-icon { transform: scale(1.08); background: var(--green-100); }
+
+/* ------------------------------ category rail ----------------------------- */
+
+.category-rail {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: 8px;
+  margin: 26px 0 4px;
+}
+.category-chip {
+  border: 0;
+  background: transparent;
+  padding: 12px 6px;
+  gap: 10px;
+}
+.category-chip:hover { box-shadow: none; border-color: transparent; }
+.chip-ring {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--green-50);
+  color: var(--primary);
+  overflow: hidden;
+  transition: background var(--t-base), box-shadow var(--t-base);
+}
+.category-chip:hover .chip-ring { background: var(--green-100); box-shadow: var(--glow); }
+.chip-ring .avatar { width: 100%; height: 100%; border-radius: 50%; background: transparent; }
+.chip-ring-more { background: var(--ink-100); color: var(--ink-600); }
+.category-chip span:last-child { font-size: 0.78rem; font-weight: 600; text-align: center; line-height: 1.3; }
+
+/* -------------------------------- deals band ------------------------------ */
+
+.deal-band {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(0, 0.85fr) minmax(0, 1.1fr);
+  gap: 18px;
+  align-items: stretch;
+  margin-top: 22px;
+}
+.deal-main, .rank-card { display: flex; flex-direction: column; min-width: 0; }
+.deal-main .card-pad { flex: 1; }
+.band-title { display: inline-flex; align-items: center; gap: 8px; padding-left: 0; }
+.band-title::before { content: none; }
+.band-title svg { color: var(--red-600); }
+.deal-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+
+/* The best-seller ranking. */
+.rank-list { display: flex; flex-direction: column; flex: 1; }
+.rank-list li { border-bottom: 1px solid var(--ink-100); }
+.rank-list li:last-child { border-bottom: 0; }
+.rank-list a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 16px;
+  transition: background var(--t-fast);
+}
+.rank-list a:hover { background: var(--green-50); }
+.rank-list img {
+  width: 42px;
+  height: 42px;
+  border-radius: 9px;
+  object-fit: cover;
+  background: var(--ink-50);
+  flex-shrink: 0;
+}
+.rank-name { display: block; font-size: 0.82rem; font-weight: 600; line-height: 1.3; }
+.rank-num {
+  width: 21px;
+  height: 21px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  background: var(--ink-100);
+  color: var(--ink-600);
+  font-size: 0.7rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+/* Top three carry the brand colour, the rest stay neutral. Rank is also the
+   list order and the printed numeral, so the colour is never the only cue. */
+.rank-list li:nth-child(-n+3) .rank-num { background: var(--green-100); color: var(--green-800); }
+
+.promo-tile-lg { min-height: 100%; justify-content: center; gap: 7px; padding: 28px; }
+.promo-tile-lg strong { font-size: 1.85rem; }
+
+/* ------------------------------- trust strip ------------------------------ */
+
+.trust-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin-top: 18px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+.trust-cell {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 14px 18px;
+  border-right: 1px solid var(--ink-100);
+}
+.trust-cell:last-child { border-right: 0; }
+.trust-cell h4 { font-size: 0.88rem; margin: 0; }
+.trust-cell p { font-size: 0.76rem; color: var(--text-muted); margin: 0; }
+.trust-cell .promise-icon { width: 40px; height: 40px; }
+
+/* ------------------------------ product cards ----------------------------- */
+
+/* The discount now rides beside the price. red-700 on red-100 is 5.3:1. */
+.off-pill {
+  margin-left: auto;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  background: var(--red-100);
+  color: var(--red-700);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+/* The "New" marker keeps the flag's default top-left slot, opposite the
+   wishlist heart. The reference swaps the two on its New Arrivals row, but
+   the heart has to stay put across every grid on the site. */
+.product-flag.new { background: var(--green-700); }
+.product-meta { gap: 8px; }
+
+/* -------------------------------- responsive ------------------------------ */
+
+@media (max-width: 1180px) {
+  .deal-band { grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr); }
+  .promo-tile-lg { grid-column: 1 / -1; min-height: 170px; }
+  .deal-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 1024px) {
+  .home-top { grid-template-columns: 1fr; }
+  .hero-aside { grid-template-rows: none; grid-template-columns: repeat(3, 1fr); }
+  .hero h1 { font-size: 2.4rem; }
+  .trust-strip { grid-template-columns: repeat(2, 1fr); }
+  .trust-cell:nth-child(2n) { border-right: 0; }
+  .trust-cell:nth-child(-n+2) { border-bottom: 1px solid var(--ink-100); }
+}
+
+@media (max-width: 860px) {
+  .deal-band { grid-template-columns: 1fr; }
+  .promise-bar span:nth-child(n+2) { display: none; }
+}
+
+@media (max-width: 768px) {
+  .hero-aside { grid-template-columns: 1fr; }
+  .action-label { display: none; }
+  .action-item { padding: 8px; }
+  .hero h1 { font-size: 1.9rem; }
+  .home-top .hero { padding: 30px 24px; }
+  .trust-strip { grid-template-columns: 1fr; }
+  .trust-cell { border-right: 0; border-bottom: 1px solid var(--ink-100); }
+  .trust-cell:last-child { border-bottom: 0; }
 }
