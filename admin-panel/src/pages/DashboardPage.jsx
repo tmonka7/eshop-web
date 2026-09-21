@@ -152,14 +152,14 @@ export default function DashboardPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2ece6" vertical={false} />
                 <XAxis
                   dataKey="date"
-                  tick={{ fontSize: 11, fill: "#9ab0a3" }}
+                  tick={{ fontSize: 11, fill: "#5a7566" }}
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(d) => (d.length > 7 ? d.slice(5) : d)}
                   minTickGap={22}
                 />
                 <YAxis
-                  tick={{ fontSize: 11, fill: "#9ab0a3" }}
+                  tick={{ fontSize: 11, fill: "#5a7566" }}
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(v) => compactNumber(v)}
@@ -282,8 +282,8 @@ export default function DashboardPage() {
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={growth.series} margin={{ top: 4, right: 4, left: -22, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2ece6" vertical={false} />
-                  <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#9ab0a3" }} tickLine={false} axisLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: "#9ab0a3" }} tickLine={false} axisLine={false} allowDecimals={false} />
+                  <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#5a7566" }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fontSize: 11, fill: "#5a7566" }} tickLine={false} axisLine={false} allowDecimals={false} />
                   <Tooltip contentStyle={{ borderRadius: 10, border: "1px solid #e2ece6", fontSize: 12 }} />
                   <Area type="monotone" dataKey="count" stroke="#16a34a" strokeWidth={2} fill="#dcfce7" />
                 </AreaChart>

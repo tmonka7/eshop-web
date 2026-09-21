@@ -4,7 +4,7 @@ import { catalogApi } from '../api';
 import ProductCard from '../components/ProductCard';
 import { Rating, SkeletonGrid } from '../components/ui';
 import {
-  Truck, Headset, Shield, Refresh, Zap, Tag, CreditCard, ChevronRight, Grid,
+  Truck, Headset, Shield, Refresh, Zap, Tag, CreditCard, ChevronRight, ChevronLeft, Grid,
 } from '../components/Icons';
 import { compactNumber, currency, discountPercent, imageUrl } from '../utils/format';
 import { useI18n } from '../i18n';
@@ -14,6 +14,7 @@ const HERO_PROMISES = [
   { icon: <Truck size={20} />, titleKey: 'home.features.shippingTitle', textKey: 'home.features.shippingText' },
   { icon: <Refresh size={20} />, titleKey: 'home.features.returnsTitle', textKey: 'home.features.returnsText' },
   { icon: <Headset size={20} />, titleKey: 'home.features.supportTitle', textKey: 'home.features.supportText' },
+  { icon: <Shield size={20} />, titleKey: 'home.features.paymentTitle', textKey: 'home.features.paymentText' },
 ];
 
 /** The reassurance strip under the deals band. */
@@ -43,6 +44,7 @@ function pickDeals(...lists) {
 
 export default function Home() {
   const { t, locale } = useI18n();
+  const [slide, setSlide] = useState(0);
   const [state, setState] = useState({
     banners: [],
     categories: [],
@@ -83,7 +85,9 @@ export default function Home() {
     // translated by the API.
   }, [locale]);
 
-  const hero = state.banners[0];
+  // Clamped rather than indexed directly: the banner list is refetched on a
+  // language change and can come back shorter than the current slide.
+  const hero = state.banners[Math.min(slide, Math.max(state.banners.length - 1, 0))];
   const deals = pickDeals(state.featured, state.bestSellers);
   // Both headline claims are read off the catalogue, so a tile can never
   // advertise a discount the data does not actually have.
@@ -94,8 +98,31 @@ export default function Home() {
 
   return (
     <div className="container">
-      {/* Hero, with the three promises stacked beside it. */}
+      {/* Department rail, hero, promises - the three columns of the design.
+          The rail duplicates the nav bar's departments, so it is dropped
+          below 1100px rather than stacked. */}
       <div className="home-top">
+        <aside className="dept-rail" aria-label={t('home.allCategories')}>
+          <ul>
+            {state.categories.slice(0, 9).map((c) => (
+              <li key={c._id}>
+                <Link to={`/products?category=${c.slug}`}>
+                  <img src={imageUrl(c.image)} alt="" loading="lazy" />
+                  <span className="truncate">{c.name}</span>
+                  <ChevronRight size={14} />
+                </Link>
+              </li>
+            ))}
+            <li>
+              <Link to="/products">
+                <span className="dept-more"><Grid size={14} /></span>
+                <span className="truncate">{t('common.seeAll')}</span>
+                <ChevronRight size={14} />
+              </Link>
+            </li>
+          </ul>
+        </aside>
+
         <section className="hero">
           <div>
             <span className="hero-eyebrow">{t('home.newArrivals')}</span>
@@ -107,6 +134,42 @@ export default function Home() {
               </Link>
             </div>
           </div>
+          {/* Carousel controls, only once there is more than one banner to
+              move between. The dots are buttons, not decoration, so the
+              slide is reachable without dragging. */}
+          {state.banners.length > 1 ? (
+            <div className="hero-nav">
+              <button
+                type="button"
+                className="hero-arrow"
+                onClick={() => setSlide((s) => (s - 1 + state.banners.length) % state.banners.length)}
+                aria-label={t('common.prev')}
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <span className="hero-dots">
+                {state.banners.map((b, i) => (
+                  <button
+                    key={b._id || i}
+                    type="button"
+                    className={i === slide ? 'on' : ''}
+                    onClick={() => setSlide(i)}
+                    aria-label={`${i + 1}`}
+                    aria-current={i === slide}
+                  />
+                ))}
+              </span>
+              <button
+                type="button"
+                className="hero-arrow"
+                onClick={() => setSlide((s) => (s + 1) % state.banners.length)}
+                aria-label={t('common.next')}
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          ) : null}
+
           <div className="hero-art">
             {hero?.image ? <img src={imageUrl(hero.image)} alt="" /> : null}
           </div>

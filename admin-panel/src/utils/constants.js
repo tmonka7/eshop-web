@@ -31,22 +31,27 @@ export const PAYMENT_TONE = {
  * status (negative deltas, destructive actions) and a status colour must never
  * double as "series 6".
  *
- * Checked with the data-viz validator against a white chart surface:
- *   adjacent pairs (bars, lines, stacked) — worst CVD ΔE 10.3, normal 31.1: passes.
- *   all pairs (the donut, where every segment is compared at once) — clears to
- *   five slots, with worst CVD ΔE 6.1, inside the 6–8 floor band. That band is
- *   only legal alongside secondary encoding, which is why the donut ships a
- *   legend and per-segment labels rather than relying on colour alone.
+ * Validated against a white chart surface in the strictest all-pairs mode —
+ * every segment compared with every other, not just its neighbour:
+ *   lightness band, chroma floor, contrast — all pass
+ *   worst normal-vision ΔE 16.7, above the 15 floor
+ *   worst CVD ΔE 6.1 (green↔magenta, deutan) — inside the 6–8 floor band,
+ *     which is legal ONLY alongside secondary encoding. That is why the donut
+ *     ships a legend, a label on every segment and 2px gaps between them,
+ *     rather than leaving colour to carry identity on its own.
+ *
+ * The amber slot is #b45309 rather than a brighter #f59e0b, which is 2.15:1
+ * against white — a mark that faint obliges a table view on its own.
+ *
+ * Past CHART_SERIES_CAP the tail folds into one neutral "Other" segment
+ * instead of cycling hues back to the start.
  */
 export const CHART_COLORS = [
   '#16a34a',
   '#7c3aed',
-  '#f59e0b',
+  '#b45309',
   '#0891b2',
   '#db2777',
-  '#4d7c0f',
-  '#2563eb',
-  '#b45309',
 ];
 
 /** Segments past this many must fold into "Other" on all-pairs forms. */

@@ -47,7 +47,7 @@ export default function ProductCard({ product, isNew = false }) {
   }
 
   return (
-    <article className="product-card">
+    <article className={`product-card ${isNew ? 'product-card-new' : ''}`}>
       <Link to={`/product/${product.slug}`} className="product-media">
         <img
           src={imageUrl(product.images?.[0])}

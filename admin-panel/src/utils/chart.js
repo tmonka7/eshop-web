@@ -36,4 +36,4 @@ export function foldSegments(segments, otherLabel, cap = CHART_SERIES_CAP) {
 }
 
 /** Neutral grey for the folded "Other" slot — it is a remainder, not an entity. */
-export const OTHER_COLOR = '#9ab0a3';
+export const OTHER_COLOR = '#57534e';

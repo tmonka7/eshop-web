@@ -4,18 +4,16 @@
    =========================================================================== */
 
 :root {
-  /* The brand ramp around #9dc209 - lime steps under the --green-* names.
-     See the long note in the storefront's global.css. */
-  --green-50: #f7fce9;
-  --green-100: #eef8cb;
-  --green-200: #ddf09b;
-  --green-300: #c6e45f;
-  --green-400: #b0d42c;
-  --green-500: #9dc209;
-  --green-600: #8aab08;
-  --green-700: #647d06;
-  --green-800: #4c5f06;
-  --green-900: #38470a;
+  --green-50: #f0fdf4;
+  --green-100: #dcfce7;
+  --green-200: #bbf7d0;
+  --green-300: #86efac;
+  --green-400: #4ade80;
+  --green-500: #22c55e;
+  --green-600: #16a34a;
+  --green-700: #15803d;
+  --green-800: #166534;
+  --green-900: #14532d;
 
   /* Accent scale: destructive actions, error states, negative deltas. */
   --red-50: #fef2f2;
@@ -55,14 +53,12 @@
   --ink-50: #f7fbf8;
 
   /* Split the same way as the storefront - see the long note in global.css.
-     White cannot sit on #9dc209 at all (2.07:1, below even the 3:1 for
-     graphics), so the brand fill carries --on-primary, a dark olive, at
-     7.81:1. --primary-ink is the brand AS text on white and on the pale
-     tints, where the fill itself is unreadable. */
-  --primary: #9dc209;
-  --primary-dark: #8aab08;
-  --on-primary: #1a2408;
-  --primary-ink: #586d06;
+     --primary is the fill, --on-primary what sits on it (white here), and
+     --primary-ink the brand as text or as any outline on a light surface. */
+  --primary: #16a34a;
+  --primary-dark: #15803d;
+  --on-primary: #ffffff;
+  --primary-ink: #15803d;
   --success: #0d9488;
   --border: var(--ink-200);
   --text: var(--ink-900);
@@ -104,7 +100,7 @@ a { color: inherit; text-decoration: none; }
 img { max-width: 100%; display: block; }
 button { font: inherit; cursor: pointer; }
 ul { margin: 0; padding: 0; list-style: none; }
-:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
+:focus-visible { outline: 2px solid var(--primary-ink); outline-offset: 2px; border-radius: 4px; }
 
 /* ------------------------------- layout --------------------------------- */
 
@@ -194,7 +190,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .input:focus, .select:focus, .textarea:focus {
-  outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--green-100);
+  outline: none; border-color: var(--primary-ink); box-shadow: 0 0 0 3px var(--green-100);
 }
 .input.has-error { border-color: var(--red-500); }
 .textarea { min-height: 96px; resize: vertical; }
@@ -269,7 +265,7 @@ table.data .actions { display: flex; gap: 4px; justify-content: flex-end; }
   background: #fff; font-size: 0.8rem; font-weight: 600; color: var(--ink-600);
 }
 .tab-chip:hover { border-color: var(--ink-400); }
-.tab-chip.active { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+.tab-chip.active { background: var(--primary); border-color: var(--primary-ink); color: var(--on-primary); }
 .tab-chip .n { opacity: 0.75; margin-left: 5px; }
 
 /* -------------------------------- modal --------------------------------- */
@@ -327,11 +323,11 @@ table.data .actions { display: flex; gap: 4px; justify-content: flex-end; }
 .pagination { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 18px; border-top: 1px solid var(--border); flex-wrap: wrap; }
 .pagination .pages { display: flex; gap: 5px; }
 .pagination button { min-width: 32px; height: 32px; border: 1px solid var(--border); background: #fff; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600; color: var(--ink-700); }
-.pagination button:hover:not(:disabled) { border-color: var(--primary); color: var(--primary-ink); }
-.pagination button.active { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+.pagination button:hover:not(:disabled) { border-color: var(--primary-ink); color: var(--primary-ink); }
+.pagination button.active { background: var(--primary); border-color: var(--primary-ink); color: var(--on-primary); }
 .pagination button:disabled { opacity: 0.45; cursor: not-allowed; }
 
-.spinner { width: 30px; height: 30px; border: 3px solid var(--ink-200); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.7s linear infinite; }
+.spinner { width: 30px; height: 30px; border: 3px solid var(--ink-200); border-top-color: var(--primary-ink); border-radius: 50%; animation: spin 0.7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .loader-wrap { display: grid; place-items: center; padding: 54px 0; }
 
@@ -416,7 +412,7 @@ table.data .actions { display: flex; gap: 4px; justify-content: flex-end; }
 }
 
 .translation-tab.active {
-  border-color: var(--primary); color: var(--primary-ink); background: var(--green-50);
+  border-color: var(--primary-ink); color: var(--primary-ink); background: var(--green-50);
 }
 
 /* Filled dot = this language has copy; hollow = it will fall back to English. */
@@ -454,7 +450,7 @@ table.data .actions { display: flex; gap: 4px; justify-content: flex-end; }
   --t-base: 240ms;
   --t-slow: 480ms;
 
-  --glow: 0 12px 26px -14px rgba(114, 143, 7, 0.55);
+  --glow: 0 12px 26px -14px rgba(21, 128, 61, 0.55);
   --lift: 0 18px 38px -22px rgba(11, 31, 20, 0.4);
 }
 
@@ -464,8 +460,8 @@ table.data .actions { display: flex; gap: 4px; justify-content: flex-end; }
 @keyframes pan { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
 @keyframes sheen { from { transform: translateX(-130%) skewX(-18deg); } to { transform: translateX(230%) skewX(-18deg); } }
 @keyframes halo {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(114, 143, 7, 0.4); }
-  70% { box-shadow: 0 0 0 9px rgba(114, 143, 7, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(21, 128, 61, 0.4); }
+  70% { box-shadow: 0 0 0 9px rgba(21, 128, 61, 0); }
 }
 @keyframes modal-pop {
   from { opacity: 0; transform: translateY(-14px) scale(0.96); }
@@ -568,15 +564,15 @@ body[data-scrolled="1"] .topbar {
   box-shadow: var(--glow);
 }
 .btn-primary:hover:not(:disabled) { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); }
-/* The success button is the same lime as the primary, so it takes the same
-   dark label. red-500 is 3.76:1 with white, under the 4.5:1 a 13px caption
+/* The success button is the same green as the primary, so it takes the same
+   label colour. red-500 is 3.76:1 with white, under the 4.5:1 a 13px caption
    needs, so the danger button runs between the two darker red steps. */
 .btn-success { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: var(--on-primary); }
 .btn-success:hover:not(:disabled) { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); }
 .btn-danger { background: linear-gradient(135deg, var(--red-600), var(--red-700)); }
 .btn-danger:hover:not(:disabled) { background: linear-gradient(135deg, var(--red-700), var(--red-600)); }
 .btn-dark { background: linear-gradient(135deg, var(--ink-900), var(--ink-700)); }
-.btn-outline:hover:not(:disabled) { border-color: var(--primary); color: var(--primary-ink); box-shadow: var(--glow); }
+.btn-outline:hover:not(:disabled) { border-color: var(--primary-ink); color: var(--primary-ink); box-shadow: var(--glow); }
 .btn-icon:hover:not(:disabled) { transform: translateY(-2px) scale(1.06); }
 
 /* --------------------------------- surfaces -------------------------------- */
@@ -665,7 +661,7 @@ table.data th { transition: color var(--t-fast); }
 .login-page {
   background:
     radial-gradient(820px 520px at 12% 4%, rgba(22, 163, 74, 0.5), transparent 60%),
-    radial-gradient(700px 460px at 88% 96%, rgba(101, 163, 13, 0.42), transparent 58%),
+    radial-gradient(700px 460px at 88% 96%, rgba(13, 148, 136, 0.42), transparent 58%),
     linear-gradient(140deg, var(--ink-900), #0f261a 58%, var(--ink-900));
   background-size: 170% 170%;
   animation: pan 24s ease-in-out infinite alternate;
@@ -703,7 +699,7 @@ table.data th { transition: color var(--t-fast); }
   bottom: 0.16em;
   width: 4px;
   border-radius: 3px;
-  background: linear-gradient(180deg, var(--green-500), var(--green-700));
+  background: linear-gradient(180deg, var(--green-700), var(--green-900));
 }
 
 /* Card headers get the same treatment, one step quieter. */

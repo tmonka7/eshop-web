@@ -90,13 +90,13 @@ export default function ReportsPage() {
               <CartesianGrid strokeDasharray="3 3" stroke="#e2ece6" vertical={false} />
               <XAxis
                 dataKey="date"
-                tick={{ fontSize: 11, fill: "#9ab0a3" }}
+                tick={{ fontSize: 11, fill: "#5a7566" }}
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(d) => (d.length > 7 ? d.slice(5) : d)}
                 minTickGap={24}
               />
-              <YAxis tick={{ fontSize: 11, fill: "#9ab0a3" }} tickLine={false} axisLine={false} allowDecimals={false} />
+              <YAxis tick={{ fontSize: 11, fill: "#5a7566" }} tickLine={false} axisLine={false} allowDecimals={false} />
               <Tooltip contentStyle={{ borderRadius: 10, border: "1px solid #e2ece6", fontSize: 12 }} />
               <Line type="monotone" dataKey="orders" stroke="#16a34a" strokeWidth={2} dot={false} />
             </LineChart>
@@ -122,7 +122,7 @@ export default function ReportsPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2ece6" horizontal={false} />
                   <XAxis
                     type="number"
-                    tick={{ fontSize: 11, fill: "#9ab0a3" }}
+                    tick={{ fontSize: 11, fill: "#5a7566" }}
                     tickLine={false}
                     axisLine={false}
                     tickFormatter={(v) => compactNumber(v)}
@@ -159,8 +159,8 @@ export default function ReportsPage() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={growth.series} margin={{ top: 4, right: 8, left: -18, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2ece6" vertical={false} />
-                <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#9ab0a3" }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: "#9ab0a3" }} tickLine={false} axisLine={false} allowDecimals={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#5a7566" }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: "#5a7566" }} tickLine={false} axisLine={false} allowDecimals={false} />
                 <Tooltip contentStyle={{ borderRadius: 10, border: "1px solid #e2ece6", fontSize: 12 }} />
                 <Bar dataKey="count" fill="#16a34a" radius={[5, 5, 0, 0]} barSize={22} />
               </BarChart>

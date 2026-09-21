@@ -5,25 +5,16 @@
    =========================================================================== */
 
 :root {
-  /* The brand ramp, built around #9dc209. It keeps the --green-* names
-     because a yellow-green is still a green and the names are referenced in
-     over a hundred places, but note the hue: these are lime steps, not the
-     emerald ones they replaced.
-
-     The important property of this hue is that it is LIGHT. White on #9dc209
-     is 2.07:1 - not merely sub-AA but below the 3:1 floor for graphics, so
-     white text and white glyphs cannot sit on the brand colour at all. The
-     system is therefore dark-on-light: see --on-primary below. */
-  --green-50: #f7fce9;
-  --green-100: #eef8cb;
-  --green-200: #ddf09b;
-  --green-300: #c6e45f;
-  --green-400: #b0d42c;
-  --green-500: #9dc209;
-  --green-600: #8aab08;
-  --green-700: #647d06;
-  --green-800: #4c5f06;
-  --green-900: #38470a;
+  --green-50: #f0fdf4;
+  --green-100: #dcfce7;
+  --green-200: #bbf7d0;
+  --green-300: #86efac;
+  --green-400: #4ade80;
+  --green-500: #22c55e;
+  --green-600: #16a34a;
+  --green-700: #15803d;
+  --green-800: #166534;
+  --green-900: #14532d;
 
   /* Kept as the accent scale: sale badges, destructive buttons, errors. */
   --red-50: #fef2f2;
@@ -75,27 +66,31 @@
 
      green-400/500 remain decoration only: rules, rings, blobs, chart marks.
 
-     NOTE, deliberately chosen: --primary is green-600, where white sits at
-     3.30:1. That clears the 3:1 WCAG asks of UI components, icons, borders and
-     large text, but it is under the 4.5:1 for labels below 18.66px.
+     The brand colour does three jobs and needs a token for each:
 
-     With #9dc209 that trade is no longer available: white on it is 2.07:1,
-     which fails even the 3:1 for non-text. So the brand fill carries DARK
-     type, not white - --on-primary, at 7.81:1. Every rule that pairs
-     `background: var(--primary)` with a label uses it.
+     --primary is the FILL - green underneath a label. green-600, where white
+     is 3.30:1: that clears the 3:1 WCAG asks of UI components, icons and
+     large text, but not the 4.5:1 for labels under 18.66px. A deliberate
+     brand call. #158741 is the lightest green that would make it AA.
 
-     --primary-ink is still the brand AS text on white and on the pale tints,
-     where the fill itself is 2.07:1 and unusable. */
-  --primary: #9dc209;
-  --primary-dark: #8aab08;
-  --on-primary: #1a2408;
-  --primary-ink: #586d06;
+     --on-primary is what sits on that fill. White here, but it stays a token
+     rather than a literal #fff, because a lighter brand green would force it
+     dark - at #9dc209, for instance, white is 2.07:1 and unusable.
+
+     --primary-ink is the brand AS text, and as any outline, focus ring,
+     border or accent on a light surface. Green type also sits on the
+     green-50/green-100 tints, where the fill drops to 4.18-4.39:1; this step
+     holds 4.57:1 on green-100. */
+  --primary: #16a34a;
+  --primary-dark: #15803d;
+  --on-primary: #ffffff;
+  --primary-ink: #15803d;
   --primary-soft: var(--green-50);
   /* A deeper emerald, so an "ok" badge stays distinct from a primary button. */
   --success: #0d9488;
 
   --bg: #ffffff;
-  --bg-soft: #f8fbef;
+  --bg-soft: #f2faf5;
   --border: var(--ink-200);
   --text: var(--ink-900);
   --text-muted: var(--ink-500);
@@ -143,7 +138,7 @@ button { font: inherit; cursor: pointer; }
 ul { margin: 0; padding: 0; list-style: none; }
 
 :focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--primary-ink);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -223,7 +218,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .input:focus, .select:focus, .textarea:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: var(--primary-ink);
   box-shadow: 0 0 0 3px var(--green-100);
 }
 .input.has-error { border-color: var(--red-500); }
@@ -323,7 +318,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 
 .search { position: relative; flex: 1; max-width: 640px; }
 .search input { width: 100%; padding: 11px 44px 11px 16px; border: 1px solid var(--border); border-radius: var(--radius-full); font-size: 0.9rem; background: var(--ink-50); }
-.search input:focus { outline: none; border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px var(--green-100); }
+.search input:focus { outline: none; border-color: var(--primary-ink); background: #fff; box-shadow: 0 0 0 3px var(--green-100); }
 .search button { position: absolute; right: 5px; top: 5px; width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--primary); color: var(--on-primary); display: grid; place-items: center; }
 .search-suggest { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: #fff; border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-lg); overflow: hidden; z-index: 20; }
 .search-suggest a { display: flex; align-items: center; gap: 12px; padding: 10px 14px; }
@@ -402,7 +397,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 
 .category-rail { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 14px; }
 .category-chip { display: flex; flex-direction: column; align-items: center; gap: 9px; padding: 16px 8px; border-radius: var(--radius); border: 1px solid var(--border); background: #fff; transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s; }
-.category-chip:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow); }
+.category-chip:hover { border-color: var(--primary-ink); transform: translateY(-2px); box-shadow: var(--shadow); }
 .category-chip .avatar { width: 54px; height: 54px; border-radius: 50%; object-fit: cover; background: var(--ink-100); }
 .category-chip span { font-size: 0.78rem; font-weight: 600; text-align: center; }
 
@@ -439,16 +434,16 @@ ul { margin: 0; padding: 0; list-style: none; }
 .gallery { display: grid; grid-template-columns: 78px 1fr; gap: 14px; }
 .gallery-thumbs { display: flex; flex-direction: column; gap: 10px; }
 .gallery-thumb { width: 78px; height: 78px; border-radius: var(--radius-sm); overflow: hidden; border: 2px solid transparent; background: var(--ink-50); padding: 0; }
-.gallery-thumb.active { border-color: var(--primary); }
+.gallery-thumb.active { border-color: var(--primary-ink); }
 .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .gallery-main { border-radius: var(--radius); overflow: hidden; background: var(--ink-50); aspect-ratio: 1 / 1; }
 .gallery-main img { width: 100%; height: 100%; object-fit: cover; }
 
 .swatches { display: flex; gap: 9px; flex-wrap: wrap; }
 .swatch { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border); padding: 0; position: relative; }
-.swatch.active { border-color: var(--primary); box-shadow: 0 0 0 3px var(--green-100); }
+.swatch.active { border-color: var(--primary-ink); box-shadow: 0 0 0 3px var(--green-100); }
 .size-chip { min-width: 46px; padding: 8px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: #fff; font-size: 0.85rem; font-weight: 600; }
-.size-chip.active { border-color: var(--primary); background: var(--green-50); color: var(--primary-ink); }
+.size-chip.active { border-color: var(--primary-ink); background: var(--green-50); color: var(--primary-ink); }
 .size-chip:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .qty { display: inline-flex; align-items: center; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
@@ -483,7 +478,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .filter-group h4 { font-size: 0.85rem; margin-bottom: 11px; }
 .filter-option { display: flex; align-items: center; gap: 9px; padding: 5px 0; font-size: 0.84rem; color: var(--ink-600); cursor: pointer; }
 .filter-option:hover { color: var(--ink-900); }
-.filter-option input { accent-color: var(--primary); width: 15px; height: 15px; }
+.filter-option input { accent-color: var(--primary-ink); width: 15px; height: 15px; }
 .filter-option .count { margin-left: auto; font-size: 0.74rem; color: var(--ink-400); }
 
 .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
@@ -493,8 +488,8 @@ ul { margin: 0; padding: 0; list-style: none; }
 
 .pagination { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 34px; }
 .pagination button { min-width: 38px; height: 38px; border: 1px solid var(--border); background: #fff; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600; color: var(--ink-700); }
-.pagination button:hover:not(:disabled) { border-color: var(--primary); color: var(--primary-ink); }
-.pagination button.active { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+.pagination button:hover:not(:disabled) { border-color: var(--primary-ink); color: var(--primary-ink); }
+.pagination button.active { background: var(--primary); border-color: var(--primary-ink); color: var(--on-primary); }
 .pagination button:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* -------------------------------- cart ---------------------------------- */
@@ -525,10 +520,10 @@ ul { margin: 0; padding: 0; list-style: none; }
 .checkout-layout { display: grid; grid-template-columns: 1fr 350px; gap: 26px; align-items: start; }
 .pay-option { display: flex; align-items: center; gap: 12px; padding: 13px 15px; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 10px; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
 .pay-option:hover { border-color: var(--ink-400); }
-.pay-option.active { border-color: var(--primary); background: var(--green-50); }
-.pay-option input { accent-color: var(--primary); }
+.pay-option.active { border-color: var(--primary-ink); background: var(--green-50); }
+.pay-option input { accent-color: var(--primary-ink); }
 .address-option { padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 10px; cursor: pointer; }
-.address-option.active { border-color: var(--primary); background: var(--green-50); }
+.address-option.active { border-color: var(--primary-ink); background: var(--green-50); }
 
 /* ------------------------------- orders --------------------------------- */
 
@@ -543,7 +538,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .timeline-item { position: relative; padding-bottom: 22px; }
 .timeline-item::before { content: ''; position: absolute; left: -26px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 2px solid var(--ink-300); }
 .timeline-item.done::before { background: var(--success); border-color: var(--success); }
-.timeline-item.current::before { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 0 4px var(--green-100); }
+.timeline-item.current::before { background: var(--primary); border-color: var(--primary-ink); box-shadow: 0 0 0 4px var(--green-100); }
 
 /* ------------------------------- account -------------------------------- */
 
@@ -575,7 +570,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .empty-state h3 { margin-bottom: 8px; }
 .empty-state p { color: var(--text-muted); margin-bottom: 20px; }
 
-.spinner { width: 34px; height: 34px; border: 3px solid var(--ink-200); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.7s linear infinite; }
+.spinner { width: 34px; height: 34px; border: 3px solid var(--ink-200); border-top-color: var(--primary-ink); border-radius: 50%; animation: spin 0.7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .loader-wrap { display: grid; place-items: center; padding: 70px 0; }
 
@@ -717,8 +712,8 @@ html[lang='zh'] .btn, html[lang='ja'] .btn { white-space: normal; }
 
   /* Tinted shadows: a green glow reads as lift on the tinted canvas in a way
      a neutral gray shadow does not. */
-  --glow: 0 14px 30px -14px rgba(114, 143, 7, 0.55);
-  --glow-strong: 0 20px 44px -14px rgba(114, 143, 7, 0.72);
+  --glow: 0 14px 30px -14px rgba(21, 128, 61, 0.55);
+  --glow-strong: 0 20px 44px -14px rgba(21, 128, 61, 0.72);
   --lift: 0 22px 44px -20px rgba(11, 31, 20, 0.38);
 }
 
@@ -729,8 +724,8 @@ html[lang='zh'] .btn, html[lang='ja'] .btn { white-space: normal; }
 @keyframes pan { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
 @keyframes sheen { from { transform: translateX(-130%) skewX(-18deg); } to { transform: translateX(230%) skewX(-18deg); } }
 @keyframes halo {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(114, 143, 7, 0.45); }
-  70% { box-shadow: 0 0 0 10px rgba(114, 143, 7, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(21, 128, 61, 0.45); }
+  70% { box-shadow: 0 0 0 10px rgba(21, 128, 61, 0); }
 }
 @keyframes flare {
   0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
@@ -807,7 +802,7 @@ body[data-scrolled="1"] .header-main {
   bottom: 3px;
   height: 2px;
   border-radius: 2px;
-  background: var(--primary);
+  background: var(--primary-ink);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform var(--t-base) var(--ease-out);
@@ -862,7 +857,7 @@ body[data-scrolled="1"] .header-main {
 .btn-success:hover:not(:disabled) { background: linear-gradient(135deg, #0f766e, #0e8379); }
 .btn-dark { background: linear-gradient(135deg, var(--ink-900), var(--ink-700)); }
 .btn-dark:hover:not(:disabled) { background: linear-gradient(135deg, var(--ink-800), var(--ink-900)); }
-.btn-outline:hover:not(:disabled) { border-color: var(--primary); color: var(--primary-ink); box-shadow: var(--glow); }
+.btn-outline:hover:not(:disabled) { border-color: var(--primary-ink); color: var(--primary-ink); box-shadow: var(--glow); }
 
 /* ---------------------------------- hero ---------------------------------- */
 
@@ -885,7 +880,7 @@ body[data-scrolled="1"] .header-main {
   height: 320px;
   top: -110px;
   right: -60px;
-  background: rgba(176, 212, 44, 0.42);
+  background: rgba(74, 222, 128, 0.42);
   animation: blob-a 16s ease-in-out infinite;
 }
 .hero::after {
@@ -893,7 +888,7 @@ body[data-scrolled="1"] .header-main {
   height: 260px;
   bottom: -120px;
   left: 18%;
-  background: rgba(101, 163, 13, 0.28);
+  background: rgba(13, 148, 136, 0.28);
   animation: blob-b 20s ease-in-out infinite;
 }
 .hero > * { position: relative; z-index: 1; }
@@ -977,7 +972,7 @@ body[data-scrolled="1"] .header-main {
   right: 0;
   bottom: -1px;
   height: 2px;
-  background: var(--primary);
+  background: var(--primary-ink);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform var(--t-base) var(--ease-out);
@@ -992,7 +987,7 @@ body[data-scrolled="1"] .header-main {
 .cart-line { transition: background var(--t-fast); }
 .cart-line:hover { background: var(--green-50); }
 .free-ship-bar .fill {
-  background: linear-gradient(90deg, var(--success), var(--green-500), var(--success));
+  background: linear-gradient(90deg, var(--success), var(--green-600), var(--success));
   background-size: 200% 100%;
   animation: pan 3.5s linear infinite;
 }
@@ -1019,7 +1014,7 @@ body[data-scrolled="1"] .header-main {
 .auth-page {
   background:
     radial-gradient(900px 480px at 12% -10%, var(--green-200), transparent 62%),
-    radial-gradient(760px 420px at 96% 110%, rgba(101, 163, 13, 0.28), transparent 60%),
+    radial-gradient(760px 420px at 96% 110%, rgba(13, 148, 136, 0.28), transparent 60%),
     linear-gradient(140deg, var(--green-100), var(--green-50) 45%, #ffffff 78%);
   background-size: 160% 160%;
   animation: pan 26s ease-in-out infinite alternate;
@@ -1094,16 +1089,15 @@ body[data-scrolled="1"] .header-main {
   bottom: 0.18em;
   width: 4px;
   border-radius: 3px;
-  background: linear-gradient(180deg, var(--green-500), var(--green-700));
+  background: linear-gradient(180deg, var(--green-700), var(--green-900));
 }
 
 /* Four across, so the row lines up with the promo stack beside it rather than
    reflowing to whatever the auto-fill grid decides. */
 .deal-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
-/* Pale green with dark type, as the reference has it - and the lightest this
-   card can go while every label still clears 4.5:1 (ink-900 on green-200 is
-   13.1:1). A dark slab here would have fought the lighter chrome around it. */
+/* Pale green with dark type, as the reference has it: ink-900 on green-200 is
+   14.2:1, and a light card sits better beside the lighter chrome than a slab. */
 .promo-tile {
   position: relative;
   overflow: hidden;
@@ -1193,7 +1187,7 @@ body[data-scrolled="1"] .header-main {
   /* Starts one step darker than --primary: this panel carries a paragraph of
      white body copy, which needs the full 4.5:1 rather than the 3:1 a button
      caption gets away with. */
-  background: linear-gradient(150deg, var(--green-800), var(--green-900) 55%, #26300a);
+  background: linear-gradient(150deg, var(--primary-dark), var(--green-800) 55%, var(--green-900));
   color: #fff;
 }
 .auth-aside::before, .auth-aside::after {
@@ -1214,7 +1208,7 @@ body[data-scrolled="1"] .header-main {
   height: 170px;
   bottom: -60px;
   left: -40px;
-  background: rgba(176, 212, 44, 0.22);
+  background: rgba(74, 222, 128, 0.22);
 }
 .auth-aside > * { position: relative; z-index: 1; }
 .auth-aside .mark {
@@ -1565,4 +1559,176 @@ body[data-scrolled="1"] .header-main {
   .trust-strip { grid-template-columns: 1fr; }
   .trust-cell { border-right: 0; border-bottom: 1px solid var(--ink-100); }
   .trust-cell:last-child { border-bottom: 0; }
+}
+
+/* ==========================================================================
+   Homepage structure, second pass against the reference
+   Supersedes the two-column hero row above: the reference puts a department
+   rail on the left, the hero in the middle and the promise stack on the
+   right, and gives the hero carousel controls.
+   ========================================================================== */
+
+.home-top {
+  display: grid;
+  grid-template-columns: 216px minmax(0, 1fr) 268px;
+  gap: 16px;
+  align-items: stretch;
+  margin-top: 18px;
+}
+
+/* ---------------------------- department rail ----------------------------- */
+
+.dept-rail {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  padding: 6px;
+}
+.dept-rail ul { display: flex; flex-direction: column; }
+.dept-rail a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.83rem;
+  font-weight: 500;
+  color: var(--ink-700);
+  transition: background var(--t-fast), color var(--t-fast), transform var(--t-fast) var(--ease-out);
+}
+.dept-rail img,
+.dept-more {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--green-50);
+  color: var(--primary-ink);
+  display: grid;
+  place-items: center;
+}
+.dept-rail a > svg { margin-left: auto; flex-shrink: 0; color: var(--ink-400); transition: transform var(--t-fast) var(--ease-out); }
+.dept-rail a:hover { background: var(--green-50); color: var(--primary-ink); transform: translateX(2px); }
+.dept-rail a:hover > svg { color: var(--primary-ink); transform: translateX(2px); }
+
+/* -------------------------------- the hero -------------------------------- */
+
+.home-top .hero { margin-top: 0; padding: 40px 42px; position: relative; }
+.hero h1 { font-size: 2.85rem; letter-spacing: -0.03em; }
+
+/* Carousel controls, centred under the copy as in the reference. */
+.hero-nav {
+  position: absolute;
+  left: 42px;
+  bottom: 22px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.hero-arrow {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink-700);
+  display: grid;
+  place-items: center;
+  transition: background var(--t-fast), color var(--t-fast), transform var(--t-fast) var(--ease-spring);
+}
+.hero-arrow:hover { background: #fff; color: var(--primary-ink); transform: scale(1.08); }
+
+.hero-dots { display: inline-flex; align-items: center; gap: 7px; }
+/* The hit area is 18px even though the dot reads as 8px, so the control is
+   still comfortably tappable. */
+.hero-dots button {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  background: none;
+  display: grid;
+  place-items: center;
+}
+.hero-dots button::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  /* ink-300 is 1.49:1 on white - a dot is a control, so it needs the same
+     3:1 as any other UI component. This step is 3.19:1. */
+  background: #7d9688;
+  transition: background var(--t-fast), width var(--t-base) var(--ease-out);
+}
+.hero-dots button.on::before { background: var(--primary); width: 20px; border-radius: 4px; }
+
+/* ------------------------------ promise stack ----------------------------- */
+/* The reference draws one card with hairline-separated rows, not four cards. */
+
+.hero-aside {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 6px;
+  gap: 0;
+}
+.promise-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  padding: 13px 12px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  box-shadow: none;
+  border-bottom: 1px solid var(--ink-100);
+  transition: background var(--t-fast), transform var(--t-fast) var(--ease-out);
+}
+.hero-aside .promise-card:last-child { border-bottom: 0; }
+.promise-card:hover { background: var(--green-50); transform: none; box-shadow: none; border-color: var(--ink-100); }
+.promise-card strong { display: block; font-size: 0.86rem; }
+.promise-card .tiny { display: block; }
+.promise-card > svg { display: none; }
+.promise-icon { width: 40px; height: 40px; }
+
+/* ------------------------------ product cards ----------------------------- */
+/* On the New Arrivals row the reference swaps the two corner marks, so the
+   green "New" flag and the wishlist heart trade sides. */
+
+.product-card-new .product-flag.new { left: auto; right: 10px; }
+.product-card-new .wish-btn { left: 8px; right: auto; }
+
+/* -------------------------------- responsive ------------------------------ */
+
+@media (max-width: 1280px) {
+  .home-top { grid-template-columns: 200px minmax(0, 1fr) 248px; }
+  .hero h1 { font-size: 2.4rem; }
+}
+
+@media (max-width: 1100px) {
+  /* The rail repeats the nav bar, so it goes rather than being stacked. */
+  .home-top { grid-template-columns: minmax(0, 1fr) 248px; }
+  .dept-rail { display: none; }
+}
+
+@media (max-width: 1024px) {
+  .home-top { grid-template-columns: 1fr; }
+  .hero-aside { flex-direction: row; flex-wrap: wrap; }
+  .hero-aside .promise-card { flex: 1 1 44%; border-bottom: 0; }
+}
+
+@media (max-width: 768px) {
+  .hero-aside { flex-direction: column; }
+  .hero-aside .promise-card { flex: 1; border-bottom: 1px solid var(--ink-100); }
+  .hero-aside .promise-card:last-child { border-bottom: 0; }
+  .home-top .hero { padding: 28px 22px 62px; }
+  .hero-nav { left: 22px; bottom: 18px; }
 }

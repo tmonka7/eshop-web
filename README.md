@@ -158,8 +158,9 @@ Restyling means editing those three blocks, not hunting hex values.
 
 | Role | Value | Why |
 |---|---|---|
-| `--primary` | `#16a34a` (green-600) | Green **under** white text: buttons, pills, active states. White on it is **3.30:1** — see the note below. |
-| `--primary-ink` | `#15803d` | Green **as** text. Green type also sits on the green-50/green-100 tints (chips, active nav, the free-shipping bar), where the fill step drops to 4.18–4.39:1. This step holds 4.57:1 on green-100. |
+| `--primary` | `#16a34a` (green-600) | The brand as a **fill** — buttons, pills, active states. White on it is **3.30:1**; see the note below. |
+| `--on-primary` | `#ffffff` | What sits **on** the fill. A token rather than a literal `#fff`, because a lighter brand green forces it dark. |
+| `--primary-ink` | `#15803d` | The brand **as** type, and as any outline, focus ring, border or accent on a light surface. 5.02:1 on white, 4.57:1 on the green-100 tint. |
 | `--bg-soft` | `#f2faf5` | The tinted page canvas white cards sit on. |
 | red scale | `#ef4444`–`#b91c1c` | **Not** a brand colour. Reserved for sale flags, destructive buttons and errors, so it still reads as an accent against all the green. |
 | `--success` | `#0d9488` teal | Deliberately not green, so an "ok" badge never looks like a primary button. |
@@ -176,30 +177,46 @@ requirements. The same two names exist in the panel's stylesheet and as
 `primary` / `primary_ink` in the Android `colors.xml`, so a change in one
 place means the same thing in the other two.
 
-**One deliberate exception to AA.** `--primary` is green-600, where white text
-lands at **3.30:1**. That clears the 3:1 WCAG asks of UI components, icons,
-borders and large text, but not the 4.5:1 for labels under 18.66px — so a
-button caption is comfortably legible without being AA-compliant. This was a
-brand decision, taken with the number known. Two things follow from it:
+**Three tokens, because the brand colour does three jobs.** A single value
+cannot serve all of them — green *under* white text and green *as* text on a
+green tint pull in opposite directions:
 
-- **`#158741` is the compliant alternative** — the lightest green that makes
-  white text AA (4.59:1). Changing the one `--primary` line in each of the
-  three stylesheets reverts it; nothing else depends on the value.
-- **Anywhere a *paragraph* of white text sits on green, the darker step is
-  used instead.** The sign-in panel's gradient starts at `--primary-dark`, and
-  the homepage promo card was rebuilt as pale green with dark type (13.1:1)
-  rather than white-on-green. Short captions take the 3:1; running text does
-  not.
+- **On the fill, type is `--on-primary`.** White today. It stays a token
+  rather than a literal `#fff` because the value is a function of the fill: at
+  a lighter brand green it has to flip dark. Every rule pairing
+  `background: var(--primary)` with a label goes through it.
+- **On a light surface, the brand is `--primary-ink`.** Green type *and* every
+  outline, focus ring, form border, checkbox accent, tab indicator and toggle
+  track — all of which need 3:1 against white, and all of which the fill would
+  fail at a lighter green.
+- **Dark surfaces use the deep end of the ramp.** The sign-in panel and the
+  footer run on green-800/900 with white type.
+
+**One deliberate exception to AA.** White on `#16a34a` is **3.30:1**: it clears
+the 3:1 for UI components, icons, borders and large text, but not the 4.5:1 for
+labels under 18.66px. A brand decision, taken with the number known. `#158741`
+is the compliant alternative — the lightest green that makes white text AA
+(4.59:1) — and changing the one `--primary` line in each of the three
+stylesheets is all it takes. Where a *paragraph* of white text sits on green,
+the darker step is used instead; the homepage promo card sidesteps the question
+entirely by being pale green with dark type (14.2:1).
 
 **Chart colour** follows the data-viz rules: a fixed categorical order that
-leads with brand green and excludes red (a reserved status colour must never
-double as a series). The order in
-[admin-panel/src/utils/constants.js](admin-panel/src/utils/constants.js) was run
-through the palette validator — worst adjacent CVD ΔE 10.3, normal-vision 31.1.
-The donut folds everything past five categories into one "Other" slice rather
-than cycling hues, and the revenue-by-category bars use a single colour because
-they are revenue-sorted, where colouring by index would encode rank instead of
-identity.
+leads with the brand and excludes red (a reserved status colour must never
+double as a series). The palette in
+[admin-panel/src/utils/constants.js](admin-panel/src/utils/constants.js) is
+validated in the strictest **all-pairs** mode — every segment against every
+other — at normal-vision ΔE 16.7 and CVD ΔE 6.1, the latter inside the 6–8
+floor band that is legal only alongside secondary encoding, which is why the
+donut carries a legend, a label per segment and gaps between them.
+
+It is five hues rather than eight: the set is what survives simulation, with
+everything past `CHART_SERIES_CAP` folding into one neutral "Other" slice
+instead of cycling hues back to the start. The amber slot is the darker
+`#b45309` rather than a brighter `#f59e0b`, which is 2.15:1 against white — a
+mark that faint obliges a table view on its own.
+The revenue-by-category bars use a single colour because they are
+revenue-sorted, where colouring by index would encode rank instead of identity.
 
 ### Modules from the reference design
 
@@ -207,7 +224,9 @@ Pieces the reference layout has that the base sheet had no equivalent for:
 
 | Module | Where |
 |---|---|
-| Department rail beside the hero | `.dept-rail` — hidden under 1024px, where the nav bar and the category grid already reach every department |
+| Department rail beside the hero | `.dept-rail` — hidden under 1100px, where the nav bar already reaches every department |
+| Hero carousel controls | `.hero-nav` — arrows and dots, shown only once the API returns more than one banner |
+| Promise stack | `.hero-aside` — one card of hairline-separated rows, not four cards |
 | Hot Deals row + promo tiles | `.deal-layout`, `.promo-tile` — the discount headline is read off the catalogue, so it can't advertise an offer that isn't there |
 | Accented section headings | `.head-accent`, and the panel's `.page-head h1` |
 | Split sign-in panel | `.auth-shell` + [AuthAside.jsx](frontend/src/components/AuthAside.jsx) — decorative and `aria-hidden`, dropped under 860px |
