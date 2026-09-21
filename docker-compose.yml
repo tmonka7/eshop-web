@@ -1,0 +1,57 @@
+# Convenience stack for local development: MongoDB 6.0 plus the API.
+# The two React apps run with `npm run dev` on the host.
+services:
+  mongo:
+    image: mongo:6.0
+    container_name: auramart-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    # A single-node replica set enables transactions, so checkout is atomic.
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mongo-init:
+    image: mongo:6.0
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: "no"
+    entrypoint:
+      - bash
+      - -c
+      - |
+        mongosh --host mongo:27017 --quiet --eval '
+          try { rs.status() } catch (e) {
+            rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "mongo:27017" }] })
+          }'
+
+  api:
+    build:
+      context: ./backend
+    container_name: auramart-api
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: development
+      PORT: "5000"
+      MONGO_URI: mongodb://mongo:27017/auramart?replicaSet=rs0
+      PUBLIC_URL: http://localhost:5000
+      CORS_ORIGINS: http://localhost:5173,http://localhost:5174
+      JWT_ACCESS_SECRET: change_this_access_secret_in_production
+      JWT_REFRESH_SECRET: change_this_refresh_secret_in_production
+    volumes:
+      - ./backend/uploads:/app/uploads
+
+volumes:
+  mongo-data:

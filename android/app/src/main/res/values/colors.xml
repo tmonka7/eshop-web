@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#EF4444</color>
+    <color name="primary_dark">#DC2626</color>
+    <color name="primary_light">#FEE2E2</color>
+    <color name="primary_surface">#FEF2F2</color>
+
+    <color name="success">#10B981</color>
+    <color name="success_dark">#059669</color>
+    <color name="success_light">#D1FAE5</color>
+    <color name="success_surface">#ECFDF5</color>
+
+    <color name="warning">#F59E0B</color>
+    <color name="warning_dark">#D97706</color>
+    <color name="warning_surface">#FFFBEB</color>
+
+    <color name="info">#3B82F6</color>
+    <color name="info_dark">#2563EB</color>
+    <color name="info_surface">#EFF6FF</color>
+
+    <color name="purple">#8B5CF6</color>
+    <color name="purple_surface">#F5F3FF</color>
+
+    <color name="ink_900">#0F172A</color>
+    <color name="ink_800">#1E293B</color>
+    <color name="ink_700">#334155</color>
+    <color name="ink_600">#475569</color>
+    <color name="ink_500">#64748B</color>
+    <color name="ink_400">#94A3B8</color>
+    <color name="ink_300">#CBD5E1</color>
+    <color name="ink_200">#E2E8F0</color>
+    <color name="ink_100">#F1F5F9</color>
+    <color name="ink_50">#F8FAFC</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+    <color name="text_primary">#0F172A</color>
+    <color name="text_secondary">#64748B</color>
+    <color name="divider">#E2E8F0</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="background">#F8FAFC</color>
+</resources>

@@ -1,0 +1,103 @@
+'use strict';
+const express = require('express');
+const { body } = require('express-validator');
+const validate = require('../middleware/validate');
+const { protect, adminOnly } = require('../middleware/auth');
+const { uploadProduct, uploadBanner } = require('../middleware/upload');
+const admin = require('../controllers/admin.controller');
+const products = require('../controllers/product.controller');
+const categories = require('../controllers/category.controller');
+const orders = require('../controllers/order.controller');
+const reviews = require('../controllers/review.controller');
+const coupons = require('../controllers/coupon.controller');
+const banners = require('../controllers/banner.controller');
+const uploads = require('../controllers/upload.controller');
+
+const router = express.Router();
+router.use(protect, adminOnly);
+
+/* ------------------------------- dashboard ------------------------------- */
+router.get('/dashboard/stats', admin.stats);
+router.get('/dashboard/sales-overview', admin.salesOverview);
+router.get('/dashboard/sales-by-category', admin.salesByCategory);
+router.get('/dashboard/customer-growth', admin.customerGrowth);
+router.get('/dashboard/recent-orders', admin.recentOrders);
+router.get('/dashboard/top-products', admin.topProducts);
+
+/* -------------------------------- products ------------------------------- */
+const productRules = [
+  body('name').trim().isLength({ min: 2 }).withMessage('Product name is required'),
+  body('price').isFloat({ min: 0 }).withMessage('Price must be 0 or more'),
+  body('category').isMongoId().withMessage('A valid category is required'),
+  body('stock').optional().isInt({ min: 0 }).withMessage('Stock must be 0 or more'),
+];
+
+router.get('/products', products.adminList);
+router.post('/products', productRules, validate, products.create);
+router.patch('/products/:id', products.update);
+router.patch('/products/:id/status', products.toggleActive);
+router.patch('/products/:id/stock', products.updateStock);
+router.delete('/products/:id', products.remove);
+
+/* ------------------------------- categories ------------------------------ */
+router.post(
+  '/categories',
+  [body('name').trim().isLength({ min: 2 }).withMessage('Category name is required')],
+  validate,
+  categories.create,
+);
+router.patch('/categories/:id', categories.update);
+router.delete('/categories/:id', categories.remove);
+
+/* --------------------------------- orders -------------------------------- */
+router.get('/orders', orders.adminList);
+router.get('/orders/:id', orders.adminGetOne);
+router.patch(
+  '/orders/:id/status',
+  [body('status').notEmpty().withMessage('Status is required')],
+  validate,
+  orders.updateStatus,
+);
+router.patch('/orders/:id/tracking', orders.updateTracking);
+
+/* ------------------------------- customers ------------------------------- */
+router.get('/customers', admin.listCustomers);
+router.get('/customers/export', admin.exportCustomers);
+router.get('/customers/:id', admin.getCustomer);
+router.patch('/customers/:id/status', admin.toggleCustomerActive);
+
+/* ------------------------------- inventory ------------------------------- */
+router.get('/inventory/alerts', admin.inventoryAlerts);
+
+/* --------------------------------- reviews ------------------------------- */
+router.get('/reviews', reviews.adminList);
+router.patch('/reviews/:id/moderate', reviews.moderate);
+router.delete('/reviews/:id', reviews.remove);
+
+/* -------------------------------- promotions ----------------------------- */
+router.get('/coupons', coupons.adminList);
+router.post(
+  '/coupons',
+  [
+    body('code').trim().isLength({ min: 3 }).withMessage('Coupon code is required'),
+    body('discountType').isIn(['percent', 'fixed']).withMessage('discountType must be percent or fixed'),
+    body('discountValue').isFloat({ min: 0 }).withMessage('discountValue must be 0 or more'),
+  ],
+  validate,
+  coupons.create,
+);
+router.patch('/coupons/:id', coupons.update);
+router.delete('/coupons/:id', coupons.remove);
+
+/* --------------------------------- content ------------------------------- */
+router.get('/banners', banners.adminList);
+router.post('/banners', [body('title').trim().notEmpty()], validate, banners.create);
+router.patch('/banners/:id', banners.update);
+router.delete('/banners/:id', banners.remove);
+
+/* --------------------------------- uploads ------------------------------- */
+router.post('/uploads/products', uploadProduct.array('images', 8), uploads.uploadImages('products'));
+router.post('/uploads/banners', uploadBanner.single('image'), uploads.uploadImages('banners'));
+router.delete('/uploads/:folder/:filename', uploads.deleteImage);
+
+module.exports = router;

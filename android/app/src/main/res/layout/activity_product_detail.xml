@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/surface"
+        app:navigationIcon="@drawable/ic_back"
+        app:titleTextColor="@color/text_primary" />
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/contentScroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/space_xl">
+
+            <!-- gallery -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="320dp"
+                android:background="@color/surface">
+
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/galleryPager"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:id="@+id/discountBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/space_md"
+                    android:background="@drawable/bg_badge_red"
+                    android:backgroundTint="@color/primary"
+                    android:paddingStart="@dimen/space_md"
+                    android:paddingEnd="@dimen/space_md"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/text_small"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+                <ImageView
+                    android:id="@+id/wishlistButton"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_gravity="top|end"
+                    android:layout_margin="@dimen/space_md"
+                    android:padding="9dp"
+                    android:background="@drawable/bg_circle_white"
+                    android:src="@drawable/ic_heart"
+                    app:tint="@color/ink_600"
+                    android:contentDescription="@string/wishlist" />
+
+                <LinearLayout
+                    android:id="@+id/galleryDots"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|center_horizontal"
+                    android:layout_marginBottom="@dimen/space_md"
+                    android:orientation="horizontal" />
+            </FrameLayout>
+
+            <!-- details -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@color/surface"
+                android:layout_marginTop="@dimen/space_sm"
+                android:padding="@dimen/space_lg">
+
+                <TextView
+                    android:id="@+id/brandText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/Text.Secondary" />
+
+                <TextView
+                    android:id="@+id/nameText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_xs"
+                    android:textSize="@dimen/text_headline"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="@dimen/space_sm">
+
+                    <ImageView
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:src="@drawable/ic_star_filled"
+                        app:tint="@color/warning"
+                        android:contentDescription="@null" />
+
+                    <TextView
+                        android:id="@+id/ratingText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_xs"
+                        style="@style/Text.Secondary" />
+
+                    <TextView
+                        android:id="@+id/soldText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_md"
+                        style="@style/Text.Secondary" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="bottom"
+                    android:layout_marginTop="@dimen/space_md">
+
+                    <TextView
+                        android:id="@+id/priceText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/text_display"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary" />
+
+                    <TextView
+                        android:id="@+id/comparePriceText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_sm"
+                        android:layout_marginBottom="4dp"
+                        android:textSize="@dimen/text_body"
+                        android:textColor="@color/ink_400"
+                        android:visibility="gone" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/stockBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_md"
+                    android:background="@drawable/bg_badge_green"
+                    android:paddingStart="@dimen/space_md"
+                    android:paddingEnd="@dimen/space_md"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:textSize="@dimen/text_tiny"
+                    android:textStyle="bold"
+                    android:textColor="@color/success_dark" />
+
+                <TextView
+                    android:id="@+id/shortDescriptionText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_md"
+                    style="@style/Text.Secondary" />
+
+                <!-- variants -->
+                <TextView
+                    android:id="@+id/variantLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_lg"
+                    style="@style/Text.Body"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/variantGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_sm"
+                    app:singleSelection="true"
+                    app:selectionRequired="true"
+                    android:visibility="gone" />
+
+                <!-- quantity -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_lg"
+                    android:text="@string/quantity"
+                    style="@style/Text.Body"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="@dimen/space_sm"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/bg_qty_stepper">
+
+                    <ImageView
+                        android:id="@+id/decreaseButton"
+                        android:layout_width="40dp"
+                        android:layout_height="match_parent"
+                        android:padding="11dp"
+                        android:src="@drawable/ic_remove"
+                        app:tint="@color/ink_700"
+                        android:contentDescription="@null" />
+
+                    <TextView
+                        android:id="@+id/quantityText"
+                        android:layout_width="44dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        style="@style/Text.Body"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:id="@+id/increaseButton"
+                        android:layout_width="40dp"
+                        android:layout_height="match_parent"
+                        android:padding="11dp"
+                        android:src="@drawable/ic_add"
+                        app:tint="@color/ink_700"
+                        android:contentDescription="@null" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- trust badges -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@color/surface"
+                android:layout_marginTop="@dimen/space_sm"
+                android:padding="@dimen/space_lg">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_truck"
+                        app:tint="@color/primary"
+                        android:contentDescription="@null" />
+
+                    <TextView
+                        android:id="@+id/shippingBadge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:gravity="center"
+                        style="@style/Text.Secondary"
+                        android:textSize="@dimen/text_tiny" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_shield"
+                        app:tint="@color/primary"
+                        android:contentDescription="@null" />
+
+                    <TextView
+                        android:id="@+id/warrantyBadge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:gravity="center"
+                        style="@style/Text.Secondary"
+                        android:textSize="@dimen/text_tiny" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_refresh"
+                        app:tint="@color/primary"
+                        android:contentDescription="@null" />
+
+                    <TextView
+                        android:id="@+id/returnBadge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:gravity="center"
+                        style="@style/Text.Secondary"
+                        android:textSize="@dimen/text_tiny" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- description -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@color/surface"
+                android:layout_marginTop="@dimen/space_sm"
+                android:padding="@dimen/space_lg">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/description"
+                    style="@style/Text.Title"
+                    android:textSize="@dimen/text_body" />
+
+                <TextView
+                    android:id="@+id/descriptionText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_sm"
+                    style="@style/Text.Secondary"
+                    android:lineSpacingExtra="3dp" />
+            </LinearLayout>
+
+            <!-- reviews -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@color/surface"
+                android:layout_marginTop="@dimen/space_sm"
+                android:padding="@dimen/space_lg">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/reviewsTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/reviews"
+                        style="@style/Text.Title"
+                        android:textSize="@dimen/text_body" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/writeReviewButton"
+                        style="@style/Widget.AuraMart.Button.Text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/write_review"
+                        android:textSize="@dimen/text_small" />
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/reviewList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_sm"
+                    android:nestedScrollingEnabled="false"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+                <TextView
+                    android:id="@+id/noReviewsText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_sm"
+                    style="@style/Text.Secondary"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- related -->
+            <LinearLayout
+                android:id="@+id/relatedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@color/surface"
+                android:layout_marginTop="@dimen/space_sm"
+                android:paddingTop="@dimen/space_lg"
+                android:paddingBottom="@dimen/space_lg"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_lg"
+                    android:text="@string/related_products"
+                    style="@style/Text.Title"
+                    android:textSize="@dimen/text_body" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/relatedList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_md"
+                    android:paddingStart="@dimen/space_md"
+                    android:paddingEnd="@dimen/space_md"
+                    android:clipToPadding="false"
+                    android:orientation="horizontal"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- sticky action bar -->
+    <LinearLayout
+        android:id="@+id/actionBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/surface"
+        android:elevation="8dp"
+        android:padding="@dimen/space_md">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/addToCartButton"
+            style="@style/Widget.AuraMart.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/add_to_cart" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buyNowButton"
+            style="@style/Widget.AuraMart.Button.Success"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="@dimen/space_sm"
+            android:text="@string/buy_now" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone" />
+</LinearLayout>

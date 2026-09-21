@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/emptyState"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="@dimen/space_xxl"
+    android:visibility="gone">
+
+    <ImageView
+        android:id="@+id/emptyIcon"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:padding="@dimen/space_lg"
+        android:background="@drawable/bg_badge_grey"
+        android:src="@drawable/ic_empty_box"
+        app:tint="@color/ink_400"
+        android:contentDescription="@null" />
+
+    <TextView
+        android:id="@+id/emptyTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_lg"
+        android:text="@string/nothing_here"
+        style="@style/Text.Title" />
+
+    <TextView
+        android:id="@+id/emptyMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_sm"
+        android:gravity="center"
+        style="@style/Text.Secondary" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/emptyAction"
+        style="@style/Widget.AuraMart.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_lg"
+        android:visibility="gone" />
+</LinearLayout>
