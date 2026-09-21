@@ -26,6 +26,8 @@ export default function OrdersPage() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [note, setNote] = useState('');
+  const [tracking, setTracking] = useState({ carrier: '', trackingNumber: '' });
+  const [savingTracking, setSavingTracking] = useState(false);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -53,10 +55,31 @@ export default function OrdersPage() {
     try {
       const res = await orderApi.get(order._id);
       setDetail(res.data);
+      // Seed the tracking inputs from the order that was just loaded, so the
+      // form edits what is there rather than starting blank over real values.
+      setTracking({
+        carrier: res.data.carrier || '',
+        trackingNumber: res.data.trackingNumber || '',
+      });
     } catch (err) {
       toast.error(err.message);
     } finally {
       setDetailLoading(false);
+    }
+  }
+
+  async function saveTracking(e) {
+    e.preventDefault();
+    setSavingTracking(true);
+    try {
+      const res = await orderApi.updateTracking(detail._id, tracking);
+      setDetail(res.data);
+      toast.success(res.message);
+      load();
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setSavingTracking(false);
     }
   }
 
@@ -232,9 +255,29 @@ export default function OrdersPage() {
                   {statusLabel(detail.payment.status, 'paymentStatus')}
                 </Badge>
               </div>
-              <span className="row gap-6 small muted">
-                <Truck size={14} /> {detail.carrier} · {detail.trackingNumber}
-              </span>
+              {/* Tracking is editable here rather than display-only: the API
+                  has always exposed PATCH /orders/:id/tracking, and without
+                  this there was no way to reach it from the panel. */}
+              <form className="tracking-form" onSubmit={saveTracking}>
+                <Truck size={15} />
+                <input
+                  className="input"
+                  placeholder={t('orders.carrierPlaceholder')}
+                  aria-label={t('orders.carrier')}
+                  value={tracking.carrier}
+                  onChange={(e) => setTracking({ ...tracking, carrier: e.target.value })}
+                />
+                <input
+                  className="input"
+                  placeholder={t('orders.trackingPlaceholder')}
+                  aria-label={t('orders.trackingNumber')}
+                  value={tracking.trackingNumber}
+                  onChange={(e) => setTracking({ ...tracking, trackingNumber: e.target.value })}
+                />
+                <button type="submit" className="btn btn-outline btn-sm" disabled={savingTracking}>
+                  {savingTracking ? t('common.working') : t('common.save')}
+                </button>
+              </form>
             </div>
 
             <div className="grid grid-2 mb-16">

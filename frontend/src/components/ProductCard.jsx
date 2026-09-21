@@ -93,9 +93,9 @@ export default function ProductCard({ product, isNew = false }) {
         </div>
 
         <div className="product-price-row">
-          <span className="price">{currency(product.price)}</span>
+          <span className="price">{currency(product.price, product.currency)}</span>
           {product.comparePrice > product.price ? (
-            <span className="price-old">{currency(product.comparePrice)}</span>
+            <span className="price-old">{currency(product.comparePrice, product.currency)}</span>
           ) : null}
           {off > 0 ? <span className="off-pill">-{off}%</span> : null}
         </div>

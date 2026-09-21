@@ -16,6 +16,7 @@ import ReviewsPage from './pages/ReviewsPage';
 import ContentPage from './pages/ContentPage';
 import ReportsPage from './pages/ReportsPage';
 import SettingsPage from './pages/SettingsPage';
+import AdministratorsPage from './pages/AdministratorsPage';
 
 import { useAuthStore, useToastStore } from './store';
 import { useI18n } from './i18n';
@@ -70,6 +71,7 @@ export default function App() {
         <Route path="content" element={<ContentPage />} />
         <Route path="reports" element={<ReportsPage />} />
         <Route path="settings" element={<SettingsPage />} />
+        <Route path="administrators" element={<AdministratorsPage />} />
         <Route
           path="*"
           element={<Empty title={t('toast.notFoundTitle')} message={t('toast.notFoundMessage')} />}

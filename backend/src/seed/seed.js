@@ -15,7 +15,9 @@ const data = require('./data');
 const i18nSeed = require('./translations');
 const { orderNumber, trackingNumber } = require('../utils/ids');
 const { computeTotals } = require('../services/pricing.service');
-const { ORDER_STATUS, PAYMENT_STATUS, ROLES } = require('../config/constants');
+const {
+  ORDER_STATUS, PAYMENT_STATUS, ROLES, PERMISSIONS, CURRENCIES,
+} = require('../config/constants');
 
 const { User, Category, Product, Cart, Order, Review, Coupon, Banner } = require('../models');
 
@@ -75,6 +77,7 @@ async function seedCategories() {
 
 async function seedProducts(categoriesByName) {
   const created = [];
+  let index = 0;
 
   for (const p of data.products) {
     const category = categoriesByName.get(p.category);
@@ -99,6 +102,10 @@ async function seedProducts(categoriesByName) {
       translations: i18nSeed.translationsFor(i18nSeed.products, p.name),
       brand: p.brand,
       category: category._id,
+      // Every fourth product is listed in REM, so the two-currency handling -
+      // the coloured badges and the cart's single-currency guard - is
+      // exercised by seeded data rather than only by hand-made rows.
+      currency: index % 4 === 3 ? CURRENCIES.REM : CURRENCIES.USD,
       images,
       price: p.price,
       comparePrice: p.comparePrice || 0,
@@ -113,6 +120,7 @@ async function seedProducts(categoriesByName) {
       isFeatured: Boolean(p.isFeatured),
       freeShipping: Boolean(p.freeShipping),
     });
+    index += 1;
     created.push(doc);
   }
 
@@ -125,7 +133,10 @@ async function seedUsers() {
     name: 'Store Admin',
     email: env.seed.adminEmail,
     password: env.seed.adminPassword,
-    role: ROLES.ADMIN,
+    // The seeded account is the super admin: someone has to be able to create
+    // the first regular administrator, and the API deliberately refuses to
+    // mint a super admin over HTTP.
+    role: ROLES.SUPER_ADMIN,
     phone: '+358 40 000 0000',
     addresses: [
       {
@@ -146,6 +157,9 @@ async function seedUsers() {
     email: 'manager@auramart.com',
     password: 'Manager@123',
     role: ROLES.MANAGER,
+    // A regular staff account with a deliberately partial grant, so the
+    // permission gates are exercised by the seed rather than only in theory.
+    permissions: [PERMISSIONS.ORDERS, PERMISSIONS.REVIEWS, PERMISSIONS.CUSTOMERS],
   });
 
   const customers = [];

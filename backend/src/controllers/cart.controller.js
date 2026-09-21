@@ -7,7 +7,30 @@ const Product = require('../models/Product');
 const Coupon = require('../models/Coupon');
 const { computeTotals, shippingRules } = require('../services/pricing.service');
 
-const CART_PRODUCT_FIELDS = 'name slug price comparePrice images stock isActive freeShipping brand sku';
+const CART_PRODUCT_FIELDS =
+  'name slug price comparePrice currency images stock isActive freeShipping brand sku';
+
+/**
+ * Refuses to mix listing currencies in one cart.
+ *
+ * There is no exchange rate between USD and REM, so a cart holding both has
+ * no total that means anything. The check reads the currency of whatever is
+ * already in the cart and compares it with the incoming product; an empty
+ * cart accepts either.
+ */
+async function assertSingleCurrency(cart, incoming) {
+  if (!cart.items.length) return;
+
+  const ids = cart.items.map((i) => i.product);
+  const existing = await Product.find({ _id: { $in: ids } }).select('currency').lean();
+  const current = existing.find((p) => p.currency && p.currency !== incoming.currency);
+  if (!current) return;
+
+  throw ApiError.badRequest('error.currencyMismatch', undefined, {
+    existing: current.currency,
+    incoming: incoming.currency,
+  });
+}
 
 async function getOrCreateCart(userId) {
   let cart = await Cart.findOne({ user: userId });
@@ -128,6 +151,12 @@ exports.addItem = asyncHandler(async (req, res) => {
 
   const qty = Math.max(1, Number.parseInt(quantity, 10) || 1);
   const cart = await getOrCreateCart(req.user._id);
+
+  // USD and REM are separate price universes with no rate between them, so a
+  // mixed cart has no meaningful total. Rejecting the add is the only honest
+  // option: silently summing the two numbers would invent a figure, and
+  // picking one currency to display would misprice the other's lines.
+  await assertSingleCurrency(cart, product);
 
   const variantValue = variant && variant.value ? variant.value : '';
   const existing = cart.items.find(

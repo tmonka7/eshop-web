@@ -1,7 +1,9 @@
 'use strict';
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-const { LOW_STOCK_THRESHOLD, PRODUCT_STATUS } = require('../config/constants');
+const {
+  LOW_STOCK_THRESHOLD, PRODUCT_STATUS, CURRENCIES, CURRENCY_VALUES,
+} = require('../config/constants');
 const { translationsField } = require('./translations');
 
 const variantSchema = new mongoose.Schema(
@@ -28,6 +30,10 @@ const productSchema = new mongoose.Schema(
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true, index: true },
     images: { type: [String], default: [] },
     price: { type: Number, required: true, min: 0, index: true },
+    // The currency this product is LISTED in. There is no rate between USD
+    // and REM, so a price is only meaningful alongside this field - never
+    // compare or sum two products without checking it first.
+    currency: { type: String, enum: CURRENCY_VALUES, default: CURRENCIES.USD, index: true },
     comparePrice: { type: Number, default: 0, min: 0 },
     cost: { type: Number, default: 0, min: 0 },
     stock: { type: Number, default: 0, min: 0 },

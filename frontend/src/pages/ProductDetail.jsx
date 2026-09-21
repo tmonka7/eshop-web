@@ -5,6 +5,7 @@ import ProductCard from '../components/ProductCard';
 import { Breadcrumb, Rating, Spinner, EmptyState, Badge } from '../components/ui';
 import {
   Cart, Heart, HeartFilled, Truck, Shield, Refresh, Minus, Plus, Check, Star, StarFilled,
+  Search,
 } from '../components/Icons';
 import { useAuthStore } from '../store/authStore';
 import { useCartStore } from '../store/cartStore';
@@ -31,10 +32,26 @@ export default function ProductDetail() {
   const [notFound, setNotFound] = useState(false);
 
   const [imageIndex, setImageIndex] = useState(0);
+  const [zoomed, setZoomed] = useState(false);
+  // Percentages, so they can be handed straight to transform-origin.
+  const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 });
   const [variant, setVariant] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [tab, setTab] = useState('description');
   const [busy, setBusy] = useState(false);
+
+  /**
+   * Tracks the cursor inside the frame as a percentage of its box, which is
+   * what transform-origin expects. Clamped so a fast pointer leaving the edge
+   * cannot push the origin outside the image.
+   */
+  function onZoomMove(e) {
+    const box = e.currentTarget.getBoundingClientRect();
+    if (!box.width || !box.height) return;
+    const x = Math.min(100, Math.max(0, ((e.clientX - box.left) / box.width) * 100));
+    const y = Math.min(100, Math.max(0, ((e.clientY - box.top) / box.height) * 100));
+    setZoomOrigin({ x, y });
+  }
 
   const [reviewForm, setReviewForm] = useState({ rating: 5, title: '', comment: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
@@ -172,8 +189,34 @@ export default function ProductDetail() {
               </button>
             ))}
           </div>
-          <div className="gallery-main">
-            <img src={imageUrl(product.images?.[imageIndex])} alt={product.name} />
+          {/* Zoom. The pointer position drives transform-origin, so the point
+              under the cursor is the point that magnifies. Kept as a hover
+              affordance with a click fallback for touch, where there is no
+              hover to track. */}
+          <div
+            className={`gallery-main zoomable ${zoomed ? 'zoomed' : ''}`}
+            onMouseMove={onZoomMove}
+            onMouseEnter={() => setZoomed(true)}
+            onMouseLeave={() => setZoomed(false)}
+            onClick={() => setZoomed((z) => !z)}
+            role="button"
+            tabIndex={0}
+            aria-label={t(zoomed ? 'product.zoomOut' : 'product.zoomIn')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setZoomed((z) => !z);
+              }
+            }}
+          >
+            <img
+              src={imageUrl(product.images?.[imageIndex])}
+              alt={product.name}
+              style={{ transformOrigin: `${zoomOrigin.x}% ${zoomOrigin.y}%` }}
+            />
+            <span className="zoom-hint" aria-hidden="true">
+              <Search size={14} /> {t('product.zoomHint')}
+            </span>
           </div>
         </div>
 
@@ -197,10 +240,10 @@ export default function ProductDetail() {
           </div>
 
           <div className="row gap-12 wrap mb-16">
-            <span className="price" style={{ fontSize: '2rem' }}>{currency(effectivePrice)}</span>
+            <span className="price" style={{ fontSize: '2rem' }}>{currency(effectivePrice, product.currency)}</span>
             {product.comparePrice > product.price ? (
               <>
-                <span className="price-old" style={{ fontSize: '1.1rem' }}>{currency(product.comparePrice)}</span>
+                <span className="price-old" style={{ fontSize: '1.1rem' }}>{currency(product.comparePrice, product.currency)}</span>
                 <Badge tone="danger">{t('common.percentOff', { percent: off })}</Badge>
               </>
             ) : null}

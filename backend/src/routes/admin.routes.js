@@ -2,8 +2,9 @@
 const express = require('express');
 const { body } = require('express-validator');
 const validate = require('../middleware/validate');
-const { protect, adminOnly } = require('../middleware/auth');
+const { protect, adminOnly, superAdminOnly } = require('../middleware/auth');
 const { rawTranslations } = require('../middleware/locale');
+const { CURRENCY_VALUES } = require('../config/constants');
 const { uploadProduct, uploadBanner } = require('../middleware/upload');
 const admin = require('../controllers/admin.controller');
 const products = require('../controllers/product.controller');
@@ -13,9 +14,26 @@ const reviews = require('../controllers/review.controller');
 const coupons = require('../controllers/coupon.controller');
 const banners = require('../controllers/banner.controller');
 const uploads = require('../controllers/upload.controller');
+const staff = require('../controllers/staff.controller');
 
 const router = express.Router();
 router.use(protect, adminOnly, rawTranslations);
+
+/* ------------------------- administrators (super admin) ------------------- */
+/* Mounted before the dashboard block so the extra gate is impossible to miss
+   when scanning this file. Every route here needs the super-admin tier. */
+const staffRules = [
+  body('name').trim().notEmpty(),
+  body('email').isEmail().normalizeEmail(),
+  body('password').isLength({ min: 6 }),
+];
+
+router.get('/staff/options', superAdminOnly, staff.options);
+router.get('/staff', superAdminOnly, staff.list);
+router.post('/staff', superAdminOnly, staffRules, validate, staff.create);
+router.get('/staff/:id', superAdminOnly, staff.getOne);
+router.patch('/staff/:id', superAdminOnly, staff.update);
+router.delete('/staff/:id', superAdminOnly, staff.remove);
 
 /* ------------------------------- dashboard ------------------------------- */
 router.get('/dashboard/stats', admin.stats);
@@ -31,6 +49,8 @@ const productRules = [
   body('price').isFloat({ min: 0 }).withMessage('validation.priceMin'),
   body('category').isMongoId().withMessage('validation.categoryValid'),
   body('stock').optional().isInt({ min: 0 }).withMessage('validation.stockMin'),
+  // Explicit, so a bad value is a clear 400 rather than a Mongoose cast error.
+  body('currency').optional().isIn(CURRENCY_VALUES).withMessage('validation.currencyValid'),
 ];
 
 router.get('/products', products.adminList);

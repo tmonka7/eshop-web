@@ -17,7 +17,6 @@
     "conflict": "数据冲突",
     "unprocessable": "无法处理该请求",
     "internal": "服务器内部错误",
-
     "routeNotFound": "找不到路由 {{method}} {{url}}",
     "invalidValue": "{{field}} 无效：{{value}}",
     "validationFailed": "校验未通过",
@@ -25,60 +24,55 @@
     "invalidToken": "令牌无效",
     "tokenExpired": "令牌已过期",
     "uploadError": "上传失败：{{message}}",
-
     "authTokenMissing": "缺少身份验证令牌",
     "userGone": "该用户已不存在",
     "accountDeactivated": "账号已被停用",
     "noPermission": "您没有权限执行此操作",
     "incorrectCredentials": "邮箱或密码不正确",
     "emailExists": "该邮箱已被注册",
+    "currencyMismatch": "购物车中已有 {{existing}} 商品。请先结算，或清空购物车后再添加 {{incoming}} 商品。",
+    "roleNotAssignable": "无法分配该角色",
+    "cannotEditSelf": "无法修改自己的管理员账号",
+    "cannotEditSuperAdmin": "超级管理员无法在此编辑或删除",
+    "staffNotFound": "未找到该管理员",
     "refreshMissing": "缺少刷新令牌",
     "refreshInvalid": "刷新令牌无效或已过期",
     "refreshRevoked": "刷新令牌已被撤销",
     "currentPasswordIncorrect": "当前密码不正确",
-
     "productNotFound": "未找到该商品",
     "productGone": "该商品已不存在",
     "productOutOfStock": "该商品已售罄",
     "onlyNUnitsAvailable": "仅剩 {{count}} 件库存",
     "stockMin": "库存不能小于 0",
-
     "categoryNotFound": "未找到该分类",
     "categoryNotExist": "该分类不存在",
     "categoryOwnParent": "分类不能将自身设为上级分类",
     "categoryHasChildren": "无法删除：该分类下仍有子分类",
-
     "cartEmpty": "您的购物车是空的",
     "cartItemNotFound": "未找到该购物车商品",
     "quantityMin": "数量不能小于 0",
-
     "orderNotFound": "未找到该订单",
     "orderNotCancellable": "该订单已无法取消",
     "orderBelongsToAnother": "该订单属于其他账号",
     "unknownStatus": "未知状态",
     "shippingAddressRequired": "请填写收货地址",
     "unsupportedPaymentMethod": "不支持的支付方式",
-
     "couponNotFound": "未找到该优惠券",
     "couponInvalid": "优惠码无效",
     "couponCodeRequired": "请输入优惠码",
-
     "reviewNotFound": "未找到该评价",
     "alreadyReviewed": "您已评价过该商品",
     "editOwnReviewOnly": "您只能修改自己的评价",
     "deleteOwnReviewOnly": "您只能删除自己的评价",
-
     "addressNotFound": "未找到该地址",
     "bannerNotFound": "未找到该横幅",
     "customerNotFound": "未找到该客户",
     "cannotDeactivateStaff": "无法在此停用员工账号",
-
     "fileNotFound": "未找到该文件",
     "noImageUploaded": "未上传图片",
     "invalidFilename": "文件名无效",
     "unknownUploadFolder": "未知的上传目录",
     "imageTypeNotAllowed": "仅支持 JPEG、PNG、WEBP、GIF 或 AVIF 格式的图片",
-
     "unsupportedLanguage": "不支持该语言。可选：{{locales}}"
   },
   "validation": {
@@ -99,6 +93,7 @@
     "productIdValid": "请提供有效的 productId",
     "priceMin": "价格不能小于 0",
     "stockMin": "库存不能小于 0",
+    "currencyValid": "货币必须为 USD 或 REM",
     "ratingRange": "评分需为 1-5 分",
     "paymentMethodRequired": "请选择支付方式",
     "statusRequired": "请选择状态",
@@ -110,7 +105,6 @@
   "success": {
     "ok": "成功",
     "created": "已创建",
-
     "accountCreated": "账号创建成功",
     "signedIn": "登录成功",
     "signedOut": "已退出登录",
@@ -120,13 +114,11 @@
     "avatarUpdated": "头像已更新",
     "passwordUpdated": "密码已更新，请重新登录。",
     "languageUpdated": "语言偏好已更新",
-
     "addresses": "地址列表",
     "addressAdded": "地址已添加",
     "addressUpdated": "地址已更新",
     "addressRemoved": "地址已删除",
     "defaultAddressUpdated": "默认地址已更新",
-
     "product": "商品",
     "products": "商品列表",
     "productCreated": "商品已创建",
@@ -139,21 +131,18 @@
     "bestSellers": "热销商品",
     "topProducts": "畅销榜",
     "stockUpdated": "库存已更新",
-
     "category": "分类",
     "categories": "分类列表",
     "categoryTree": "分类树",
     "categoryCreated": "分类已创建",
     "categoryUpdated": "分类已更新",
     "categoryDeleted": "分类已删除",
-
     "cart": "购物车",
     "cartUpdated": "购物车已更新",
     "cartCleared": "购物车已清空",
     "cartMerged": "购物车已合并",
     "addedToCart": "已加入购物车",
     "itemRemoved": "商品已移除",
-
     "order": "订单",
     "yourOrders": "我的订单",
     "recentOrders": "最近订单",
@@ -163,11 +152,9 @@
     "statusUnchanged": "状态未变更",
     "trackingUpdated": "物流信息已更新",
     "checkoutPreview": "结算预览",
-
     "wishlist": "心愿单",
     "addedToWishlist": "已加入心愿单",
     "removedFromWishlist": "已从心愿单移除",
-
     "coupons": "优惠券",
     "couponCreated": "优惠券已创建",
     "couponUpdated": "优惠券已更新",
@@ -175,7 +162,6 @@
     "couponApplied": "优惠券已使用",
     "couponRemoved": "优惠券已取消",
     "availablePromotions": "可用优惠",
-
     "reviews": "评价",
     "reviewSubmitted": "评价已提交",
     "reviewUpdated": "评价已更新",
@@ -183,31 +169,32 @@
     "reviewApproved": "评价已通过",
     "reviewHidden": "评价已隐藏",
     "thanksForFeedback": "感谢您的反馈",
-
     "banner": "横幅",
     "banners": "横幅列表",
     "bannerCreated": "横幅已创建",
     "bannerUpdated": "横幅已更新",
     "bannerDeleted": "横幅已删除",
-
     "customers": "客户列表",
     "customerActivated": "客户已启用",
     "customerDeactivated": "客户已停用",
     "customerGrowth": "客户增长",
-
     "salesOverview": "销售概览",
     "salesByCategory": "分类销售额",
-
     "imagesUploaded": "已上传 {{count}} 张图片",
     "imageDeleted": "图片已删除",
-
     "languages": "支持的语言",
     "dashboardStats": "仪表盘数据",
     "customerDetail": "客户详情",
     "couponValid": "优惠码有效",
     "orderTracking": "物流跟踪",
     "productFilters": "商品筛选项",
-    "reviewSummary": "评价概览"
+    "reviewSummary": "评价概览",
+    "staffOptions": "管理员选项",
+    "staffDeleted": "管理员已删除",
+    "staffUpdated": "管理员已更新",
+    "staffCreated": "管理员已创建",
+    "staffFetched": "管理员详情",
+    "staffList": "管理员列表"
   },
   "common": {
     "uncategorised": "未分类"

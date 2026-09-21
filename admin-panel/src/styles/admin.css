@@ -745,3 +745,102 @@ table.data thead th:last-child { border-top-right-radius: var(--radius); }
 .sidebar-nav::-webkit-scrollbar { width: 6px; }
 .sidebar-nav::-webkit-scrollbar-thumb { background: var(--ink-700); border-radius: 3px; }
 .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+
+/* ==========================================================================
+   Listing currency + staff permissions
+   ========================================================================== */
+
+/* --------------------------- currency colour coding ----------------------- */
+/* The spec fixes USD red and REM blue. Red is a status colour everywhere else
+   in this app, so both tags always spell the code out - colour is the second
+   cue here, never the only one. Text steps are checked against their own
+   tint: -700 on -100 is 5.3:1 (red) and 7.2:1 (blue). */
+
+:root {
+  --usd-ink: #b91c1c;
+  --usd-tint: #fee2e2;
+  --rem-ink: #1e40af;
+  --rem-tint: #dbeafe;
+}
+
+.currency-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: var(--radius-sm);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+.currency-tag.currency-usd { background: var(--usd-tint); color: var(--usd-ink); }
+.currency-tag.currency-rem { background: var(--rem-tint); color: var(--rem-ink); }
+
+/* The radio pair on the product form. */
+.currency-choice { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.currency-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 11px 13px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color var(--t-fast), background var(--t-fast), transform var(--t-fast) var(--ease-out);
+}
+.currency-option:hover { transform: translateY(-1px); }
+/* The native control stays in the accessibility tree and keeps keyboard
+   support; it is only moved out of sight, never display:none. */
+.currency-option input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+}
+.currency-option:focus-within { box-shadow: 0 0 0 3px var(--green-100); }
+.currency-code { font-size: 0.95rem; font-weight: 800; letter-spacing: 0.02em; }
+.currency-name { font-size: 0.74rem; color: var(--text-muted); }
+
+.currency-option.currency-usd .currency-code { color: var(--usd-ink); }
+.currency-option.currency-rem .currency-code { color: var(--rem-ink); }
+.currency-option.currency-usd.active { border-color: var(--usd-ink); background: var(--usd-tint); }
+.currency-option.currency-rem.active { border-color: var(--rem-ink); background: var(--rem-tint); }
+/* The selected tile's supporting line sits on a tint, so it takes the same
+   ink as the code rather than the grey it uses when unselected. */
+.currency-option.currency-usd.active .currency-name { color: var(--usd-ink); }
+.currency-option.currency-rem.active .currency-name { color: var(--rem-ink); }
+
+/* ----------------------------- permission grid ---------------------------- */
+
+.permission-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 6px;
+}
+.permission-option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.83rem;
+  cursor: pointer;
+  transition: border-color var(--t-fast), background var(--t-fast);
+}
+.permission-option:hover { border-color: var(--ink-400); background: var(--ink-50); }
+.permission-option:focus-within { border-color: var(--primary-ink); box-shadow: 0 0 0 3px var(--green-100); }
+.permission-option input { accent-color: var(--primary-ink); width: 15px; height: 15px; flex-shrink: 0; }
+.permission-option:has(input:checked) { border-color: var(--primary-ink); background: var(--green-50); }
+
+@media (max-width: 560px) {
+  .currency-choice { grid-template-columns: 1fr; }
+}
+
+/* Tracking editor in the order detail modal. */
+.tracking-form { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tracking-form > svg { color: var(--ink-400); flex-shrink: 0; }
+.tracking-form .input { width: auto; flex: 1 1 150px; min-width: 120px; padding: 6px 10px; font-size: 0.8rem; }

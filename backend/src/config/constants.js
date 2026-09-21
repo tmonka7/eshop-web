@@ -1,6 +1,47 @@
 'use strict';
 
-const ROLES = { CUSTOMER: 'customer', ADMIN: 'admin', MANAGER: 'manager' };
+/**
+ * SUPER_ADMIN sits above ADMIN: it is the only role that may manage other
+ * staff accounts. Existing `admin` accounts keep every other power they had,
+ * so adding the tier does not demote anyone by accident - the seed promotes
+ * the original admin account explicitly.
+ */
+const ROLES = {
+  CUSTOMER: 'customer',
+  MANAGER: 'manager',
+  ADMIN: 'admin',
+  SUPER_ADMIN: 'superadmin',
+};
+
+/** Roles that may sign in to the admin panel at all. */
+const STAFF_ROLES = [ROLES.MANAGER, ROLES.ADMIN, ROLES.SUPER_ADMIN];
+
+/**
+ * Fine-grained permissions a super admin can grant to a staff account.
+ *
+ * These gate admin-panel sections. A super admin implicitly holds all of
+ * them - the check is "is super admin OR has the permission" - so the list is
+ * only ever consulted for the roles below it.
+ */
+const PERMISSIONS = {
+  PRODUCTS: 'products',
+  ORDERS: 'orders',
+  CUSTOMERS: 'customers',
+  REVIEWS: 'reviews',
+  CONTENT: 'content',
+  REPORTS: 'reports',
+  SETTINGS: 'settings',
+};
+
+const PERMISSION_VALUES = Object.values(PERMISSIONS);
+
+/**
+ * Listing currencies. REM is not an ISO 4217 code and no exchange rate exists
+ * between the two, so they are separate price universes rather than two views
+ * of one number - see the cart's single-currency guard.
+ */
+const CURRENCIES = { USD: 'USD', REM: 'REM' };
+const CURRENCY_VALUES = Object.values(CURRENCIES);
 
 const ORDER_STATUS = {
   PENDING: 'pending',
@@ -34,6 +75,11 @@ const LOW_STOCK_THRESHOLD = 10;
 
 module.exports = {
   ROLES,
+  STAFF_ROLES,
+  PERMISSIONS,
+  PERMISSION_VALUES,
+  CURRENCIES,
+  CURRENCY_VALUES,
   ORDER_STATUS,
   ORDER_FLOW,
   PAYMENT_STATUS,

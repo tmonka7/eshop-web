@@ -92,3 +92,17 @@ export const uploadApi = {
     });
   },
 };
+
+/**
+ * Staff accounts. Every route here is super-admin only on the server, so a
+ * regular administrator calling them gets a 403 rather than a partial result -
+ * the panel hides the section as well, but the server is what enforces it.
+ */
+export const staffApi = {
+  list: (params) => client.get('/admin/staff', { params: clean(params) }),
+  options: () => client.get('/admin/staff/options'),
+  get: (id) => client.get(`/admin/staff/${id}`),
+  create: (payload) => client.post('/admin/staff', payload),
+  update: (id, payload) => client.patch(`/admin/staff/${id}`, payload),
+  remove: (id) => client.delete(`/admin/staff/${id}`),
+};

@@ -64,3 +64,21 @@ export const RANGE_OPTIONS = [
   { value: '90d', labelKey: 'range.90d' },
   { value: '12m', labelKey: 'range.12m' },
 ];
+
+/**
+ * Listing currencies offered when a product is registered.
+ *
+ * REM is not an ISO 4217 code, so `Intl.NumberFormat` cannot format it and
+ * there is no exchange rate to USD - see `currency()` in utils/format.js and
+ * the cart's single-currency guard on the server.
+ *
+ * The colours are fixed by the spec: USD red, REM blue. They are the one
+ * place in this app where red is not a status colour, so both tones are
+ * checked against their own tint rather than borrowed from the badge scale.
+ */
+export const CURRENCIES = [
+  { value: 'USD', labelKey: 'products.currencyUsd', tone: 'usd' },
+  { value: 'REM', labelKey: 'products.currencyRem', tone: 'rem' },
+];
+
+export const DEFAULT_CURRENCY = 'USD';

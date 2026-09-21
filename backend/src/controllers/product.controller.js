@@ -23,7 +23,7 @@ const SORTS = {
 // `translations` must stay selected or the response-layer fold has nothing to
 // work with and every locale falls back to the English columns.
 const LIST_FIELDS =
-  'name slug sku brand price comparePrice stock images rating reviewCount soldCount ' +
+  'name slug sku brand price comparePrice currency stock images rating reviewCount soldCount ' +
   'category isActive isFeatured freeShipping shortDescription colors tags createdAt translations';
 
 /** Category fields to populate; `translations` for the same reason as above. */

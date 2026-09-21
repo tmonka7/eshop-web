@@ -17,7 +17,6 @@
     "conflict": "データが競合しています",
     "unprocessable": "リクエストを処理できません",
     "internal": "サーバー内部エラー",
-
     "routeNotFound": "ルート {{method}} {{url}} は見つかりません",
     "invalidValue": "{{field}} が不正です: {{value}}",
     "validationFailed": "入力内容に誤りがあります",
@@ -25,60 +24,55 @@
     "invalidToken": "トークンが無効です",
     "tokenExpired": "トークンの有効期限が切れています",
     "uploadError": "アップロードに失敗しました: {{message}}",
-
     "authTokenMissing": "認証トークンがありません",
     "userGone": "このユーザーは存在しません",
     "accountDeactivated": "アカウントは無効化されています",
     "noPermission": "この操作を行う権限がありません",
     "incorrectCredentials": "メールアドレスまたはパスワードが正しくありません",
     "emailExists": "このメールアドレスは既に登録されています",
+    "currencyMismatch": "カートには {{existing}} の商品が入っています。先に購入を完了するか、カートを空にしてから {{incoming}} の商品を追加してください。",
+    "roleNotAssignable": "その権限は割り当てできません",
+    "cannotEditSelf": "自分の管理者アカウントは変更できません",
+    "cannotEditSuperAdmin": "スーパー管理者はここで編集・削除できません",
+    "staffNotFound": "管理者が見つかりません",
     "refreshMissing": "リフレッシュトークンがありません",
     "refreshInvalid": "リフレッシュトークンが無効または期限切れです",
     "refreshRevoked": "リフレッシュトークンは失効しています",
     "currentPasswordIncorrect": "現在のパスワードが正しくありません",
-
     "productNotFound": "商品が見つかりません",
     "productGone": "この商品は存在しません",
     "productOutOfStock": "この商品は在庫切れです",
     "onlyNUnitsAvailable": "残り {{count}} 点のみです",
     "stockMin": "在庫は 0 以上である必要があります",
-
     "categoryNotFound": "カテゴリーが見つかりません",
     "categoryNotExist": "このカテゴリーは存在しません",
     "categoryOwnParent": "カテゴリーを自身の親に設定することはできません",
     "categoryHasChildren": "削除できません: サブカテゴリーが存在します",
-
     "cartEmpty": "カートは空です",
     "cartItemNotFound": "カート内の商品が見つかりません",
     "quantityMin": "数量は 0 以上である必要があります",
-
     "orderNotFound": "注文が見つかりません",
     "orderNotCancellable": "この注文はキャンセルできません",
     "orderBelongsToAnother": "この注文は別のアカウントのものです",
     "unknownStatus": "不明なステータスです",
     "shippingAddressRequired": "配送先住所を入力してください",
     "unsupportedPaymentMethod": "対応していない支払い方法です",
-
     "couponNotFound": "クーポンが見つかりません",
     "couponInvalid": "クーポンコードが無効です",
     "couponCodeRequired": "クーポンコードを入力してください",
-
     "reviewNotFound": "レビューが見つかりません",
     "alreadyReviewed": "この商品には既にレビューを投稿済みです",
     "editOwnReviewOnly": "自分のレビューのみ編集できます",
     "deleteOwnReviewOnly": "自分のレビューのみ削除できます",
-
     "addressNotFound": "住所が見つかりません",
     "bannerNotFound": "バナーが見つかりません",
     "customerNotFound": "顧客が見つかりません",
     "cannotDeactivateStaff": "ここではスタッフアカウントを無効化できません",
-
     "fileNotFound": "ファイルが見つかりません",
     "noImageUploaded": "画像がアップロードされていません",
     "invalidFilename": "ファイル名が不正です",
     "unknownUploadFolder": "不明なアップロード先です",
     "imageTypeNotAllowed": "JPEG、PNG、WEBP、GIF、AVIF 形式の画像のみアップロードできます",
-
     "unsupportedLanguage": "対応していない言語です。利用可能: {{locales}}"
   },
   "validation": {
@@ -99,6 +93,7 @@
     "productIdValid": "有効な productId を指定してください",
     "priceMin": "価格は 0 以上である必要があります",
     "stockMin": "在庫は 0 以上である必要があります",
+    "currencyValid": "通貨は USD または REM を指定してください",
     "ratingRange": "評価は 1〜5 で入力してください",
     "paymentMethodRequired": "支払い方法を選択してください",
     "statusRequired": "ステータスを選択してください",
@@ -110,7 +105,6 @@
   "success": {
     "ok": "成功しました",
     "created": "作成しました",
-
     "accountCreated": "アカウントを作成しました",
     "signedIn": "ログインしました",
     "signedOut": "ログアウトしました",
@@ -120,13 +114,11 @@
     "avatarUpdated": "プロフィール画像を更新しました",
     "passwordUpdated": "パスワードを変更しました。再度ログインしてください。",
     "languageUpdated": "言語設定を更新しました",
-
     "addresses": "住所一覧",
     "addressAdded": "住所を追加しました",
     "addressUpdated": "住所を更新しました",
     "addressRemoved": "住所を削除しました",
     "defaultAddressUpdated": "既定の住所を更新しました",
-
     "product": "商品",
     "products": "商品一覧",
     "productCreated": "商品を作成しました",
@@ -139,21 +131,18 @@
     "bestSellers": "人気商品",
     "topProducts": "売れ筋商品",
     "stockUpdated": "在庫を更新しました",
-
     "category": "カテゴリー",
     "categories": "カテゴリー一覧",
     "categoryTree": "カテゴリーツリー",
     "categoryCreated": "カテゴリーを作成しました",
     "categoryUpdated": "カテゴリーを更新しました",
     "categoryDeleted": "カテゴリーを削除しました",
-
     "cart": "カート",
     "cartUpdated": "カートを更新しました",
     "cartCleared": "カートを空にしました",
     "cartMerged": "カートを統合しました",
     "addedToCart": "カートに追加しました",
     "itemRemoved": "商品を削除しました",
-
     "order": "注文",
     "yourOrders": "注文履歴",
     "recentOrders": "最近の注文",
@@ -163,11 +152,9 @@
     "statusUnchanged": "ステータスは変更されていません",
     "trackingUpdated": "配送情報を更新しました",
     "checkoutPreview": "お支払い内容の確認",
-
     "wishlist": "ほしい物リスト",
     "addedToWishlist": "ほしい物リストに追加しました",
     "removedFromWishlist": "ほしい物リストから削除しました",
-
     "coupons": "クーポン",
     "couponCreated": "クーポンを作成しました",
     "couponUpdated": "クーポンを更新しました",
@@ -175,7 +162,6 @@
     "couponApplied": "クーポンを適用しました",
     "couponRemoved": "クーポンを解除しました",
     "availablePromotions": "利用できるクーポン",
-
     "reviews": "レビュー",
     "reviewSubmitted": "レビューを投稿しました",
     "reviewUpdated": "レビューを更新しました",
@@ -183,31 +169,32 @@
     "reviewApproved": "レビューを承認しました",
     "reviewHidden": "レビューを非表示にしました",
     "thanksForFeedback": "フィードバックありがとうございます",
-
     "banner": "バナー",
     "banners": "バナー一覧",
     "bannerCreated": "バナーを作成しました",
     "bannerUpdated": "バナーを更新しました",
     "bannerDeleted": "バナーを削除しました",
-
     "customers": "顧客一覧",
     "customerActivated": "顧客を有効化しました",
     "customerDeactivated": "顧客を無効化しました",
     "customerGrowth": "顧客の推移",
-
     "salesOverview": "売上概況",
     "salesByCategory": "カテゴリー別売上",
-
     "imagesUploaded": "{{count}} 枚の画像をアップロードしました",
     "imageDeleted": "画像を削除しました",
-
     "languages": "対応言語",
     "dashboardStats": "ダッシュボード統計",
     "customerDetail": "顧客詳細",
     "couponValid": "クーポンは有効です",
     "orderTracking": "配送状況",
     "productFilters": "商品の絞り込み条件",
-    "reviewSummary": "レビュー概要"
+    "reviewSummary": "レビュー概要",
+    "staffOptions": "管理者オプション",
+    "staffDeleted": "管理者を削除しました",
+    "staffUpdated": "管理者を更新しました",
+    "staffCreated": "管理者を作成しました",
+    "staffFetched": "管理者の詳細",
+    "staffList": "管理者一覧"
   },
   "common": {
     "uncategorised": "未分類"

@@ -5,6 +5,7 @@ import { Plus, Search, Edit, Trash, Boxes, X, Image as ImageIcon } from '../comp
 import TranslationFields from '../components/TranslationFields';
 import { useToastStore } from '../store';
 import { currency } from '../utils/format';
+import { CURRENCIES } from '../utils/constants';
 import { useI18n } from '../i18n';
 
 // The fields below are the canonical English copy; `translations` carries the
@@ -14,6 +15,7 @@ const emptyProduct = {
   brand: '',
   category: '',
   price: '',
+  currency: 'USD',
   comparePrice: '',
   cost: '',
   stock: '',
@@ -101,6 +103,7 @@ export default function ProductsPage() {
       brand: p.brand,
       category: p.category?._id || p.category,
       price: p.price,
+      currency: p.currency || 'USD',
       comparePrice: p.comparePrice || '',
       cost: p.cost || '',
       stock: p.stock,
@@ -139,6 +142,7 @@ export default function ProductsPage() {
       translations: form.translations,
       category: form.category,
       price: Number(form.price),
+      currency: form.currency,
       comparePrice: form.comparePrice === '' ? 0 : Number(form.comparePrice),
       cost: form.cost === '' ? 0 : Number(form.cost),
       stock: Number(form.stock),
@@ -323,10 +327,18 @@ export default function ProductsPage() {
                       </td>
                       <td className="muted">{p.category?.name || '-'}</td>
                       <td className="right">
-                        <div className="bold">{currency(p.price)}</div>
+                        <div className="row gap-6" style={{ justifyContent: 'flex-end' }}>
+                          {/* The code is spelled out beside every figure, not
+                              just colour-coded: two currencies that cannot be
+                              converted must never be told apart by hue alone. */}
+                          <span className={`currency-tag currency-${(p.currency || 'USD').toLowerCase()}`}>
+                            {p.currency || 'USD'}
+                          </span>
+                          <span className="bold">{currency(p.price, p.currency)}</span>
+                        </div>
                         {p.comparePrice > p.price ? (
                           <div className="tiny muted" style={{ textDecoration: 'line-through' }}>
-                            {currency(p.comparePrice)}
+                            {currency(p.comparePrice, p.currency)}
                           </div>
                         ) : null}
                       </td>
@@ -427,6 +439,35 @@ export default function ProductsPage() {
               ))}
             </select>
             {errors.category ? <span className="field-error">{errors.category}</span> : null}
+          </div>
+
+          {/* Listing currency. The two are separate price universes - there is
+              no rate between them - so this choice decides what every figure
+              below means, which is why it sits above them rather than beside
+              the cost field. */}
+          <div className="field">
+            <span className="field-label">{t('products.currencyField')}</span>
+            <div className="currency-choice">
+              {CURRENCIES.map((c) => (
+                <label
+                  key={c.value}
+                  className={`currency-option currency-${c.value.toLowerCase()} ${
+                    form.currency === c.value ? 'active' : ''
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="currency"
+                    value={c.value}
+                    checked={form.currency === c.value}
+                    onChange={() => setForm({ ...form, currency: c.value })}
+                  />
+                  <span className="currency-code">{c.value}</span>
+                  <span className="currency-name">{t(c.labelKey)}</span>
+                </label>
+              ))}
+            </div>
+            <span className="field-hint">{t('products.currencyHint')}</span>
           </div>
 
           <div className="form-row-3">

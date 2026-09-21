@@ -1,7 +1,7 @@
 'use strict';
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const { ROLES } = require('../config/constants');
+const { ROLES, PERMISSION_VALUES } = require('../config/constants');
 const { LOCALES, DEFAULT_LOCALE } = require('../i18n');
 
 const addressSchema = new mongoose.Schema(
@@ -34,6 +34,13 @@ const userSchema = new mongoose.Schema(
     phone: { type: String, trim: true, default: '' },
     avatar: { type: String, default: '' },
     role: { type: String, enum: Object.values(ROLES), default: ROLES.CUSTOMER, index: true },
+    // Section permissions for staff below super admin. Empty for customers,
+    // and ignored for a super admin, who implicitly holds all of them.
+    permissions: {
+      type: [String],
+      enum: PERMISSION_VALUES,
+      default: [],
+    },
     isActive: { type: Boolean, default: true },
     addresses: { type: [addressSchema], default: [] },
     wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],

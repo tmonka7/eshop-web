@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   Dashboard, Boxes, Package, Users, Layers, Megaphone, Star2, Image, Chart, Settings,
-  LogOut, Menu, Globe, AlertTriangle,
+  LogOut, Menu, Globe, AlertTriangle, Shield,
 } from './Icons';
 import { Toasts } from './ui';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -45,6 +45,15 @@ const NAV = [
     items: [
       { to: '/reports', icon: <Chart size={17} />, labelKey: 'nav.reports' },
       { to: '/settings', icon: <Settings size={17} />, labelKey: 'nav.settings' },
+      // Staff administration is the super admin's alone. The server refuses
+      // the routes either way; hiding the entry keeps the panel honest about
+      // what the signed-in account can actually reach.
+      {
+        to: '/administrators',
+        icon: <Shield size={17} />,
+        labelKey: 'nav.administrators',
+        superAdminOnly: true,
+      },
     ],
   },
 ];
@@ -61,6 +70,7 @@ const TITLE_KEYS = {
   '/content': 'content.title',
   '/reports': 'reports.title',
   '/settings': 'settings.title',
+  '/administrators': 'staff.title',
 };
 
 export default function Layout() {
@@ -73,6 +83,8 @@ export default function Layout() {
   const sidebarOpen = useUiStore((s) => s.sidebarOpen);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
   const closeSidebar = useUiStore((s) => s.closeSidebar);
+
+  const isSuperAdmin = user?.role === 'superadmin';
 
   const titleKey = TITLE_KEYS[pathname] || TITLE_KEYS[`/${pathname.split('/')[1]}`];
   const title = titleKey ? t(titleKey) : t('app.panel');
@@ -106,7 +118,9 @@ export default function Layout() {
           {NAV.map((group) => (
             <div key={group.sectionKey}>
               <div className="sidebar-section">{t(group.sectionKey)}</div>
-              {group.items.map((item) => (
+              {group.items
+                .filter((item) => !item.superAdminOnly || isSuperAdmin)
+                .map((item) => (
                 <NavLink
                   key={item.to}
                   to={item.to}

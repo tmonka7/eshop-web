@@ -3,7 +3,7 @@ const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
 const { verifyAccessToken } = require('../utils/token');
 const User = require('../models/User');
-const { ROLES } = require('../config/constants');
+const { ROLES, STAFF_ROLES } = require('../config/constants');
 const { applyUserLocale } = require('./locale');
 
 function extractToken(req) {
@@ -63,6 +63,32 @@ const restrictTo = (...roles) => (req, _res, next) => {
   return next();
 };
 
-const adminOnly = restrictTo(ROLES.ADMIN, ROLES.MANAGER);
+const adminOnly = restrictTo(...STAFF_ROLES);
 
-module.exports = { protect, optionalAuth, restrictTo, adminOnly };
+/** Only a super admin may manage other staff accounts. */
+const superAdminOnly = restrictTo(ROLES.SUPER_ADMIN);
+
+/**
+ * Section gate, e.g. requirePermission(PERMISSIONS.ORDERS).
+ *
+ * A super admin passes unconditionally - the whole point of the tier is that
+ * it is not itself gated - and everyone else needs the named permission on
+ * their account.
+ */
+const requirePermission = (permission) => (req, _res, next) => {
+  if (!req.user) return next(ApiError.unauthorized());
+  if (req.user.role === ROLES.SUPER_ADMIN) return next();
+  if (!(req.user.permissions || []).includes(permission)) {
+    return next(ApiError.forbidden('error.noPermission'));
+  }
+  return next();
+};
+
+module.exports = {
+  protect,
+  optionalAuth,
+  restrictTo,
+  adminOnly,
+  superAdminOnly,
+  requirePermission,
+};

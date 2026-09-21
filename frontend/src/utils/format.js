@@ -13,13 +13,32 @@ import { INTL_BY_LOCALE, DEFAULT_LOCALE } from '../i18n/constants';
  */
 const intlTag = (locale) => INTL_BY_LOCALE[locale || getActiveLocale()] || INTL_BY_LOCALE[DEFAULT_LOCALE];
 
-export const currency = (value, opts = {}) =>
-  new Intl.NumberFormat(intlTag(), {
+/**
+ * Formats a price in its product's listing currency.
+ *
+ * USD goes through Intl as a real currency. REM is not an ISO 4217 code, so
+ * Intl would throw on it - it is formatted as a plain grouped number with the
+ * code appended, which also makes it visually obvious that the two are not
+ * interchangeable. There is no exchange rate between them; the server refuses
+ * to put both in one cart for exactly that reason.
+ */
+export const currency = (value, code = 'USD', opts = {}) => {
+  const amount = Number(value) || 0;
+  if (code === 'REM') {
+    const n = new Intl.NumberFormat(intlTag(), {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+      ...opts,
+    }).format(amount);
+    return `${n} REM`;
+  }
+  return new Intl.NumberFormat(intlTag(), {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 2,
     ...opts,
-  }).format(Number(value) || 0);
+  }).format(amount);
+};
 
 export const compactNumber = (value) =>
   new Intl.NumberFormat(intlTag(), { notation: 'compact', maximumFractionDigits: 1 })

@@ -1732,3 +1732,40 @@ body[data-scrolled="1"] .header-main {
   .home-top .hero { padding: 28px 22px 62px; }
   .hero-nav { left: 22px; bottom: 18px; }
 }
+
+/* ------------------------------ gallery zoom ------------------------------ */
+/* The pointer position drives transform-origin from JS, so the point under
+   the cursor is the point that magnifies. */
+
+.gallery-main.zoomable { cursor: zoom-in; position: relative; }
+.gallery-main.zoomable img { transition: transform var(--t-base) var(--ease-out); }
+.gallery-main.zoomed { cursor: zoom-out; }
+.gallery-main.zoomed img { transform: scale(2.1); }
+
+.zoom-hint {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--ink-700);
+  font-size: 0.72rem;
+  font-weight: 600;
+  pointer-events: none;
+  transition: opacity var(--t-fast);
+}
+.gallery-main.zoomed .zoom-hint { opacity: 0; }
+
+/* Touch has no hover to track, so the hint would be permanent and the scale
+   would only ever come from the tap fallback. */
+@media (hover: none) {
+  .zoom-hint { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-main.zoomed img { transform: scale(1.4); }
+}
