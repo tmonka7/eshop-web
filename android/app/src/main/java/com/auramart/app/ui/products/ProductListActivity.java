@@ -41,9 +41,11 @@ public class ProductListActivity extends AppCompatActivity implements ProductAda
     private static final String[] SORT_VALUES = {
             "best_selling", "newest", "price_asc", "price_desc", "rating", "name_asc",
     };
-    private static final String[] SORT_LABELS = {
-            "Best Selling", "Newest Arrivals", "Price: Low to High", "Price: High to Low",
-            "Top Rated", "Name: A to Z",
+    /** Parallel to SORT_VALUES; resolved at show time so it follows the language. */
+    private static final int[] SORT_LABEL_RES = {
+            R.string.sort_best_selling, R.string.sort_newest,
+            R.string.sort_price_asc, R.string.sort_price_desc,
+            R.string.sort_rating, R.string.sort_name_asc,
     };
 
     public static Intent intent(Context context, @Nullable String categorySlug,
@@ -164,8 +166,8 @@ public class ProductListActivity extends AppCompatActivity implements ProductAda
 
                 boolean empty = loaded.isEmpty();
                 b.empty.getRoot().setVisibility(empty ? View.VISIBLE : View.GONE);
-                b.empty.emptyTitle.setText("No products found");
-                b.empty.emptyMessage.setText("Try a different search or category.");
+                b.empty.emptyTitle.setText(R.string.no_products_found);
+                b.empty.emptyMessage.setText(R.string.no_products_hint);
             }
 
             @Override
@@ -178,10 +180,19 @@ public class ProductListActivity extends AppCompatActivity implements ProductAda
         });
     }
 
+    /** Resolves SORT_LABEL_RES against the current locale. */
+    private String[] sortLabels() {
+        String[] labels = new String[SORT_LABEL_RES.length];
+        for (int i = 0; i < labels.length; i++) {
+            labels[i] = getString(SORT_LABEL_RES[i]);
+        }
+        return labels;
+    }
+
     private void showSortDialog() {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.sort_by)
-                .setSingleChoiceItems(SORT_LABELS, sortIndex, (dialog, which) -> {
+                .setSingleChoiceItems(sortLabels(), sortIndex, (dialog, which) -> {
                     sortIndex = which;
                     dialog.dismiss();
                     reload(false);

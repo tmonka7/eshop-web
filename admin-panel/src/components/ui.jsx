@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { X, TrendUp, TrendDown } from './Icons';
 import { useToastStore } from '../store';
+import { useI18n } from '../i18n';
 
 export function Spinner({ label }) {
   return (
@@ -60,6 +61,8 @@ export function StatCard({ label, value, delta, icon, tone = 'red' }) {
 }
 
 export function Modal({ open, title, onClose, children, footer, wide = false }) {
+  const { t } = useI18n();
+
   useEffect(() => {
     if (!open) return undefined;
     function onKey(e) {
@@ -85,7 +88,7 @@ export function Modal({ open, title, onClose, children, footer, wide = false }) 
       <div className={`modal ${wide ? 'wide' : ''}`} role="dialog" aria-modal="true" aria-label={title}>
         <div className="modal-head">
           <h2>{title}</h2>
-          <button type="button" className="btn btn-ghost btn-icon" onClick={onClose} aria-label="Close">
+          <button type="button" className="btn btn-ghost btn-icon" onClick={onClose} aria-label={t('common.close')}>
             <X size={17} />
           </button>
         </div>
@@ -97,6 +100,7 @@ export function Modal({ open, title, onClose, children, footer, wide = false }) 
 }
 
 export function Pagination({ page, totalPages, total, limit, onChange }) {
+  const { t } = useI18n();
   if (!totalPages || totalPages < 1) return null;
 
   const start = Math.max(1, Math.min(page - 2, totalPages - 4));
@@ -107,10 +111,10 @@ export function Pagination({ page, totalPages, total, limit, onChange }) {
   return (
     <div className="pagination">
       <span className="small muted">
-        Showing {from}–{to} of {total}
+        {t('common.showingRange', { from, to, total })}
       </span>
       <div className="pages">
-        <button type="button" onClick={() => onChange(page - 1)} disabled={page <= 1}>Prev</button>
+        <button type="button" onClick={() => onChange(page - 1)} disabled={page <= 1}>{t('common.prev')}</button>
         {pages.map((p) => (
           <button
             key={p}
@@ -121,7 +125,7 @@ export function Pagination({ page, totalPages, total, limit, onChange }) {
             {p}
           </button>
         ))}
-        <button type="button" onClick={() => onChange(page + 1)} disabled={page >= totalPages}>Next</button>
+        <button type="button" onClick={() => onChange(page + 1)} disabled={page >= totalPages}>{t('common.next')}</button>
       </div>
     </div>
   );
@@ -142,16 +146,17 @@ export function Switch({ checked, onChange, disabled }) {
 }
 
 export function Toasts() {
+  const { t } = useI18n();
   const toasts = useToastStore((s) => s.toasts);
   const dismiss = useToastStore((s) => s.dismiss);
 
   if (!toasts.length) return null;
   return (
     <div className="toast-stack" role="status" aria-live="polite">
-      {toasts.map((t) => (
-        <div key={t.id} className={`toast ${t.type}`}>
-          <span className="grow">{t.message}</span>
-          <button type="button" onClick={() => dismiss(t.id)} aria-label="Dismiss">
+      {toasts.map((item) => (
+        <div key={item.id} className={`toast ${item.type}`}>
+          <span className="grow">{item.message}</span>
+          <button type="button" onClick={() => dismiss(item.id)} aria-label={t('common.close')}>
             <X size={14} />
           </button>
         </div>
@@ -161,7 +166,8 @@ export function Toasts() {
 }
 
 /** Confirm dialog used before destructive actions. */
-export function ConfirmModal({ open, title, message, confirmLabel = 'Delete', onConfirm, onClose, busy }) {
+export function ConfirmModal({ open, title, message, confirmLabel, onConfirm, onClose, busy }) {
+  const { t } = useI18n();
   return (
     <Modal
       open={open}
@@ -170,10 +176,10 @@ export function ConfirmModal({ open, title, message, confirmLabel = 'Delete', on
       footer={
         <>
           <button type="button" className="btn btn-outline" onClick={onClose} disabled={busy}>
-            Cancel
+            {t('common.cancel')}
           </button>
           <button type="button" className="btn btn-danger" onClick={onConfirm} disabled={busy}>
-            {busy ? 'Working…' : confirmLabel}
+            {busy ? t('common.working') : (confirmLabel || t('common.delete'))}
           </button>
         </>
       }

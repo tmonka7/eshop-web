@@ -44,19 +44,19 @@ public class RegisterActivity extends AppCompatActivity {
         b.confirmLayout.setError(null);
 
         if (!Validators.notBlank(name) || name.length() < 2) {
-            b.nameLayout.setError("Enter your name");
+            b.nameLayout.setError(getString(R.string.error_name_required));
             return;
         }
         if (!Validators.isEmail(email)) {
-            b.emailLayout.setError("Enter a valid email");
+            b.emailLayout.setError(getString(R.string.error_email_invalid));
             return;
         }
         if (!Validators.isPassword(password)) {
-            b.passwordLayout.setError("At least 6 characters");
+            b.passwordLayout.setError(getString(R.string.error_password_short));
             return;
         }
         if (!password.equals(confirm)) {
-            b.confirmLayout.setError("Passwords do not match");
+            b.confirmLayout.setError(getString(R.string.error_passwords_differ));
             return;
         }
 

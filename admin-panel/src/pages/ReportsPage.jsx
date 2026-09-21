@@ -7,8 +7,10 @@ import { Empty, Spinner, StatCard } from '../components/ui';
 import { Dollar, Package, Chart, TrendUp } from '../components/Icons';
 import { currency, compactNumber } from '../utils/format';
 import { CHART_COLORS, RANGE_OPTIONS } from '../utils/constants';
+import { useI18n } from '../i18n';
 
 export default function ReportsPage() {
+  const { t } = useI18n();
   const [range, setRange] = useState('90d');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -42,8 +44,10 @@ export default function ReportsPage() {
     };
   }, [range]);
 
-  if (loading) return <Spinner label="Building reports..." />;
-  if (!data) return <Empty title="Could not load reports" message="Check that the API is running." />;
+  if (loading) return <Spinner label={t('reports.loading')} />;
+  if (!data) {
+    return <Empty title={t('reports.loadFailed')} message={t('reports.loadFailedMessage')} />;
+  }
 
   const { stats, sales, byCategory, top, growth } = data;
 
@@ -51,8 +55,8 @@ export default function ReportsPage() {
     <>
       <div className="page-head">
         <div>
-          <h1>Reports</h1>
-          <p>Deeper analytics across revenue, catalogue and customers</p>
+          <h1>{t('reports.title')}</h1>
+          <p>{t('reports.subtitle')}</p>
         </div>
         <div className="tabs">
           {RANGE_OPTIONS.map((r) => (
@@ -62,23 +66,23 @@ export default function ReportsPage() {
               className={`tab-chip ${range === r.value ? 'active' : ''}`}
               onClick={() => setRange(r.value)}
             >
-              {r.label}
+              {t(r.labelKey)}
             </button>
           ))}
         </div>
       </div>
 
       <div className="grid grid-4 mb-24">
-        <StatCard label="Revenue" value={currency(stats.totalRevenue.value)} delta={stats.totalRevenue.change} icon={<Dollar size={18} />} tone="red" />
-        <StatCard label="Orders" value={compactNumber(stats.totalOrders.value)} delta={stats.totalOrders.change} icon={<Package size={18} />} tone="blue" />
-        <StatCard label="Avg. order value" value={currency(stats.averageOrderValue)} icon={<Chart size={18} />} tone="green" />
-        <StatCard label="Active products" value={stats.activeProducts} icon={<TrendUp size={18} />} tone="purple" />
+        <StatCard label={t('dashboard.revenue')} value={currency(stats.totalRevenue.value)} delta={stats.totalRevenue.change} icon={<Dollar size={18} />} tone="red" />
+        <StatCard label={t('dashboard.orders')} value={compactNumber(stats.totalOrders.value)} delta={stats.totalOrders.change} icon={<Package size={18} />} tone="blue" />
+        <StatCard label={t('dashboard.avgOrderValue')} value={currency(stats.averageOrderValue)} icon={<Chart size={18} />} tone="green" />
+        <StatCard label={t('dashboard.activeProducts')} value={stats.activeProducts} icon={<TrendUp size={18} />} tone="purple" />
       </div>
 
       <div className="card mb-24">
         <div className="card-header">
-          <span className="card-title">Orders per day</span>
-          <span className="small muted">Order volume across the selected range</span>
+          <span className="card-title">{t('reports.ordersPerDay')}</span>
+          <span className="small muted">{t('dashboard.orderVolumeSub')}</span>
         </div>
         <div className="card-pad" style={{ height: 260 }}>
           <ResponsiveContainer width="100%" height="100%">
@@ -103,11 +107,11 @@ export default function ReportsPage() {
       <div className="grid grid-2 mb-24">
         <div className="card">
           <div className="card-header">
-            <span className="card-title">Revenue by category</span>
+            <span className="card-title">{t('reports.revenueByCategory')}</span>
           </div>
           <div className="card-pad" style={{ height: 300 }}>
             {byCategory.segments.length === 0 ? (
-              <p className="muted small">No sales in this range.</p>
+              <p className="muted small">{t('reports.noSalesInRange')}</p>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
@@ -148,7 +152,7 @@ export default function ReportsPage() {
 
         <div className="card">
           <div className="card-header">
-            <span className="card-title">New customers per month</span>
+            <span className="card-title">{t('dashboard.newCustomersPerMonth')}</span>
             <span className="bold">{compactNumber(growth.total)} total</span>
           </div>
           <div className="card-pad" style={{ height: 300 }}>
@@ -167,18 +171,18 @@ export default function ReportsPage() {
 
       <div className="card">
         <div className="card-header">
-          <span className="card-title">Best selling products</span>
+          <span className="card-title">{t('dashboard.bestSelling')}</span>
         </div>
         <div className="table-wrap">
           <table className="data">
             <thead>
               <tr>
                 <th>#</th>
-                <th>Product</th>
-                <th className="right">Price</th>
-                <th className="right">Units sold</th>
-                <th className="right">Revenue</th>
-                <th className="right">Stock left</th>
+                <th>{t('common.product')}</th>
+                <th className="right">{t('common.price')}</th>
+                <th className="right">{t('dashboard.unitsSold')}</th>
+                <th className="right">{t('dashboard.revenue')}</th>
+                <th className="right">{t('dashboard.stockLeft')}</th>
               </tr>
             </thead>
             <tbody>

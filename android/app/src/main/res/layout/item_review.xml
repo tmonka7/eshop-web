@@ -75,7 +75,7 @@
                 android:background="@drawable/bg_badge_green"
                 android:paddingStart="@dimen/space_sm"
                 android:paddingEnd="@dimen/space_sm"
-                android:text="Verified"
+                android:text="@string/verified"
                 android:textColor="@color/success_dark"
                 android:textSize="@dimen/text_tiny"
                 android:textStyle="bold"

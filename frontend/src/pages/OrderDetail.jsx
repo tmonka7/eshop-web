@@ -6,9 +6,11 @@ import { Package, MapPin, CreditCard, Truck } from '../components/Icons';
 import { useToastStore } from '../store/toastStore';
 import { currency, formatDate, formatDateTime, imageUrl, statusLabel } from '../utils/format';
 import { ORDER_STATUS_META } from '../utils/constants';
+import { useI18n } from '../i18n';
 
 export default function OrderDetail() {
   const { id } = useParams();
+  const { t, locale } = useI18n();
   const toast = useToastStore();
 
   const [order, setOrder] = useState(null);
@@ -19,23 +21,24 @@ export default function OrderDetail() {
   const load = useCallback(() => {
     setLoading(true);
     Promise.all([orderApi.get(id), orderApi.track(id)])
-      .then(([o, t]) => {
-        setOrder(o.data);
-        setTracking(t.data);
+      .then(([orderRes, trackRes]) => {
+        setOrder(orderRes.data);
+        setTracking(trackRes.data);
       })
       .catch(() => setOrder(null))
       .finally(() => setLoading(false));
-  }, [id]);
+    // Line-item names are localised server-side, so reload on a switch.
+  }, [id, locale]);
 
   useEffect(load, [load]);
 
   async function cancelOrder() {
     // eslint-disable-next-line no-alert
-    if (!window.confirm('Cancel this order? Stock will be returned and any payment refunded.')) return;
+    if (!window.confirm(t('orders.cancelConfirm'))) return;
     setCancelling(true);
     try {
-      await orderApi.cancel(id, 'Cancelled by customer');
-      toast.success('Order cancelled');
+      await orderApi.cancel(id, t('orders.cancelledByCustomer'));
+      toast.success(t('toast.orderCancelled'));
       load();
     } catch (err) {
       toast.error(err.message);
@@ -51,35 +54,36 @@ export default function OrderDetail() {
       <div className="container">
         <EmptyState
           icon={<Package size={30} />}
-          title="Order not found"
-          action={<Link to="/orders" className="btn btn-primary">Back to my orders</Link>}
+          title={t('orders.notFoundTitle')}
+          action={<Link to="/orders" className="btn btn-primary">{t('orders.backToOrders')}</Link>}
         />
       </div>
     );
   }
 
-  const meta = ORDER_STATUS_META[order.status] || { label: order.status, tone: 'muted' };
+  const meta = ORDER_STATUS_META[order.status];
+  const statusText = meta ? t(meta.labelKey) : order.status;
   const canCancel = ['pending', 'processing'].includes(order.status);
 
   return (
     <div className="container">
       <Breadcrumb
         items={[
-          { label: 'Home', to: '/' },
-          { label: 'My Orders', to: '/orders' },
+          { label: t('common.home'), to: '/' },
+          { label: t('orders.breadcrumb'), to: '/orders' },
           { label: order.orderNumber },
         ]}
       />
 
       <div className="row between wrap gap-12 mb-24">
         <div>
-          <h1 style={{ fontSize: '1.5rem' }}>Order {order.orderNumber}</h1>
+          <h1 style={{ fontSize: '1.5rem' }}>{t('orders.orderTitle', { number: order.orderNumber })}</h1>
           <p className="small muted" style={{ margin: 0 }}>
-            Placed {formatDateTime(order.createdAt)}
+            {t('orders.placedAt', { datetime: formatDateTime(order.createdAt) })}
           </p>
         </div>
         <div className="row gap-12">
-          <Badge tone={meta.tone}>{meta.label}</Badge>
+          <Badge tone={meta ? meta.tone : 'muted'}>{statusText}</Badge>
           {canCancel ? (
             <button
               type="button"
@@ -87,7 +91,7 @@ export default function OrderDetail() {
               onClick={cancelOrder}
               disabled={cancelling}
             >
-              {cancelling ? 'Cancelling…' : 'Cancel order'}
+              {cancelling ? t('orders.cancelling') : t('orders.cancelOrder')}
             </button>
           ) : null}
         </div>
@@ -96,11 +100,13 @@ export default function OrderDetail() {
       <div className="cart-layout" style={{ marginTop: 0 }}>
         <div className="stack gap-20">
           <div className="card">
-            <div className="card-header"><span className="card-title">Order Tracking</span></div>
+            <div className="card-header"><span className="card-title">{t('orders.tracking')}</span></div>
             <div className="card-pad">
               {order.status === 'cancelled' ? (
                 <div className="alert alert-error">
-                  This order was cancelled{order.cancelReason ? `: ${order.cancelReason}` : ''}.
+                  {order.cancelReason
+                    ? t('orders.cancelledNoticeWithReason', { reason: order.cancelReason })
+                    : t('orders.cancelledNotice')}
                 </div>
               ) : (
                 <div className="row between wrap gap-12 mb-24">
@@ -108,7 +114,7 @@ export default function OrderDetail() {
                     <Truck size={16} /> {order.carrier} · <strong>{order.trackingNumber}</strong>
                   </span>
                   <span className="small muted">
-                    Estimated delivery {formatDate(order.estimatedDelivery)}
+                    {t('orders.estimatedDelivery', { date: formatDate(order.estimatedDelivery) })}
                   </span>
                 </div>
               )}
@@ -123,7 +129,7 @@ export default function OrderDetail() {
                     >
                       <div className="bold small">{statusLabel(s.status)}</div>
                       <div className="tiny muted">
-                        {s.at ? formatDateTime(s.at) : i === 0 ? '' : 'Pending'}
+                        {s.at ? formatDateTime(s.at) : i === 0 ? '' : t('orderStatus.pending')}
                       </div>
                     </div>
                   );
@@ -134,7 +140,7 @@ export default function OrderDetail() {
 
           <div className="card">
             <div className="card-header">
-              <span className="card-title">Items ({order.items.length})</span>
+              <span className="card-title">{t('orders.itemsCount', { count: order.items.length })}</span>
             </div>
             {order.items.map((item) => (
               <div key={item._id} className="order-item-row">
@@ -142,7 +148,11 @@ export default function OrderDetail() {
                 <div className="grow">
                   <div className="small bold">{item.name}</div>
                   <div className="tiny muted">
-                    SKU {item.sku} · Qty {item.quantity} · {currency(item.price)}
+                    {t('orders.itemMeta', {
+                      sku: item.sku,
+                      qty: item.quantity,
+                      price: currency(item.price),
+                    })}
                     {item.variant?.value ? ` · ${item.variant.value}` : ''}
                   </div>
                 </div>
@@ -154,46 +164,48 @@ export default function OrderDetail() {
 
         <aside className="stack gap-20">
           <div className="card card-pad">
-            <h3 style={{ fontSize: '0.95rem', marginBottom: 12 }}>Payment Summary</h3>
+            <h3 style={{ fontSize: '0.95rem', marginBottom: 12 }}>{t('orders.paymentSummary')}</h3>
             <div className="summary-row">
-              <span className="muted">Subtotal</span>
+              <span className="muted">{t('cart.subtotal')}</span>
               <span>{currency(order.pricing.subtotal)}</span>
             </div>
             {order.pricing.discount > 0 ? (
               <div className="summary-row">
-                <span className="muted">Discount {order.couponCode ? `(${order.couponCode})` : ''}</span>
+                <span className="muted">{t('cart.discount')} {order.couponCode ? `(${order.couponCode})` : ''}</span>
                 <span style={{ color: 'var(--green-600)' }}>−{currency(order.pricing.discount)}</span>
               </div>
             ) : null}
             <div className="summary-row">
-              <span className="muted">Shipping</span>
-              <span>{order.pricing.shipping === 0 ? 'Free' : currency(order.pricing.shipping)}</span>
+              <span className="muted">{t('cart.shipping')}</span>
+              <span>{order.pricing.shipping === 0 ? t('common.free') : currency(order.pricing.shipping)}</span>
             </div>
             <div className="summary-row">
-              <span className="muted">Tax</span>
+              <span className="muted">{t('checkout.tax')}</span>
               <span>{currency(order.pricing.tax)}</span>
             </div>
             <div className="summary-row total">
-              <span>Total</span>
+              <span>{t('cart.total')}</span>
               <span>{currency(order.pricing.total)}</span>
             </div>
 
             <hr className="divider" />
             <div className="row gap-8 small">
               <CreditCard size={15} />
-              <span className="grow">{statusLabel(order.payment.method)}</span>
+              <span className="grow">{t(`payment.${order.payment.method}`)}</span>
               <Badge tone={order.payment.status === 'paid' ? 'ok' : order.payment.status === 'refunded' ? 'info' : 'warn'}>
-                {statusLabel(order.payment.status)}
+                {t(`paymentStatus.${order.payment.status}`)}
               </Badge>
             </div>
             {order.payment.cardLast4 ? (
-              <div className="tiny muted mt-8">Card ending {order.payment.cardLast4}</div>
+              <div className="tiny muted mt-8">
+                {t('orders.cardEnding', { last4: order.payment.cardLast4 })}
+              </div>
             ) : null}
           </div>
 
           <div className="card card-pad">
             <h3 style={{ fontSize: '0.95rem', marginBottom: 12 }}>
-              <span className="row gap-8"><MapPin size={15} /> Shipping Address</span>
+              <span className="row gap-8"><MapPin size={15} /> {t('checkout.shippingAddress')}</span>
             </h3>
             <div className="small muted">
               <strong style={{ color: 'var(--text)' }}>{order.shippingAddress.fullName}</strong><br />

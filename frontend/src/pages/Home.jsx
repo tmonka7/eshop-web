@@ -4,16 +4,18 @@ import { catalogApi } from '../api';
 import ProductCard from '../components/ProductCard';
 import { SkeletonGrid } from '../components/ui';
 import { Truck, Headset, Shield, Refresh, Zap, Tag } from '../components/Icons';
-import { imageUrl } from '../utils/format';
+import { currency, imageUrl } from '../utils/format';
+import { useI18n } from '../i18n';
 
 const features = [
-  { icon: <Truck size={18} />, title: 'Free Shipping', text: 'For orders over $50' },
-  { icon: <Headset size={18} />, title: '24/7 Support', text: 'We are here to help' },
-  { icon: <Shield size={18} />, title: 'Secure Payment', text: '100% protected' },
-  { icon: <Refresh size={18} />, title: 'Easy Returns', text: 'Within 30 days' },
+  { icon: <Truck size={18} />, titleKey: 'home.features.shippingTitle', textKey: 'home.features.shippingText' },
+  { icon: <Headset size={18} />, titleKey: 'home.features.supportTitle', textKey: 'home.features.supportText' },
+  { icon: <Shield size={18} />, titleKey: 'home.features.paymentTitle', textKey: 'home.features.paymentText' },
+  { icon: <Refresh size={18} />, titleKey: 'home.features.returnsTitle', textKey: 'home.features.returnsText' },
 ];
 
 export default function Home() {
+  const { t, locale } = useI18n();
   const [state, setState] = useState({
     banners: [],
     categories: [],
@@ -47,7 +49,9 @@ export default function Home() {
     return () => {
       alive = false;
     };
-  }, []);
+    // Refetch on a language change so banners and category names come back
+    // translated by the API.
+  }, [locale]);
 
   const hero = state.banners[0];
 
@@ -55,15 +59,15 @@ export default function Home() {
     <div className="container">
       <section className="hero">
         <div>
-          <span className="badge badge-danger mb-16">New season</span>
-          <h1>{hero?.title || 'Discover Premium Products'}</h1>
-          <p>{hero?.subtitle || 'Top brands. Better prices. Faster delivery.'}</p>
+          <span className="badge badge-danger mb-16">{t('home.newSeason')}</span>
+          <h1>{hero?.title || t('home.heroTitle')}</h1>
+          <p>{hero?.subtitle || t('home.heroSubtitle')}</p>
           <div className="row gap-12 mt-24">
             <Link to={hero?.ctaLink || '/products'} className="btn btn-primary btn-lg">
-              {hero?.ctaText || 'Shop Now'}
+              {hero?.ctaText || t('home.shopNow')}
             </Link>
             <Link to="/products?sort=newest" className="btn btn-outline btn-lg">
-              New Arrivals
+              {t('home.newArrivals')}
             </Link>
           </div>
         </div>
@@ -74,11 +78,11 @@ export default function Home() {
 
       <div className="feature-strip">
         {features.map((f) => (
-          <div key={f.title} className="feature-item">
+          <div key={f.titleKey} className="feature-item">
             <span className="feature-icon">{f.icon}</span>
             <div>
-              <h4>{f.title}</h4>
-              <p>{f.text}</p>
+              <h4>{t(f.titleKey)}</h4>
+              <p>{t(f.textKey, { amount: currency(50) })}</p>
             </div>
           </div>
         ))}
@@ -87,10 +91,10 @@ export default function Home() {
       <section className="section">
         <div className="section-head">
           <div>
-            <h2>Shop by Category</h2>
-            <p className="muted small">Browse our most popular departments</p>
+            <h2>{t('home.shopByCategory')}</h2>
+            <p className="muted small">{t('home.shopByCategorySub')}</p>
           </div>
-          <Link to="/products" className="link">See All</Link>
+          <Link to="/products" className="link">{t('common.seeAll')}</Link>
         </div>
 
         <div className="category-rail">
@@ -99,7 +103,7 @@ export default function Home() {
               <img className="avatar" src={imageUrl(c.image)} alt="" loading="lazy" />
               <span>{c.name}</span>
               {c.productCount !== undefined ? (
-                <span className="tiny muted">{c.productCount} items</span>
+                <span className="tiny muted">{t('common.itemsCount', { count: c.productCount })}</span>
               ) : null}
             </Link>
           ))}
@@ -113,8 +117,8 @@ export default function Home() {
               <div className="row gap-12">
                 <span className="feature-icon"><Tag size={18} /></span>
                 <div>
-                  <h3 style={{ fontSize: '1rem' }}>Active promo codes</h3>
-                  <p className="small muted" style={{ margin: 0 }}>Apply one at checkout</p>
+                  <h3 style={{ fontSize: '1rem' }}>{t('home.activePromos')}</h3>
+                  <p className="small muted" style={{ margin: 0 }}>{t('home.activePromosSub')}</p>
                 </div>
               </div>
               <div className="chips">
@@ -132,10 +136,10 @@ export default function Home() {
       <section className="section">
         <div className="section-head">
           <div>
-            <h2>Featured Products</h2>
-            <p className="muted small">Hand-picked by our team</p>
+            <h2>{t('home.featuredProducts')}</h2>
+            <p className="muted small">{t('home.featuredProductsSub')}</p>
           </div>
-          <Link to="/products?featured=true" className="link">See All</Link>
+          <Link to="/products?featured=true" className="link">{t('common.seeAll')}</Link>
         </div>
 
         {state.loading ? <SkeletonGrid count={5} /> : (
@@ -148,10 +152,10 @@ export default function Home() {
       <section className="section" style={{ paddingTop: 0 }}>
         <div className="section-head">
           <div>
-            <h2>Best Sellers</h2>
-            <p className="muted small">What everyone is buying right now</p>
+            <h2>{t('home.bestSellers')}</h2>
+            <p className="muted small">{t('home.bestSellersSub')}</p>
           </div>
-          <Link to="/products?sort=best_selling" className="link">See All</Link>
+          <Link to="/products?sort=best_selling" className="link">{t('common.seeAll')}</Link>
         </div>
 
         {state.loading ? <SkeletonGrid count={5} /> : (

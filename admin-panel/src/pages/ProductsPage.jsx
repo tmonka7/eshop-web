@@ -2,9 +2,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { productApi, categoryApi, uploadApi } from '../api';
 import { Badge, ConfirmModal, Empty, Modal, Pagination, Spinner, Switch } from '../components/ui';
 import { Plus, Search, Edit, Trash, Boxes, X, Image as ImageIcon } from '../components/Icons';
+import TranslationFields from '../components/TranslationFields';
 import { useToastStore } from '../store';
 import { currency } from '../utils/format';
+import { useI18n } from '../i18n';
 
+// The fields below are the canonical English copy; `translations` carries the
+// zh and ja versions and is edited in the block at the bottom of the form.
 const emptyProduct = {
   name: '',
   brand: '',
@@ -21,16 +25,21 @@ const emptyProduct = {
   isActive: true,
   isFeatured: false,
   freeShipping: false,
+  translations: {},
 };
 
-function stockBadge(stock) {
-  if (stock <= 0) return <Badge tone="danger">Out of Stock</Badge>;
-  if (stock <= 10) return <Badge tone="warn">Low Stock</Badge>;
-  return <Badge tone="ok">In Stock</Badge>;
-}
+/** Which of the translatable fields a product actually carries. */
+const TRANSLATED_FIELDS = ['name', 'shortDescription', 'description'];
 
 export default function ProductsPage() {
+  const { t } = useI18n();
   const toast = useToastStore();
+
+  function stockBadge(stock) {
+    if (stock <= 0) return <Badge tone="danger">{t('products.outOfStock')}</Badge>;
+    if (stock <= 10) return <Badge tone="warn">{t('products.lowStock')}</Badge>;
+    return <Badge tone="ok">{t('products.inStock')}</Badge>;
+  }
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -103,6 +112,8 @@ export default function ProductsPage() {
       isActive: p.isActive,
       isFeatured: p.isFeatured,
       freeShipping: p.freeShipping,
+      // Admin responses carry the whole sub-document, so it round-trips intact.
+      translations: p.translations || {},
     });
     setErrors({});
     setModalOpen(true);
@@ -110,10 +121,10 @@ export default function ProductsPage() {
 
   function validate() {
     const next = {};
-    if (!form.name.trim()) next.name = 'Product name is required';
-    if (!form.category) next.category = 'Pick a category';
-    if (form.price === '' || Number(form.price) < 0) next.price = 'Enter a valid price';
-    if (form.stock === '' || Number(form.stock) < 0) next.stock = 'Enter a valid stock count';
+    if (!form.name.trim()) next.name = t('products.nameRequired');
+    if (!form.category) next.category = t('products.pickCategory');
+    if (form.price === '' || Number(form.price) < 0) next.price = t('products.invalidPrice');
+    if (form.stock === '' || Number(form.stock) < 0) next.stock = t('products.invalidStock');
     setErrors(next);
     return Object.keys(next).length === 0;
   }
@@ -125,6 +136,7 @@ export default function ProductsPage() {
     const payload = {
       name: form.name.trim(),
       brand: form.brand.trim() || 'Generic',
+      translations: form.translations,
       category: form.category,
       price: Number(form.price),
       comparePrice: form.comparePrice === '' ? 0 : Number(form.comparePrice),
@@ -144,10 +156,10 @@ export default function ProductsPage() {
     try {
       if (editing) {
         await productApi.update(editing._id, payload);
-        toast.success('Product updated');
+        toast.success(t('products.updated'));
       } else {
         await productApi.create(payload);
-        toast.success('Product created');
+        toast.success(t('products.created'));
       }
       closeModal();
       setPage(1);
@@ -189,7 +201,7 @@ export default function ProductsPage() {
     setDeleting(true);
     try {
       await productApi.remove(deleteTarget._id);
-      toast.success('Product deleted');
+      toast.success(t('products.deleted'));
       setDeleteTarget(null);
       load();
     } catch (err) {
@@ -203,11 +215,11 @@ export default function ProductsPage() {
     <>
       <div className="page-head">
         <div>
-          <h1>Products Management</h1>
-          <p>{pagination.total} product(s) in the catalogue</p>
+          <h1>{t('products.title')}</h1>
+          <p>{t('products.headCount', { total: pagination.total })}</p>
         </div>
         <button type="button" className="btn btn-primary" onClick={openCreate}>
-          <Plus size={16} /> Add Product
+          <Plus size={16} /> {t('products.add')}
         </button>
       </div>
 
@@ -217,7 +229,7 @@ export default function ProductsPage() {
             <Search size={15} />
             <input
               className="input"
-              placeholder="Search products…"
+              placeholder={t('products.searchPlaceholder')}
               value={filters.search}
               onChange={(e) => {
                 setFilters({ ...filters, search: e.target.value });
@@ -236,7 +248,7 @@ export default function ProductsPage() {
               }}
               style={{ width: 170 }}
             >
-              <option value="">All Categories</option>
+              <option value="">{t('products.allCategories')}</option>
               {categories.map((c) => (
                 <option key={c._id} value={c.slug}>{c.name}</option>
               ))}
@@ -251,9 +263,9 @@ export default function ProductsPage() {
               }}
               style={{ width: 150 }}
             >
-              <option value="">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              <option value="">{t('products.allStatus')}</option>
+              <option value="active">{t('common.active')}</option>
+              <option value="inactive">{t('common.inactive')}</option>
             </select>
 
             <select
@@ -265,9 +277,9 @@ export default function ProductsPage() {
               }}
               style={{ width: 150 }}
             >
-              <option value="">All Stock</option>
-              <option value="low">Low stock</option>
-              <option value="out">Out of stock</option>
+              <option value="">{t('products.allStock')}</option>
+              <option value="low">{t('inventory.lowStock')}</option>
+              <option value="out">{t('inventory.outOfStock')}</option>
             </select>
           </div>
         </div>
@@ -277,9 +289,13 @@ export default function ProductsPage() {
         ) : products.length === 0 ? (
           <Empty
             icon={<Boxes size={26} />}
-            title="No products found"
-            message="Adjust the filters or add your first product."
-            action={<button type="button" className="btn btn-primary" onClick={openCreate}>Add Product</button>}
+            title={t('products.emptyTitle')}
+            message={t('products.emptyMessage')}
+            action={(
+              <button type="button" className="btn btn-primary" onClick={openCreate}>
+                {t('products.add')}
+              </button>
+            )}
           />
         ) : (
           <>
@@ -287,14 +303,14 @@ export default function ProductsPage() {
               <table className="data">
                 <thead>
                   <tr>
-                    <th>Image</th>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th className="right">Price</th>
-                    <th className="right">Stock</th>
-                    <th>Status</th>
-                    <th>Active</th>
-                    <th className="right">Actions</th>
+                    <th>{t('common.image')}</th>
+                    <th>{t('common.name')}</th>
+                    <th>{t('common.category')}</th>
+                    <th className="right">{t('common.price')}</th>
+                    <th className="right">{t('common.stock')}</th>
+                    <th>{t('common.status')}</th>
+                    <th>{t('common.active')}</th>
+                    <th className="right">{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -325,7 +341,7 @@ export default function ProductsPage() {
                             type="button"
                             className="btn btn-ghost btn-icon"
                             onClick={() => openEdit(p)}
-                            aria-label="Edit"
+                            aria-label={t('products.editAria')}
                           >
                             <Edit size={15} />
                           </button>
@@ -333,7 +349,7 @@ export default function ProductsPage() {
                             type="button"
                             className="btn btn-danger-ghost btn-icon"
                             onClick={() => setDeleteTarget(p)}
-                            aria-label="Delete"
+                            aria-label={t('products.deleteAria')}
                           >
                             <Trash size={15} />
                           </button>
@@ -359,15 +375,17 @@ export default function ProductsPage() {
       <Modal
         open={modalOpen}
         wide
-        title={editing ? `Edit: ${editing.name}` : 'Add Product'}
+        title={editing ? t('products.editTitle', { name: editing.name }) : t('products.add')}
         onClose={closeModal}
         footer={
           <>
             <button type="button" className="btn btn-outline" onClick={closeModal}>
-              Cancel
+              {t('common.cancel')}
             </button>
             <button type="submit" form="product-form" className="btn btn-primary" disabled={saving}>
-              {saving ? 'Saving…' : editing ? 'Save changes' : 'Create product'}
+              {saving
+                ? t('common.saving')
+                : editing ? t('common.saveChanges') : t('products.create')}
             </button>
           </>
         }
@@ -375,7 +393,7 @@ export default function ProductsPage() {
         <form id="product-form" onSubmit={save}>
           <div className="form-row">
             <div className="field">
-              <label className="field-label" htmlFor="p-name">Product name *</label>
+              <label className="field-label" htmlFor="p-name">{t('products.nameField')}</label>
               <input
                 id="p-name"
                 className={`input ${errors.name ? 'has-error' : ''}`}
@@ -385,7 +403,7 @@ export default function ProductsPage() {
               {errors.name ? <span className="field-error">{errors.name}</span> : null}
             </div>
             <div className="field">
-              <label className="field-label" htmlFor="p-brand">Brand</label>
+              <label className="field-label" htmlFor="p-brand">{t('common.brand')}</label>
               <input
                 id="p-brand"
                 className="input"
@@ -396,14 +414,14 @@ export default function ProductsPage() {
           </div>
 
           <div className="field">
-            <label className="field-label" htmlFor="p-cat">Category *</label>
+            <label className="field-label" htmlFor="p-cat">{t('products.categoryField')}</label>
             <select
               id="p-cat"
               className={`select ${errors.category ? 'has-error' : ''}`}
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
             >
-              <option value="">Select a category…</option>
+              <option value="">{t('products.selectCategory')}</option>
               {categories.map((c) => (
                 <option key={c._id} value={c._id}>{c.name}</option>
               ))}
@@ -413,7 +431,7 @@ export default function ProductsPage() {
 
           <div className="form-row-3">
             <div className="field">
-              <label className="field-label" htmlFor="p-price">Price *</label>
+              <label className="field-label" htmlFor="p-price">{t('products.priceField')}</label>
               <input
                 id="p-price"
                 type="number"
@@ -426,7 +444,7 @@ export default function ProductsPage() {
               {errors.price ? <span className="field-error">{errors.price}</span> : null}
             </div>
             <div className="field">
-              <label className="field-label" htmlFor="p-compare">Compare at</label>
+              <label className="field-label" htmlFor="p-compare">{t('products.comparePrice')}</label>
               <input
                 id="p-compare"
                 type="number"
@@ -436,10 +454,10 @@ export default function ProductsPage() {
                 value={form.comparePrice}
                 onChange={(e) => setForm({ ...form, comparePrice: e.target.value })}
               />
-              <span className="field-hint">Shown struck through</span>
+              <span className="field-hint">{t('products.comparePriceHint')}</span>
             </div>
             <div className="field">
-              <label className="field-label" htmlFor="p-cost">Cost</label>
+              <label className="field-label" htmlFor="p-cost">{t('products.cost')}</label>
               <input
                 id="p-cost"
                 type="number"
@@ -454,7 +472,7 @@ export default function ProductsPage() {
 
           <div className="form-row">
             <div className="field">
-              <label className="field-label" htmlFor="p-stock">Stock *</label>
+              <label className="field-label" htmlFor="p-stock">{t('products.stockField')}</label>
               <input
                 id="p-stock"
                 type="number"
@@ -466,20 +484,20 @@ export default function ProductsPage() {
               {errors.stock ? <span className="field-error">{errors.stock}</span> : null}
             </div>
             <div className="field">
-              <label className="field-label" htmlFor="p-colors">Colors</label>
+              <label className="field-label" htmlFor="p-colors">{t('products.colors')}</label>
               <input
                 id="p-colors"
                 className="input"
                 value={form.colors}
                 onChange={(e) => setForm({ ...form, colors: e.target.value })}
-                placeholder="Black, Red, White"
+                placeholder={t('products.colorsPlaceholder')}
               />
-              <span className="field-hint">Comma separated</span>
+              <span className="field-hint">{t('products.commaSeparated')}</span>
             </div>
           </div>
 
           <div className="field">
-            <label className="field-label" htmlFor="p-short">Short description</label>
+            <label className="field-label" htmlFor="p-short">{t('products.shortDescription')}</label>
             <input
               id="p-short"
               className="input"
@@ -490,7 +508,7 @@ export default function ProductsPage() {
           </div>
 
           <div className="field">
-            <label className="field-label" htmlFor="p-desc">Full description</label>
+            <label className="field-label" htmlFor="p-desc">{t('products.fullDescription')}</label>
             <textarea
               id="p-desc"
               className="textarea"
@@ -500,18 +518,18 @@ export default function ProductsPage() {
           </div>
 
           <div className="field">
-            <label className="field-label" htmlFor="p-tags">Tags</label>
+            <label className="field-label" htmlFor="p-tags">{t('products.tags')}</label>
             <input
               id="p-tags"
               className="input"
               value={form.tags}
               onChange={(e) => setForm({ ...form, tags: e.target.value })}
-              placeholder="audio, wireless, best-seller"
+              placeholder={t('products.tagsPlaceholder')}
             />
           </div>
 
           <div className="field">
-            <span className="field-label">Images</span>
+            <span className="field-label">{t('common.images')}</span>
             <div className="row gap-8 wrap mb-8">
               {form.images.map((src) => (
                 <div key={src} style={{ position: 'relative' }}>
@@ -525,7 +543,7 @@ export default function ProductsPage() {
                     className="btn btn-danger btn-icon"
                     style={{ position: 'absolute', top: -7, right: -7, width: 22, height: 22 }}
                     onClick={() => setForm((f) => ({ ...f, images: f.images.filter((i) => i !== src) }))}
-                    aria-label="Remove image"
+                    aria-label={t('products.removeImage')}
                   >
                     <X size={12} />
                   </button>
@@ -553,30 +571,36 @@ export default function ProductsPage() {
               onChange={(e) => uploadImages(e.target.files)}
               disabled={uploading}
             />
-            {uploading ? <span className="field-hint">Uploading…</span> : null}
+            {uploading ? <span className="field-hint">{t('products.uploading')}</span> : null}
           </div>
 
           <div className="row gap-20 wrap">
             <label className="row gap-8 small">
               <Switch checked={form.isActive} onChange={(v) => setForm({ ...form, isActive: v })} />
-              Active
+              {t('common.active')}
             </label>
             <label className="row gap-8 small">
               <Switch checked={form.isFeatured} onChange={(v) => setForm({ ...form, isFeatured: v })} />
-              Featured
+              {t('products.featured')}
             </label>
             <label className="row gap-8 small">
               <Switch checked={form.freeShipping} onChange={(v) => setForm({ ...form, freeShipping: v })} />
-              Free shipping
+              {t('products.freeShipping')}
             </label>
           </div>
+
+          <TranslationFields
+            fields={TRANSLATED_FIELDS}
+            value={form.translations}
+            onChange={(translations) => setForm({ ...form, translations })}
+          />
         </form>
       </Modal>
 
       <ConfirmModal
         open={Boolean(deleteTarget)}
-        title="Delete product"
-        message={`Delete “${deleteTarget?.name}”? Its reviews are removed too. This cannot be undone.`}
+        title={t('products.deleteTitle')}
+        message={t('products.deleteMessage', { name: deleteTarget?.name })}
         onConfirm={confirmDelete}
         onClose={() => setDeleteTarget(null)}
         busy={deleting}

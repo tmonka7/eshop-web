@@ -3,6 +3,7 @@ const express = require('express');
 const { body } = require('express-validator');
 const validate = require('../middleware/validate');
 const { protect, adminOnly } = require('../middleware/auth');
+const { rawTranslations } = require('../middleware/locale');
 const { uploadProduct, uploadBanner } = require('../middleware/upload');
 const admin = require('../controllers/admin.controller');
 const products = require('../controllers/product.controller');
@@ -14,7 +15,7 @@ const banners = require('../controllers/banner.controller');
 const uploads = require('../controllers/upload.controller');
 
 const router = express.Router();
-router.use(protect, adminOnly);
+router.use(protect, adminOnly, rawTranslations);
 
 /* ------------------------------- dashboard ------------------------------- */
 router.get('/dashboard/stats', admin.stats);
@@ -26,10 +27,10 @@ router.get('/dashboard/top-products', admin.topProducts);
 
 /* -------------------------------- products ------------------------------- */
 const productRules = [
-  body('name').trim().isLength({ min: 2 }).withMessage('Product name is required'),
-  body('price').isFloat({ min: 0 }).withMessage('Price must be 0 or more'),
-  body('category').isMongoId().withMessage('A valid category is required'),
-  body('stock').optional().isInt({ min: 0 }).withMessage('Stock must be 0 or more'),
+  body('name').trim().isLength({ min: 2 }).withMessage('validation.productNameRequired'),
+  body('price').isFloat({ min: 0 }).withMessage('validation.priceMin'),
+  body('category').isMongoId().withMessage('validation.categoryValid'),
+  body('stock').optional().isInt({ min: 0 }).withMessage('validation.stockMin'),
 ];
 
 router.get('/products', products.adminList);
@@ -42,7 +43,7 @@ router.delete('/products/:id', products.remove);
 /* ------------------------------- categories ------------------------------ */
 router.post(
   '/categories',
-  [body('name').trim().isLength({ min: 2 }).withMessage('Category name is required')],
+  [body('name').trim().isLength({ min: 2 }).withMessage('validation.categoryNameRequired')],
   validate,
   categories.create,
 );
@@ -54,7 +55,7 @@ router.get('/orders', orders.adminList);
 router.get('/orders/:id', orders.adminGetOne);
 router.patch(
   '/orders/:id/status',
-  [body('status').notEmpty().withMessage('Status is required')],
+  [body('status').notEmpty().withMessage('validation.statusRequired')],
   validate,
   orders.updateStatus,
 );
@@ -79,9 +80,9 @@ router.get('/coupons', coupons.adminList);
 router.post(
   '/coupons',
   [
-    body('code').trim().isLength({ min: 3 }).withMessage('Coupon code is required'),
-    body('discountType').isIn(['percent', 'fixed']).withMessage('discountType must be percent or fixed'),
-    body('discountValue').isFloat({ min: 0 }).withMessage('discountValue must be 0 or more'),
+    body('code').trim().isLength({ min: 3 }).withMessage('validation.couponCodeRequired'),
+    body('discountType').isIn(['percent', 'fixed']).withMessage('validation.discountTypeEnum'),
+    body('discountValue').isFloat({ min: 0 }).withMessage('validation.discountValueMin'),
   ],
   validate,
   coupons.create,

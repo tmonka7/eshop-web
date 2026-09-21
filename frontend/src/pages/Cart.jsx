@@ -6,9 +6,11 @@ import { useToastStore } from '../store/toastStore';
 import { Breadcrumb, EmptyState } from '../components/ui';
 import { Cart as CartIcon, Minus, Plus, Trash, Tag, Truck, X } from '../components/Icons';
 import { currency, imageUrl } from '../utils/format';
+import { useI18n } from '../i18n';
 
 export default function CartPage() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const user = useAuthStore((s) => s.user);
   const cart = useCartStore();
   const toast = useToastStore();
@@ -48,7 +50,7 @@ export default function CartPage() {
     setBusyId(item._id);
     try {
       await cart.remove(item._id, Boolean(user));
-      toast.success('Item removed');
+      toast.success(t('toast.itemRemoved'));
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -59,7 +61,7 @@ export default function CartPage() {
   async function applyCoupon(e) {
     e.preventDefault();
     if (!user) {
-      toast.info('Sign in to use a promo code');
+      toast.info(t('toast.signInForPromo'));
       return;
     }
     setApplying(true);
@@ -85,12 +87,12 @@ export default function CartPage() {
   if (!items.length) {
     return (
       <div className="container">
-        <Breadcrumb items={[{ label: 'Home', to: '/' }, { label: 'Cart' }]} />
+        <Breadcrumb items={[{ label: t('common.home'), to: '/' }, { label: t('cart.short') }]} />
         <EmptyState
           icon={<CartIcon size={30} />}
-          title="Your cart is empty"
-          message="Browse the catalogue and add something you like."
-          action={<Link to="/products" className="btn btn-primary btn-lg">Start shopping</Link>}
+          title={t('cart.emptyTitle')}
+          message={t('cart.emptyMessage')}
+          action={<Link to="/products" className="btn btn-primary btn-lg">{t('common.startShopping')}</Link>}
         />
       </div>
     );
@@ -98,18 +100,18 @@ export default function CartPage() {
 
   return (
     <div className="container">
-      <Breadcrumb items={[{ label: 'Home', to: '/' }, { label: 'Shopping Cart' }]} />
+      <Breadcrumb items={[{ label: t('common.home'), to: '/' }, { label: t('cart.breadcrumb') }]} />
 
       <div className="row between wrap gap-12">
-        <h1 style={{ fontSize: '1.6rem' }}>Your Cart ({cart.itemCount})</h1>
+        <h1 style={{ fontSize: '1.6rem' }}>{t('cart.title', { count: cart.itemCount })}</h1>
         <div className="row gap-8">
-          <Link to="/products" className="btn btn-ghost btn-sm">Continue shopping</Link>
+          <Link to="/products" className="btn btn-ghost btn-sm">{t('cart.continueShopping')}</Link>
           <button
             type="button"
             className="btn btn-danger-ghost btn-sm"
             onClick={() => cart.clear(Boolean(user))}
           >
-            <Trash size={14} /> Clear cart
+            <Trash size={14} /> {t('cart.clearCart')}
           </button>
         </div>
       </div>
@@ -120,13 +122,13 @@ export default function CartPage() {
             <div className="free-ship-bar mb-16">
               <span className="row gap-8">
                 <Truck size={15} />
-                Add <strong>{currency(remainingForFreeShipping)}</strong> more for free shipping
+                {t('cart.addMoreForFreeShipping', { amount: currency(remainingForFreeShipping) })}
               </span>
               <span className="track"><span className="fill" style={{ width: `${shippingProgress}%` }} /></span>
             </div>
           ) : (
             <div className="free-ship-bar mb-16">
-              <span className="row gap-8"><Truck size={15} /> You have free shipping on this order</span>
+              <span className="row gap-8"><Truck size={15} /> {t('cart.haveFreeShipping')}</span>
             </div>
           )}
 
@@ -141,7 +143,7 @@ export default function CartPage() {
                 {item.variant?.value ? (
                   <span className="small muted">{item.variant.name}: {item.variant.value}</span>
                 ) : null}
-                <span className="small muted">{currency(item.price)} each</span>
+                <span className="small muted">{t('cart.each', { amount: currency(item.price) })}</span>
 
                 <div className="row gap-12 mt-8 wrap">
                   <div className="qty">
@@ -149,7 +151,7 @@ export default function CartPage() {
                       type="button"
                       onClick={() => changeQty(item, item.quantity - 1)}
                       disabled={item.quantity <= 1 || busyId === item._id}
-                      aria-label="Decrease"
+                      aria-label={t('cart.decrease')}
                     >
                       <Minus size={13} />
                     </button>
@@ -158,7 +160,7 @@ export default function CartPage() {
                       type="button"
                       onClick={() => changeQty(item, item.quantity + 1)}
                       disabled={item.quantity >= (item.product.stock || 99) || busyId === item._id}
-                      aria-label="Increase"
+                      aria-label={t('cart.increase')}
                     >
                       <Plus size={13} />
                     </button>
@@ -169,7 +171,7 @@ export default function CartPage() {
                     onClick={() => removeItem(item)}
                     disabled={busyId === item._id}
                   >
-                    <Trash size={14} /> Remove
+                    <Trash size={14} /> {t('common.remove')}
                   </button>
                 </div>
               </div>
@@ -190,32 +192,32 @@ export default function CartPage() {
 
         <aside className="summary">
           <div className="card card-pad">
-            <h3 style={{ fontSize: '1rem', marginBottom: 14 }}>Order Summary</h3>
+            <h3 style={{ fontSize: '1rem', marginBottom: 14 }}>{t('cart.orderSummary')}</h3>
 
             <div className="summary-row">
-              <span className="muted">Subtotal</span>
+              <span className="muted">{t('cart.subtotal')}</span>
               <span className="bold">{currency(totals.subtotal)}</span>
             </div>
             {totals.discount > 0 ? (
               <div className="summary-row">
-                <span className="muted">Discount {cart.coupon ? `(${cart.coupon.code})` : ''}</span>
+                <span className="muted">{t('cart.discount')} {cart.coupon ? `(${cart.coupon.code})` : ''}</span>
                 <span className="bold" style={{ color: 'var(--green-600)' }}>
                   −{currency(totals.discount)}
                 </span>
               </div>
             ) : null}
             <div className="summary-row">
-              <span className="muted">Shipping</span>
+              <span className="muted">{t('cart.shipping')}</span>
               <span className="bold" style={{ color: totals.shipping === 0 ? 'var(--green-600)' : undefined }}>
-                {totals.shipping === 0 ? 'Free' : currency(totals.shipping)}
+                {totals.shipping === 0 ? t('common.free') : currency(totals.shipping)}
               </span>
             </div>
             <div className="summary-row">
-              <span className="muted">Tax ({Math.round(rules.taxRate * 100)}%)</span>
+              <span className="muted">{t('cart.tax', { percent: Math.round(rules.taxRate * 100) })}</span>
               <span className="bold">{currency(totals.tax)}</span>
             </div>
             <div className="summary-row total">
-              <span>Total</span>
+              <span>{t('cart.total')}</span>
               <span>{currency(totals.total)}</span>
             </div>
 
@@ -224,7 +226,7 @@ export default function CartPage() {
             {cart.coupon ? (
               <div className="row between" style={{ padding: '8px 12px', background: 'var(--green-50)', borderRadius: 8 }}>
                 <span className="row gap-8 small bold" style={{ color: 'var(--green-600)' }}>
-                  <Tag size={14} /> {cart.coupon.code} applied
+                  <Tag size={14} /> {t('cart.couponApplied', { code: cart.coupon.code })}
                 </span>
                 <button type="button" className="btn btn-ghost btn-sm" onClick={() => cart.removeCoupon()}>
                   <X size={13} />
@@ -234,24 +236,24 @@ export default function CartPage() {
               <form className="row gap-8" onSubmit={applyCoupon}>
                 <input
                   className="input"
-                  placeholder="Promo code"
+                  placeholder={t('cart.promoPlaceholder')}
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                  aria-label="Promo code"
+                  aria-label={t('cart.promoAria')}
                 />
                 <button type="submit" className="btn btn-outline" disabled={applying || !couponCode}>
-                  Apply
+                  {t('common.apply')}
                 </button>
               </form>
             )}
 
             <button type="button" className="btn btn-primary btn-lg btn-block mt-16" onClick={goToCheckout}>
-              Proceed to Checkout
+              {t('cart.proceedToCheckout')}
             </button>
 
             {!user ? (
               <p className="tiny muted mt-8" style={{ textAlign: 'center' }}>
-                You will be asked to sign in first.
+                {t('cart.signInFirst')}
               </p>
             ) : null}
           </div>

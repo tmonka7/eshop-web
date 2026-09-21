@@ -101,6 +101,7 @@
             <include android:id="@+id/rowOrders" layout="@layout/item_account_row" />
             <include android:id="@+id/rowAddresses" layout="@layout/item_account_row" />
             <include android:id="@+id/rowWishlist" layout="@layout/item_account_row" />
+            <include android:id="@+id/rowLanguage" layout="@layout/item_account_row" />
             <include android:id="@+id/rowSettings" layout="@layout/item_account_row" />
         </LinearLayout>
 

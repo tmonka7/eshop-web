@@ -3,9 +3,11 @@ import { Link, useParams } from 'react-router-dom';
 import { orderApi } from '../api';
 import { Spinner, EmptyState, Badge } from '../components/ui';
 import { CheckCircle, Package, Truck } from '../components/Icons';
-import { currency, formatDate, imageUrl } from '../utils/format';
+import { currency, formatDate, imageUrl, statusLabel } from '../utils/format';
+import { useI18n } from '../i18n';
 
 export default function OrderSuccess() {
+  const { t } = useI18n();
   const { orderNumber } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -24,9 +26,9 @@ export default function OrderSuccess() {
     return (
       <div className="container">
         <EmptyState
-          title="Order not found"
-          message="We could not find that order number."
-          action={<Link to="/orders" className="btn btn-primary">View my orders</Link>}
+          title={t('orderSuccess.notFoundTitle')}
+          message={t('orderSuccess.notFoundMessage')}
+          action={<Link to="/orders" className="btn btn-primary">{t('orderSuccess.viewMyOrders')}</Link>}
         />
       </div>
     );
@@ -50,16 +52,16 @@ export default function OrderSuccess() {
           <CheckCircle size={40} />
         </div>
 
-        <h1 style={{ fontSize: '1.6rem', marginBottom: 8 }}>Payment Successful!</h1>
-        <p className="muted">Your order has been placed successfully.</p>
+        <h1 style={{ fontSize: '1.6rem', marginBottom: 8 }}>{t('orderSuccess.title')}</h1>
+        <p className="muted">{t('orderSuccess.subtitle')}</p>
 
         <div
           className="row center gap-12 wrap mt-16"
           style={{ padding: 14, background: 'var(--ink-50)', borderRadius: 10 }}
         >
-          <span className="small muted">Order</span>
+          <span className="small muted">{t('orderSuccess.order')}</span>
           <span className="bold">{order.orderNumber}</span>
-          <Badge tone="warn">{order.status}</Badge>
+          <Badge tone="warn">{statusLabel(order.status)}</Badge>
         </div>
 
         <div className="stack gap-8 mt-24" style={{ textAlign: 'left' }}>
@@ -68,7 +70,7 @@ export default function OrderSuccess() {
               <img src={imageUrl(item.image)} alt="" />
               <div className="grow">
                 <div className="small bold">{item.name}</div>
-                <div className="tiny muted">Qty {item.quantity}</div>
+                <div className="tiny muted">{t('orderSuccess.qty', { count: item.quantity })}</div>
               </div>
               <span className="bold small">{currency(item.subtotal)}</span>
             </div>
@@ -76,21 +78,23 @@ export default function OrderSuccess() {
         </div>
 
         <div className="summary-row total" style={{ justifyContent: 'space-between' }}>
-          <span>Total paid</span>
+          <span>{t('orderSuccess.totalPaid')}</span>
           <span>{currency(order.pricing.total)}</span>
         </div>
 
         <div className="row center gap-12 wrap mt-16 small muted">
           <span className="row gap-6"><Truck size={15} /> {order.carrier} · {order.trackingNumber}</span>
-          <span className="row gap-6"><Package size={15} /> Est. {formatDate(order.estimatedDelivery)}</span>
+          <span className="row gap-6">
+            <Package size={15} /> {t('orderSuccess.estimated', { date: formatDate(order.estimatedDelivery) })}
+          </span>
         </div>
 
         <div className="row gap-12 mt-24">
           <Link to={`/orders/${order.orderNumber}`} className="btn btn-primary btn-lg grow">
-            View Order
+            {t('orderSuccess.viewOrder')}
           </Link>
           <Link to="/products" className="btn btn-outline btn-lg grow">
-            Continue Shopping
+            {t('common.continueShopping')}
           </Link>
         </div>
       </div>

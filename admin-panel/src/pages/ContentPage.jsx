@@ -2,8 +2,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { bannerApi, uploadApi } from '../api';
 import { Badge, ConfirmModal, Empty, Modal, Spinner, Switch } from '../components/ui';
 import { Plus, Edit, Trash, Image as ImageIcon } from '../components/Icons';
+import TranslationFields from '../components/TranslationFields';
 import { useToastStore } from '../store';
+import { useI18n } from '../i18n';
 
+// The canonical fields stay English; `translations` carries zh and ja.
 const emptyBanner = {
   title: '',
   subtitle: '',
@@ -13,15 +16,20 @@ const emptyBanner = {
   placement: 'hero',
   order: 0,
   isActive: true,
+  translations: {},
 };
 
+/** Which of the translatable fields a banner actually carries. */
+const TRANSLATED_FIELDS = ['title', 'subtitle', 'ctaText'];
+
 const PLACEMENTS = [
-  { value: 'hero', label: 'Homepage hero' },
-  { value: 'promo', label: 'Promo strip' },
-  { value: 'mobile', label: 'Mobile app' },
+  { value: 'hero', labelKey: 'content.homepageHero' },
+  { value: 'promo', labelKey: 'content.promoStrip' },
+  { value: 'mobile', labelKey: 'content.mobileApp' },
 ];
 
 export default function ContentPage() {
+  const { t } = useI18n();
   const toast = useToastStore();
 
   const [banners, setBanners] = useState([]);
@@ -63,6 +71,7 @@ export default function ContentPage() {
       placement: b.placement,
       order: b.order || 0,
       isActive: b.isActive,
+      translations: b.translations || {},
     });
     setModalOpen(true);
   }
@@ -73,7 +82,7 @@ export default function ContentPage() {
     try {
       const res = await uploadApi.banner(file);
       setForm((f) => ({ ...f, image: res.data[0].url }));
-      toast.success('Image uploaded');
+      toast.success(t('products.imageUploaded'));
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -88,10 +97,10 @@ export default function ContentPage() {
       const payload = { ...form, order: Number(form.order) || 0 };
       if (editing) {
         await bannerApi.update(editing._id, payload);
-        toast.success('Banner updated');
+        toast.success(t('content.updated'));
       } else {
         await bannerApi.create(payload);
-        toast.success('Banner created');
+        toast.success(t('content.created'));
       }
       setModalOpen(false);
       load();
@@ -106,7 +115,7 @@ export default function ContentPage() {
     setDeleting(true);
     try {
       await bannerApi.remove(deleteTarget._id);
-      toast.success('Banner deleted');
+      toast.success(t('content.deleted'));
       setDeleteTarget(null);
       load();
     } catch (err) {
@@ -120,8 +129,8 @@ export default function ContentPage() {
     <>
       <div className="page-head">
         <div>
-          <h1>Content</h1>
-          <p>Banners shown on the storefront and in the mobile app</p>
+          <h1>{t('content.title')}</h1>
+          <p>{t('content.subtitle')}</p>
         </div>
         <button type="button" className="btn btn-primary" onClick={openCreate}>
           <Plus size={16} /> Add Banner
@@ -134,8 +143,12 @@ export default function ContentPage() {
         <div className="card">
           <Empty
             icon={<ImageIcon size={26} />}
-            title="No banners yet"
-            action={<button type="button" className="btn btn-primary" onClick={openCreate}>Create one</button>}
+            title={t('content.emptyTitle')}
+            action={(
+              <button type="button" className="btn btn-primary" onClick={openCreate}>
+                {t('content.createOne')}
+              </button>
+            )}
           />
         </div>
       ) : (
@@ -160,8 +173,15 @@ export default function ContentPage() {
               </div>
               <div className="card-pad">
                 <div className="row between mb-8">
-                  <Badge tone="info">{PLACEMENTS.find((p) => p.value === b.placement)?.label || b.placement}</Badge>
-                  <Badge tone={b.isActive ? 'ok' : 'muted'}>{b.isActive ? 'Live' : 'Hidden'}</Badge>
+                  <Badge tone="info">
+                    {(() => {
+                      const hit = PLACEMENTS.find((p) => p.value === b.placement);
+                      return hit ? t(hit.labelKey) : b.placement;
+                    })()}
+                  </Badge>
+                  <Badge tone={b.isActive ? 'ok' : 'muted'}>
+                    {b.isActive ? t('content.live') : t('content.hidden')}
+                  </Badge>
                 </div>
                 <div className="bold">{b.title}</div>
                 <div className="small muted">{b.subtitle}</div>
@@ -174,7 +194,7 @@ export default function ContentPage() {
                     type="button"
                     className="btn btn-danger-ghost btn-sm"
                     onClick={() => setDeleteTarget(b)}
-                    aria-label="Delete banner"
+                    aria-label={t('content.deleteBannerAria')}
                   >
                     <Trash size={14} />
                   </button>
@@ -187,20 +207,22 @@ export default function ContentPage() {
 
       <Modal
         open={modalOpen}
-        title={editing ? `Edit: ${editing.title}` : 'Add Banner'}
+        title={editing ? t('content.editTitle', { name: editing.title }) : t('content.add')}
         onClose={() => setModalOpen(false)}
         footer={
           <>
-            <button type="button" className="btn btn-outline" onClick={() => setModalOpen(false)}>Cancel</button>
+            <button type="button" className="btn btn-outline" onClick={() => setModalOpen(false)}>
+              {t('common.cancel')}
+            </button>
             <button type="submit" form="banner-form" className="btn btn-primary" disabled={saving}>
-              {saving ? 'Saving…' : 'Save'}
+              {saving ? t('common.saving') : t('common.save')}
             </button>
           </>
         }
       >
         <form id="banner-form" onSubmit={save}>
           <div className="field">
-            <label className="field-label" htmlFor="b-title">Title *</label>
+            <label className="field-label" htmlFor="b-title">{t('content.titleRequired')}</label>
             <input
               id="b-title"
               className="input"
@@ -211,7 +233,7 @@ export default function ContentPage() {
           </div>
 
           <div className="field">
-            <label className="field-label" htmlFor="b-sub">Subtitle</label>
+            <label className="field-label" htmlFor="b-sub">{t('content.subtitleField')}</label>
             <input
               id="b-sub"
               className="input"
@@ -222,7 +244,7 @@ export default function ContentPage() {
 
           <div className="form-row">
             <div className="field">
-              <label className="field-label" htmlFor="b-cta">Button text</label>
+              <label className="field-label" htmlFor="b-cta">{t('content.buttonText')}</label>
               <input
                 id="b-cta"
                 className="input"
@@ -231,7 +253,7 @@ export default function ContentPage() {
               />
             </div>
             <div className="field">
-              <label className="field-label" htmlFor="b-link">Button link</label>
+              <label className="field-label" htmlFor="b-link">{t('content.buttonLink')}</label>
               <input
                 id="b-link"
                 className="input"
@@ -244,7 +266,7 @@ export default function ContentPage() {
 
           <div className="form-row">
             <div className="field">
-              <label className="field-label" htmlFor="b-place">Placement</label>
+              <label className="field-label" htmlFor="b-place">{t('content.placement')}</label>
               <select
                 id="b-place"
                 className="select"
@@ -257,7 +279,7 @@ export default function ContentPage() {
               </select>
             </div>
             <div className="field">
-              <label className="field-label" htmlFor="b-order">Sort order</label>
+              <label className="field-label" htmlFor="b-order">{t('content.sortOrder')}</label>
               <input
                 id="b-order"
                 type="number"
@@ -269,7 +291,7 @@ export default function ContentPage() {
           </div>
 
           <div className="field">
-            <span className="field-label">Image</span>
+            <span className="field-label">{t('common.image')}</span>
             {form.image ? (
               <img
                 src={form.image}
@@ -278,20 +300,26 @@ export default function ContentPage() {
               />
             ) : null}
             <input type="file" accept="image/*" onChange={(e) => uploadImage(e.target.files[0])} disabled={uploading} />
-            {uploading ? <span className="field-hint">Uploading…</span> : null}
+            {uploading ? <span className="field-hint">{t('content.uploading')}</span> : null}
           </div>
 
           <label className="row gap-8 small">
             <Switch checked={form.isActive} onChange={(v) => setForm({ ...form, isActive: v })} />
-            Live
+            {t('content.live')}
           </label>
+
+          <TranslationFields
+            fields={TRANSLATED_FIELDS}
+            value={form.translations}
+            onChange={(translations) => setForm({ ...form, translations })}
+          />
         </form>
       </Modal>
 
       <ConfirmModal
         open={Boolean(deleteTarget)}
-        title="Delete banner"
-        message={`Delete “${deleteTarget?.title}”?`}
+        title={t('content.deleteTitle')}
+        message={t('content.deleteMessage', { name: deleteTarget?.title })}
         onConfirm={confirmDelete}
         onClose={() => setDeleteTarget(null)}
         busy={deleting}

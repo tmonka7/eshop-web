@@ -8,6 +8,7 @@ import { Spinner, EmptyState } from '../components/ui';
 import { Check, CreditCard, MapPin, Package } from '../components/Icons';
 import { currency, imageUrl } from '../utils/format';
 import { PAYMENT_METHODS } from '../utils/constants';
+import { useI18n } from '../i18n';
 
 const emptyAddress = {
   fullName: '',
@@ -21,6 +22,7 @@ const emptyAddress = {
 
 export default function Checkout() {
   const navigate = useNavigate();
+  const { t, locale } = useI18n();
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
   const cart = useCartStore();
@@ -66,13 +68,14 @@ export default function Checkout() {
     return () => {
       alive = false;
     };
+    // Refetch on a language change so the preview's product names follow it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [locale]);
 
   function validateAddress() {
     const next = {};
     ['fullName', 'street', 'city', 'zipCode', 'country'].forEach((f) => {
-      if (!String(address[f] || '').trim()) next[f] = 'Required';
+      if (!String(address[f] || '').trim()) next[f] = t('common.required');
     });
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -81,10 +84,10 @@ export default function Checkout() {
   function validatePayment() {
     if (paymentMethod !== 'card') return true;
     const next = {};
-    if (String(card.number).replace(/\D/g, '').length < 12) next.number = 'Enter a valid card number';
-    if (!card.name.trim()) next.name = 'Required';
-    if (!/^\d{2}\s*\/\s*\d{2,4}$/.test(card.expiry)) next.expiry = 'Use MM/YY';
-    if (!/^\d{3,4}$/.test(card.cvc)) next.cvc = '3-4 digits';
+    if (String(card.number).replace(/\D/g, '').length < 12) next.number = t('checkout.invalidCard');
+    if (!card.name.trim()) next.name = t('common.required');
+    if (!/^\d{2}\s*\/\s*\d{2,4}$/.test(card.expiry)) next.expiry = t('checkout.useMMYY');
+    if (!/^\d{3,4}$/.test(card.cvc)) next.cvc = t('checkout.cvcDigits');
     setErrors(next);
     return Object.keys(next).length === 0;
   }
@@ -93,7 +96,7 @@ export default function Checkout() {
     if (step === 1) {
       if (useNewAddress && !validateAddress()) return;
       if (!useNewAddress && !selectedAddressId) {
-        toast.error('Choose a shipping address');
+        toast.error(t('checkout.chooseAddress'));
         return;
       }
       setErrors({});
@@ -114,7 +117,7 @@ export default function Checkout() {
     setSelectedAddressId(created._id);
     setUseNewAddress(false);
     setUser({ ...user, addresses: res.data });
-    toast.success('Address saved');
+    toast.success(t('toast.addressSaved'));
   }
 
   async function placeOrder() {
@@ -136,16 +139,16 @@ export default function Checkout() {
     }
   }
 
-  if (loading) return <Spinner label="Preparing checkout..." />;
+  if (loading) return <Spinner label={t('checkout.preparing')} />;
 
   if (!preview || !preview.items.length) {
     return (
       <div className="container">
         <EmptyState
           icon={<Package size={30} />}
-          title="Nothing to check out"
-          message="Your cart is empty."
-          action={<Link to="/products" className="btn btn-primary">Browse products</Link>}
+          title={t('checkout.emptyTitle')}
+          message={t('checkout.emptyMessage')}
+          action={<Link to="/products" className="btn btn-primary">{t('common.browseProducts')}</Link>}
         />
       </div>
     );
@@ -158,9 +161,9 @@ export default function Checkout() {
     <div className="container">
       <div className="steps">
         {[
-          { n: 1, label: 'Shipping' },
-          { n: 2, label: 'Payment' },
-          { n: 3, label: 'Complete' },
+          { n: 1, label: t('checkout.stepShipping') },
+          { n: 2, label: t('checkout.stepPayment') },
+          { n: 3, label: t('checkout.stepComplete') },
         ].map((s, i) => (
           <div key={s.n} className="row gap-8">
             <div className={`step ${step === s.n ? 'active' : ''} ${step > s.n ? 'done' : ''}`}>
@@ -178,7 +181,7 @@ export default function Checkout() {
             <div className="card card-pad">
               <div className="row between mb-16">
                 <h3 style={{ fontSize: '1.05rem' }}>
-                  <span className="row gap-8"><MapPin size={17} /> Shipping Address</span>
+                  <span className="row gap-8"><MapPin size={17} /> {t('checkout.shippingAddress')}</span>
                 </h3>
                 {addresses.length > 0 ? (
                   <button
@@ -186,7 +189,7 @@ export default function Checkout() {
                     className="btn btn-ghost btn-sm"
                     onClick={() => setUseNewAddress((v) => !v)}
                   >
-                    {useNewAddress ? 'Use a saved address' : 'Add new address'}
+                    {useNewAddress ? t('checkout.useSavedAddress') : t('checkout.addNewAddress')}
                   </button>
                 ) : null}
               </div>
@@ -208,7 +211,7 @@ export default function Checkout() {
                         <div>
                           <div className="bold small">
                             {a.fullName}
-                            {a.isDefault ? <span className="badge badge-ok" style={{ marginLeft: 8 }}>Default</span> : null}
+                            {a.isDefault ? <span className="badge badge-ok" style={{ marginLeft: 8 }}>{t('common.default')}</span> : null}
                           </div>
                           <div className="small muted">
                             {a.street}, {a.city} {a.zipCode}, {a.country}
@@ -223,7 +226,7 @@ export default function Checkout() {
                 <>
                   <div className="form-row">
                     <div className="field">
-                      <label className="field-label" htmlFor="fullName">Full Name *</label>
+                      <label className="field-label" htmlFor="fullName">{t('checkout.fullName')}</label>
                       <input
                         id="fullName"
                         className={`input ${errors.fullName ? 'has-error' : ''}`}
@@ -233,7 +236,7 @@ export default function Checkout() {
                       {errors.fullName ? <span className="field-error">{errors.fullName}</span> : null}
                     </div>
                     <div className="field">
-                      <label className="field-label" htmlFor="phone">Phone</label>
+                      <label className="field-label" htmlFor="phone">{t('checkout.phone')}</label>
                       <input
                         id="phone"
                         className="input"
@@ -244,20 +247,20 @@ export default function Checkout() {
                   </div>
 
                   <div className="field">
-                    <label className="field-label" htmlFor="street">Address *</label>
+                    <label className="field-label" htmlFor="street">{t('checkout.addressField')}</label>
                     <input
                       id="street"
                       className={`input ${errors.street ? 'has-error' : ''}`}
                       value={address.street}
                       onChange={(e) => setAddress({ ...address, street: e.target.value })}
-                      placeholder="123 Main Street"
+                      placeholder={t('checkout.addressPlaceholder')}
                     />
                     {errors.street ? <span className="field-error">{errors.street}</span> : null}
                   </div>
 
                   <div className="form-row">
                     <div className="field">
-                      <label className="field-label" htmlFor="city">City *</label>
+                      <label className="field-label" htmlFor="city">{t('checkout.city')}</label>
                       <input
                         id="city"
                         className={`input ${errors.city ? 'has-error' : ''}`}
@@ -267,7 +270,7 @@ export default function Checkout() {
                       {errors.city ? <span className="field-error">{errors.city}</span> : null}
                     </div>
                     <div className="field">
-                      <label className="field-label" htmlFor="state">State / Province</label>
+                      <label className="field-label" htmlFor="state">{t('checkout.state')}</label>
                       <input
                         id="state"
                         className="input"
@@ -279,7 +282,7 @@ export default function Checkout() {
 
                   <div className="form-row">
                     <div className="field">
-                      <label className="field-label" htmlFor="zip">Zip Code *</label>
+                      <label className="field-label" htmlFor="zip">{t('checkout.zipCode')}</label>
                       <input
                         id="zip"
                         className={`input ${errors.zipCode ? 'has-error' : ''}`}
@@ -289,7 +292,7 @@ export default function Checkout() {
                       {errors.zipCode ? <span className="field-error">{errors.zipCode}</span> : null}
                     </div>
                     <div className="field">
-                      <label className="field-label" htmlFor="country">Country *</label>
+                      <label className="field-label" htmlFor="country">{t('checkout.country')}</label>
                       <input
                         id="country"
                         className={`input ${errors.country ? 'has-error' : ''}`}
@@ -305,13 +308,13 @@ export default function Checkout() {
                     className="btn btn-outline btn-sm"
                     onClick={() => validateAddress() && saveNewAddress().catch((e) => toast.error(e.message))}
                   >
-                    Save to my addresses
+                    {t('checkout.saveToMyAddresses')}
                   </button>
                 </>
               )}
 
               <button type="button" className="btn btn-primary btn-lg btn-block mt-24" onClick={nextStep}>
-                Continue to Payment
+                {t('checkout.continueToPayment')}
               </button>
             </div>
           ) : null}
@@ -319,7 +322,7 @@ export default function Checkout() {
           {step === 2 ? (
             <div className="card card-pad">
               <h3 style={{ fontSize: '1.05rem', marginBottom: 16 }}>
-                <span className="row gap-8"><CreditCard size={17} /> Payment Method</span>
+                <span className="row gap-8"><CreditCard size={17} /> {t('checkout.paymentMethod')}</span>
               </h3>
 
               {PAYMENT_METHODS.map((m) => (
@@ -331,8 +334,8 @@ export default function Checkout() {
                     onChange={() => setPaymentMethod(m.value)}
                   />
                   <div className="grow">
-                    <div className="bold small">{m.label}</div>
-                    <div className="tiny muted">{m.hint}</div>
+                    <div className="bold small">{t(m.labelKey)}</div>
+                    <div className="tiny muted">{t(m.hintKey)}</div>
                   </div>
                 </label>
               ))}
@@ -340,11 +343,10 @@ export default function Checkout() {
               {paymentMethod === 'card' ? (
                 <div className="mt-16">
                   <div className="alert alert-info">
-                    Demo gateway — no real charge is made. Any card ending in <strong>0000</strong> is
-                    declined so you can test the failure path.
+                    {t('checkout.demoGateway', { digits: '0000' })}
                   </div>
                   <div className="field">
-                    <label className="field-label" htmlFor="cardnum">Card Number</label>
+                    <label className="field-label" htmlFor="cardnum">{t('checkout.cardNumber')}</label>
                     <input
                       id="cardnum"
                       className={`input ${errors.number ? 'has-error' : ''}`}
@@ -356,7 +358,7 @@ export default function Checkout() {
                     {errors.number ? <span className="field-error">{errors.number}</span> : null}
                   </div>
                   <div className="field">
-                    <label className="field-label" htmlFor="cardname">Name on Card</label>
+                    <label className="field-label" htmlFor="cardname">{t('checkout.nameOnCard')}</label>
                     <input
                       id="cardname"
                       className={`input ${errors.name ? 'has-error' : ''}`}
@@ -367,7 +369,7 @@ export default function Checkout() {
                   </div>
                   <div className="form-row">
                     <div className="field">
-                      <label className="field-label" htmlFor="expiry">Expiry</label>
+                      <label className="field-label" htmlFor="expiry">{t('checkout.expiry')}</label>
                       <input
                         id="expiry"
                         className={`input ${errors.expiry ? 'has-error' : ''}`}
@@ -378,7 +380,7 @@ export default function Checkout() {
                       {errors.expiry ? <span className="field-error">{errors.expiry}</span> : null}
                     </div>
                     <div className="field">
-                      <label className="field-label" htmlFor="cvc">CVC</label>
+                      <label className="field-label" htmlFor="cvc">{t('checkout.cvc')}</label>
                       <input
                         id="cvc"
                         className={`input ${errors.cvc ? 'has-error' : ''}`}
@@ -395,10 +397,10 @@ export default function Checkout() {
 
               <div className="row gap-12 mt-16">
                 <button type="button" className="btn btn-outline btn-lg grow" onClick={() => setStep(1)}>
-                  Back
+                  {t('checkout.back')}
                 </button>
                 <button type="button" className="btn btn-primary btn-lg grow" onClick={nextStep}>
-                  Review Order
+                  {t('checkout.reviewOrder')}
                 </button>
               </div>
             </div>
@@ -406,12 +408,12 @@ export default function Checkout() {
 
           {step === 3 ? (
             <div className="card card-pad">
-              <h3 style={{ fontSize: '1.05rem', marginBottom: 16 }}>Review &amp; Place Order</h3>
+              <h3 style={{ fontSize: '1.05rem', marginBottom: 16 }}>{t('checkout.stepReview')}</h3>
 
               <div className="card card-pad mb-16" style={{ background: 'var(--ink-50)' }}>
                 <div className="row between">
-                  <span className="bold small">Shipping to</span>
-                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => setStep(1)}>Edit</button>
+                  <span className="bold small">{t('checkout.shippingTo')}</span>
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => setStep(1)}>{t('common.edit')}</button>
                 </div>
                 <div className="small muted mt-8">
                   {useNewAddress ? (
@@ -432,13 +434,13 @@ export default function Checkout() {
 
               <div className="card card-pad mb-16" style={{ background: 'var(--ink-50)' }}>
                 <div className="row between">
-                  <span className="bold small">Payment</span>
-                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => setStep(2)}>Edit</button>
+                  <span className="bold small">{t('checkout.stepPayment')}</span>
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => setStep(2)}>{t('common.edit')}</button>
                 </div>
                 <div className="small muted mt-8">
-                  {PAYMENT_METHODS.find((m) => m.value === paymentMethod)?.label}
+                  {t(PAYMENT_METHODS.find((m) => m.value === paymentMethod)?.labelKey || 'payment.card')}
                   {paymentMethod === 'card' && card.number
-                    ? ` ending ${card.number.replace(/\D/g, '').slice(-4)}`
+                    ? ` ${t('checkout.cardEnding', { last4: card.number.replace(/\D/g, '').slice(-4) })}`
                     : ''}
                 </div>
               </div>
@@ -450,7 +452,7 @@ export default function Checkout() {
                     <div className="grow">
                       <div className="small bold">{item.product.name}</div>
                       <div className="tiny muted">
-                        Qty {item.quantity}
+                        {t('orderSuccess.qty', { count: item.quantity })}
                         {item.variant?.value ? ` · ${item.variant.value}` : ''}
                       </div>
                     </div>
@@ -461,7 +463,7 @@ export default function Checkout() {
 
               <div className="row gap-12 mt-24">
                 <button type="button" className="btn btn-outline btn-lg grow" onClick={() => setStep(2)}>
-                  Back
+                  {t('checkout.back')}
                 </button>
                 <button
                   type="button"
@@ -469,7 +471,9 @@ export default function Checkout() {
                   onClick={placeOrder}
                   disabled={placing}
                 >
-                  {placing ? 'Placing order…' : `Place Order · ${currency(totals.total)}`}
+                  {placing
+                    ? t('checkout.placingOrder')
+                    : t('checkout.placeOrderWithTotal', { total: currency(totals.total) })}
                 </button>
               </div>
             </div>
@@ -478,29 +482,29 @@ export default function Checkout() {
 
         <aside className="summary">
           <div className="card card-pad">
-            <h3 style={{ fontSize: '1rem', marginBottom: 14 }}>Order Summary</h3>
-            <div className="small muted mb-16">{preview.itemCount} item(s)</div>
+            <h3 style={{ fontSize: '1rem', marginBottom: 14 }}>{t('checkout.orderSummary')}</h3>
+            <div className="small muted mb-16">{t('checkout.itemCount', { count: preview.itemCount })}</div>
 
             <div className="summary-row">
-              <span className="muted">Subtotal</span>
+              <span className="muted">{t('checkout.subtotal')}</span>
               <span className="bold">{currency(totals.subtotal)}</span>
             </div>
             {totals.discount > 0 ? (
               <div className="summary-row">
-                <span className="muted">Discount</span>
+                <span className="muted">{t('checkout.discount')}</span>
                 <span className="bold" style={{ color: 'var(--green-600)' }}>−{currency(totals.discount)}</span>
               </div>
             ) : null}
             <div className="summary-row">
-              <span className="muted">Shipping</span>
-              <span className="bold">{totals.shipping === 0 ? 'Free' : currency(totals.shipping)}</span>
+              <span className="muted">{t('checkout.shipping')}</span>
+              <span className="bold">{totals.shipping === 0 ? t('common.free') : currency(totals.shipping)}</span>
             </div>
             <div className="summary-row">
-              <span className="muted">Tax</span>
+              <span className="muted">{t('checkout.tax')}</span>
               <span className="bold">{currency(totals.tax)}</span>
             </div>
             <div className="summary-row total">
-              <span>Total</span>
+              <span>{t('checkout.total')}</span>
               <span>{currency(totals.total)}</span>
             </div>
           </div>

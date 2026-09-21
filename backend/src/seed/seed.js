@@ -12,6 +12,7 @@ const env = require('../config/env');
 const { connectDB, disconnectDB } = require('../config/db');
 const { writePlaceholder } = require('./placeholder');
 const data = require('./data');
+const i18nSeed = require('./translations');
 const { orderNumber, trackingNumber } = require('../utils/ids');
 const { computeTotals } = require('../services/pricing.service');
 const { ORDER_STATUS, PAYMENT_STATUS, ROLES } = require('../config/constants');
@@ -51,6 +52,7 @@ async function seedCategories() {
       icon: c.icon,
       order: c.order,
       image: env.publicUrl + image,
+      translations: i18nSeed.translationsFor(i18nSeed.categories, c.name),
     });
     byName.set(c.name, doc);
   }
@@ -62,6 +64,7 @@ async function seedCategories() {
       parent: parent ? parent._id : null,
       order: 100,
       icon: 'tag',
+      translations: i18nSeed.translationsFor(i18nSeed.categories, s.name),
     });
     byName.set(s.name, doc);
   }
@@ -93,6 +96,7 @@ async function seedProducts(categoriesByName) {
       name: p.name,
       description: p.description,
       shortDescription: p.shortDescription,
+      translations: i18nSeed.translationsFor(i18nSeed.products, p.name),
       brand: p.brand,
       category: category._id,
       images,
@@ -342,6 +346,7 @@ async function seedPromotions() {
       subtitle: b.subtitle,
       ctaText: b.ctaText,
       ctaLink: b.ctaLink,
+      translations: i18nSeed.translationsFor(i18nSeed.banners, b.title),
       placement: b.placement,
       order: b.order,
       image: env.publicUrl + writePlaceholder(

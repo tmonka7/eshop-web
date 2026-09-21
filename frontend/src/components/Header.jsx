@@ -7,9 +7,12 @@ import { useAuthStore } from '../store/authStore';
 import { useCartStore } from '../store/cartStore';
 import { catalogApi } from '../api';
 import { currency, imageUrl } from '../utils/format';
+import { useI18n } from '../i18n';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Header() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [searchParams] = useSearchParams();
 
   const user = useAuthStore((s) => s.user);
@@ -78,8 +81,8 @@ export default function Header() {
             <span className="row gap-6"><Mail size={13} /> help@auramart.com</span>
           </div>
           <div className="row gap-16">
-            <Link to="/orders">Track Order</Link>
-            <span>Free shipping over $50</span>
+            <Link to="/orders">{t('header.trackOrder')}</Link>
+            <span>{t('header.freeShippingOver', { amount: currency(50) })}</span>
           </div>
         </div>
       </div>
@@ -89,8 +92,8 @@ export default function Header() {
           <Link to="/" className="brand">
             <span className="brand-mark">A</span>
             <span className="brand-text">
-              <span className="brand-name">AuraMart</span>
-              <span className="brand-tag" style={{ display: 'block' }}>Better Products, Brighter Life</span>
+              <span className="brand-name">{t('brand.name')}</span>
+              <span className="brand-tag" style={{ display: 'block' }}>{t('brand.tagline')}</span>
             </span>
           </Link>
 
@@ -99,10 +102,10 @@ export default function Header() {
               type="search"
               value={term}
               onChange={(e) => setTerm(e.target.value)}
-              placeholder="Search for products, brands and more..."
-              aria-label="Search products"
+              placeholder={t('header.searchPlaceholder')}
+              aria-label={t('header.searchAria')}
             />
-            <button type="submit" aria-label="Search"><Search size={16} /></button>
+            <button type="submit" aria-label={t('common.search')}><Search size={16} /></button>
 
             {suggestions.length > 0 ? (
               <div className="search-suggest">
@@ -122,19 +125,21 @@ export default function Header() {
                   className="btn btn-ghost btn-sm btn-block"
                   style={{ borderRadius: 0, borderTop: '1px solid var(--border)' }}
                 >
-                  See all results for “{term}”
+                  {t('header.seeAllResults', { term })}
                 </button>
               </div>
             ) : null}
           </form>
 
           <div className="header-actions">
-            <Link to="/wishlist" className="icon-btn" aria-label="Wishlist">
+            <LanguageSwitcher />
+
+            <Link to="/wishlist" className="icon-btn" aria-label={t('header.wishlist')}>
               <Heart size={19} />
               {wishCount > 0 ? <span className="count">{wishCount}</span> : null}
             </Link>
 
-            <Link to="/cart" className="icon-btn" aria-label="Cart">
+            <Link to="/cart" className="icon-btn" aria-label={t('header.cart')}>
               <Cart size={19} />
               {cartCount > 0 ? <span className="count">{cartCount}</span> : null}
             </Link>
@@ -158,17 +163,17 @@ export default function Header() {
                       <div className="bold small">{user.name}</div>
                       <div className="tiny muted truncate">{user.email}</div>
                     </div>
-                    <Link to="/account" onClick={() => setMenuOpen(false)}><User size={15} /> My Account</Link>
-                    <Link to="/orders" onClick={() => setMenuOpen(false)}><Package size={15} /> My Orders</Link>
-                    <Link to="/account/addresses" onClick={() => setMenuOpen(false)}><MapPin size={15} /> Addresses</Link>
-                    <Link to="/account/settings" onClick={() => setMenuOpen(false)}><Settings size={15} /> Settings</Link>
-                    <button type="button" onClick={handleLogout}><LogOut size={15} /> Sign out</button>
+                    <Link to="/account" onClick={() => setMenuOpen(false)}><User size={15} /> {t('header.myAccount')}</Link>
+                    <Link to="/orders" onClick={() => setMenuOpen(false)}><Package size={15} /> {t('header.myOrders')}</Link>
+                    <Link to="/account/addresses" onClick={() => setMenuOpen(false)}><MapPin size={15} /> {t('header.addresses')}</Link>
+                    <Link to="/account/settings" onClick={() => setMenuOpen(false)}><Settings size={15} /> {t('header.settings')}</Link>
+                    <button type="button" onClick={handleLogout}><LogOut size={15} /> {t('header.signOut')}</button>
                   </div>
                 ) : null}
               </div>
             ) : (
               <Link to="/login" className="btn btn-primary btn-sm" style={{ marginLeft: 6 }}>
-                Sign In
+                {t('header.signIn')}
               </Link>
             )}
           </div>
@@ -178,7 +183,7 @@ export default function Header() {
       <nav className="header-nav">
         <div className="container">
           <NavLink to="/products" end className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-            All Categories
+            {t('header.allCategories')}
           </NavLink>
           {categories.map((c) => (
             <NavLink

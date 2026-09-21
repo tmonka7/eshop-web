@@ -15,7 +15,7 @@ router.use(protect);
 router.get('/cart', cart.getCart);
 router.post(
   '/cart/items',
-  [body('productId').isMongoId().withMessage('A valid productId is required')],
+  [body('productId').isMongoId().withMessage('validation.productIdValid')],
   validate,
   cart.addItem,
 );
@@ -31,7 +31,7 @@ router.get('/checkout/preview', orders.preview);
 router.post(
   '/orders',
   writeLimiter,
-  [body('paymentMethod').notEmpty().withMessage('Select a payment method')],
+  [body('paymentMethod').notEmpty().withMessage('validation.paymentMethodRequired')],
   validate,
   orders.create,
 );
@@ -45,8 +45,8 @@ router.post(
   '/reviews',
   writeLimiter,
   [
-    body('productId').isMongoId().withMessage('A valid productId is required'),
-    body('rating').isInt({ min: 1, max: 5 }).withMessage('Rating must be 1-5'),
+    body('productId').isMongoId().withMessage('validation.productIdValid'),
+    body('rating').isInt({ min: 1, max: 5 }).withMessage('validation.ratingRange'),
   ],
   validate,
   reviews.create,

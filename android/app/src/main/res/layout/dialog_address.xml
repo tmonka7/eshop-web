@@ -43,7 +43,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_sm"
-            android:hint="Street address">
+            android:hint="@string/street_address">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/streetInput"
@@ -63,7 +63,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="City">
+                android:hint="@string/city">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/cityInput"
@@ -78,7 +78,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="@dimen/space_sm"
-                android:hint="Zip code">
+                android:hint="@string/zip_code">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/zipInput"
@@ -93,14 +93,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_sm"
-            android:hint="Country">
+            android:hint="@string/country">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/countryInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:text="Finland" />
+                android:text="@string/default_country" />
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 </ScrollView>

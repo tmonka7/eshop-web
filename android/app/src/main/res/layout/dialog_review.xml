@@ -11,7 +11,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Your rating"
+        android:text="@string/your_rating"
         style="@style/Text.Body"
         android:textStyle="bold" />
 
@@ -28,7 +28,7 @@
             android:padding="@dimen/space_xs"
             android:src="@drawable/ic_star_filled"
             app:tint="@color/warning"
-            android:contentDescription="1 star" />
+            android:contentDescription="@string/star_1" />
 
         <ImageView
             android:id="@+id/star2"
@@ -37,7 +37,7 @@
             android:padding="@dimen/space_xs"
             android:src="@drawable/ic_star_filled"
             app:tint="@color/warning"
-            android:contentDescription="2 stars" />
+            android:contentDescription="@string/star_2" />
 
         <ImageView
             android:id="@+id/star3"
@@ -46,7 +46,7 @@
             android:padding="@dimen/space_xs"
             android:src="@drawable/ic_star_filled"
             app:tint="@color/warning"
-            android:contentDescription="3 stars" />
+            android:contentDescription="@string/star_3" />
 
         <ImageView
             android:id="@+id/star4"
@@ -55,7 +55,7 @@
             android:padding="@dimen/space_xs"
             android:src="@drawable/ic_star_filled"
             app:tint="@color/warning"
-            android:contentDescription="4 stars" />
+            android:contentDescription="@string/star_4" />
 
         <ImageView
             android:id="@+id/star5"
@@ -64,7 +64,7 @@
             android:padding="@dimen/space_xs"
             android:src="@drawable/ic_star_filled"
             app:tint="@color/warning"
-            android:contentDescription="5 stars" />
+            android:contentDescription="@string/star_5" />
     </LinearLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -72,7 +72,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/space_md"
-        android:hint="Title">
+        android:hint="@string/review_title_hint">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/titleInput"
@@ -86,7 +86,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/space_sm"
-        android:hint="What did you like or dislike?">
+        android:hint="@string/review_body_hint">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/commentInput"

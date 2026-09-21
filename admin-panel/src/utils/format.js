@@ -1,5 +1,20 @@
+import { translate } from '../i18n';
+import { getActiveLocale } from '../i18n/activeLocale';
+import { INTL_BY_LOCALE, DEFAULT_LOCALE } from '../i18n/constants';
+
+/**
+ * Formatting helpers.
+ *
+ * Prices stay in USD in every language — only the presentation follows the
+ * locale, so zh-CN renders "US$1,299.00" and ja-JP "$1,299.00". The locale is
+ * read from the active-locale holder rather than passed in, which keeps every
+ * `currency(product.price)` call site unchanged; the whole tree re-renders when
+ * the language changes, so these always run with the current value.
+ */
+const intlTag = (locale) => INTL_BY_LOCALE[locale || getActiveLocale()] || INTL_BY_LOCALE[DEFAULT_LOCALE];
+
 export const currency = (value, opts = {}) =>
-  new Intl.NumberFormat('en-US', {
+  new Intl.NumberFormat(intlTag(), {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 2,
@@ -7,13 +22,14 @@ export const currency = (value, opts = {}) =>
   }).format(Number(value) || 0);
 
 export const compactNumber = (value) =>
-  new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(
-    Number(value) || 0,
-  );
+  new Intl.NumberFormat(intlTag(), { notation: 'compact', maximumFractionDigits: 1 })
+    .format(Number(value) || 0);
+
+export const formatNumber = (value) => new Intl.NumberFormat(intlTag()).format(Number(value) || 0);
 
 export const formatDate = (value, opts = {}) => {
   if (!value) return '-';
-  return new Date(value).toLocaleDateString('en-US', {
+  return new Date(value).toLocaleDateString(intlTag(), {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -23,7 +39,7 @@ export const formatDate = (value, opts = {}) => {
 
 export const formatDateTime = (value) => {
   if (!value) return '-';
-  return new Date(value).toLocaleString('en-US', {
+  return new Date(value).toLocaleString(intlTag(), {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -32,15 +48,17 @@ export const formatDateTime = (value) => {
   });
 };
 
+/** "3 days ago" / "3 天前" / "3 日前" — wording comes from the catalogue. */
 export const relativeDate = (value) => {
   if (!value) return '-';
+  const locale = getActiveLocale();
   const diff = Date.now() - new Date(value).getTime();
   const days = Math.floor(diff / 86400000);
-  if (days === 0) return 'Today';
-  if (days === 1) return 'Yesterday';
-  if (days < 30) return `${days} days ago`;
-  if (days < 365) return `${Math.floor(days / 30)} months ago`;
-  return `${Math.floor(days / 365)} years ago`;
+  if (days === 0) return translate(locale, 'date.today');
+  if (days === 1) return translate(locale, 'date.yesterday');
+  if (days < 30) return translate(locale, 'date.daysAgo', { count: days });
+  if (days < 365) return translate(locale, 'date.monthsAgo', { count: Math.floor(days / 30) });
+  return translate(locale, 'date.yearsAgo', { count: Math.floor(days / 365) });
 };
 
 export const discountPercent = (price, comparePrice) => {
@@ -48,10 +66,20 @@ export const discountPercent = (price, comparePrice) => {
   return Math.round(((comparePrice - price) / comparePrice) * 100);
 };
 
-export const statusLabel = (status) =>
-  String(status || '')
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+/**
+ * Order and payment statuses arrive as snake_case enum values; the catalogue
+ * has a translation for each. `namespace` picks which section to read, and an
+ * unknown value falls back to a title-cased version so a status added
+ * server-side still reads sensibly.
+ */
+export const statusLabel = (status, namespace = 'orderStatus') => {
+  const key = String(status || '');
+  if (!key) return '';
+  const path = `${namespace}.${key}`;
+  const translated = translate(getActiveLocale(), path);
+  if (translated !== path) return translated;
+  return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+};
 
 /** Orders arrive with absolute image URLs from the API; guard the empty case. */
 export const imageUrl = (src, fallback = '') => {

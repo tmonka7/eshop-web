@@ -114,7 +114,7 @@ public class ProductDetailActivity extends AppCompatActivity implements ProductA
             public void onSuccess(List<Review> items, Pagination pagination) {
                 reviewAdapter.submit(items);
                 b.noReviewsText.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
-                b.noReviewsText.setText("No reviews yet. Be the first to review this product.");
+                b.noReviewsText.setText(R.string.no_reviews_yet);
             }
 
             @Override
@@ -167,7 +167,7 @@ public class ProductDetailActivity extends AppCompatActivity implements ProductA
             b.stockBadge.setBackgroundResource(R.drawable.bg_badge_red);
             b.stockBadge.setTextColor(getColor(R.color.primary_dark));
         } else if (product.stock <= 10) {
-            b.stockBadge.setText("Only " + product.stock + " left");
+            b.stockBadge.setText(getString(R.string.only_n_left, product.stock));
             b.stockBadge.setBackgroundResource(R.drawable.bg_badge_amber);
             b.stockBadge.setTextColor(getColor(R.color.warning_dark));
         } else {

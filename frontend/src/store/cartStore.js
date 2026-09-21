@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { cartApi } from '../api';
+import { translate } from '../i18n';
+import { getActiveLocale } from '../i18n/activeLocale';
 
 const GUEST_KEY = 'auramart.guestCart';
 
@@ -84,7 +86,7 @@ export const useCartStore = create((set, get) => ({
     }
     writeGuestCart(guest);
     set({ guest, items: guest, ...derive(guest, get().rules) });
-    return 'Added to cart';
+    return translate(getActiveLocale(), 'toast.addedToCart');
   },
 
   async update(itemId, quantity, isAuthenticated) {

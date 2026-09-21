@@ -57,7 +57,9 @@ html, body, #root { height: 100%; }
 
 body {
   margin: 0;
-  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Inter has no CJK glyphs; the Noto families cover zh and ja. */
+  font-family: Inter, 'Noto Sans SC', 'Noto Sans JP', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', 'Microsoft YaHei', 'Hiragino Sans', 'Yu Gothic UI', Roboto, sans-serif;
   font-size: 14px;
   line-height: 1.55;
   color: var(--text);
@@ -349,4 +351,58 @@ table.data .actions { display: flex; gap: 4px; justify-content: flex-end; }
 
 @media (max-width: 1024px) {
   .sidebar-toggle { display: inline-grid; place-items: center; }
+}
+
+/* ------------------------- language + translations ------------------------ */
+.lang-switcher { position: relative; }
+
+.lang-trigger { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.lang-trigger .lang-name { font-weight: 600; }
+
+.lang-menu {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 60;
+  min-width: 170px; margin: 0; padding: 6px; list-style: none;
+  background: var(--surface, #fff); border: 1px solid var(--border);
+  border-radius: 10px; box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+}
+
+.lang-menu button {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 8px 10px; border: 0; border-radius: 7px; background: none;
+  font: inherit; font-size: 0.85rem; color: var(--ink-600); cursor: pointer; text-align: left;
+}
+
+.lang-menu button:hover { background: var(--ink-50); color: var(--ink-900); }
+.lang-menu button.active { color: var(--primary); font-weight: 600; }
+
+/* The per-language editor inside product, category and banner forms. */
+.translation-block {
+  margin-top: 20px; padding-top: 18px; border-top: 1px dashed var(--border);
+}
+
+.translation-tab {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 10px; border: 1px solid var(--border); border-radius: 999px;
+  background: none; font: inherit; font-size: 0.78rem; color: var(--ink-600); cursor: pointer;
+}
+
+.translation-tab.active {
+  border-color: var(--primary); color: var(--primary); background: var(--red-50, #fef2f2);
+}
+
+/* Filled dot = this language has copy; hollow = it will fall back to English. */
+.translation-tab .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  border: 1px solid currentColor; background: none;
+}
+
+.translation-tab .dot.on { background: currentColor; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+@media (max-width: 720px) {
+  .lang-trigger .lang-name { display: none; }
 }

@@ -5,10 +5,12 @@ import { Breadcrumb, EmptyState, Pagination, Spinner, Badge } from '../component
 import { Package } from '../components/Icons';
 import { currency, formatDate, imageUrl } from '../utils/format';
 import { ORDER_STATUS_META } from '../utils/constants';
+import { useI18n } from '../i18n';
 
 const FILTERS = ['all', 'pending', 'processing', 'shipped', 'delivered', 'cancelled'];
 
 export default function Orders() {
+  const { t, locale } = useI18n();
   const [orders, setOrders] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
   const [status, setStatus] = useState('all');
@@ -32,12 +34,13 @@ export default function Orders() {
     return () => {
       alive = false;
     };
-  }, [status, page]);
+    // Line-item names are localised server-side, so refetch on a switch.
+  }, [status, page, locale]);
 
   return (
     <div className="container">
-      <Breadcrumb items={[{ label: 'Home', to: '/' }, { label: 'My Orders' }]} />
-      <h1 style={{ fontSize: '1.6rem', marginBottom: 16 }}>My Orders</h1>
+      <Breadcrumb items={[{ label: t('common.home'), to: '/' }, { label: t('orders.breadcrumb') }]} />
+      <h1 style={{ fontSize: '1.6rem', marginBottom: 16 }}>{t('orders.title')}</h1>
 
       <div className="chips mb-24">
         {FILTERS.map((f) => (
@@ -55,7 +58,7 @@ export default function Orders() {
               setPage(1);
             }}
           >
-            {f === 'all' ? 'All' : ORDER_STATUS_META[f]?.label || f}
+            {f === 'all' ? t('orders.filterAll') : t(ORDER_STATUS_META[f]?.labelKey || f)}
           </button>
         ))}
       </div>
@@ -65,35 +68,40 @@ export default function Orders() {
       ) : orders.length === 0 ? (
         <EmptyState
           icon={<Package size={30} />}
-          title="No orders yet"
-          message={status === 'all' ? 'When you place an order it will show up here.' : `No ${status} orders.`}
-          action={<Link to="/products" className="btn btn-primary">Start shopping</Link>}
+          title={t('orders.emptyTitle')}
+          message={
+            status === 'all'
+              ? t('orders.emptyMessage')
+              : t('orders.emptyFiltered', { status: t(ORDER_STATUS_META[status]?.labelKey || status) })
+          }
+          action={<Link to="/products" className="btn btn-primary">{t('common.startShopping')}</Link>}
         />
       ) : (
         <>
           {orders.map((order) => {
-            const meta = ORDER_STATUS_META[order.status] || { label: order.status, tone: 'muted' };
+            const meta = ORDER_STATUS_META[order.status];
+            const statusText = meta ? t(meta.labelKey) : order.status;
             return (
               <div key={order._id} className="order-card">
                 <div className="order-card-head">
                   <div className="row gap-16 wrap">
                     <div>
-                      <div className="tiny muted">Order</div>
+                      <div className="tiny muted">{t('orders.orderLabel')}</div>
                       <div className="bold small">{order.orderNumber}</div>
                     </div>
                     <div>
-                      <div className="tiny muted">Placed</div>
+                      <div className="tiny muted">{t('orders.placed')}</div>
                       <div className="small">{formatDate(order.createdAt)}</div>
                     </div>
                     <div>
-                      <div className="tiny muted">Total</div>
+                      <div className="tiny muted">{t('cart.total')}</div>
                       <div className="bold small">{currency(order.pricing.total)}</div>
                     </div>
                   </div>
                   <div className="row gap-12">
-                    <Badge tone={meta.tone}>{meta.label}</Badge>
+                    <Badge tone={meta ? meta.tone : 'muted'}>{statusText}</Badge>
                     <Link to={`/orders/${order.orderNumber}`} className="btn btn-outline btn-sm">
-                      View details
+                      {t('orders.viewDetails')}
                     </Link>
                   </div>
                 </div>
@@ -104,7 +112,7 @@ export default function Orders() {
                     <div className="grow">
                       <div className="small bold">{item.name}</div>
                       <div className="tiny muted">
-                        Qty {item.quantity} · {currency(item.price)}
+                        {t('orderSuccess.qty', { count: item.quantity })} · {currency(item.price)}
                       </div>
                     </div>
                     <span className="small bold">{currency(item.subtotal)}</span>
@@ -113,7 +121,7 @@ export default function Orders() {
 
                 {order.items.length > 3 ? (
                   <div className="order-item-row tiny muted">
-                    + {order.items.length - 3} more item(s)
+                    {t('orders.moreItems', { count: order.items.length - 3 })}
                   </div>
                 ) : null}
               </div>

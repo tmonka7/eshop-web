@@ -25,11 +25,13 @@ import NotFound from './pages/NotFound';
 import { useAuthStore } from './store/authStore';
 import { useCartStore } from './store/cartStore';
 import { useToastStore } from './store/toastStore';
+import { useI18n } from './i18n';
 
 const AUTH_ROUTES = ['/login', '/register'];
 
 export default function App() {
   const location = useLocation();
+  const { t, locale } = useI18n();
   const bootstrap = useAuthStore((s) => s.bootstrap);
   const user = useAuthStore((s) => s.user);
   const status = useAuthStore((s) => s.status);
@@ -40,21 +42,22 @@ export default function App() {
     bootstrap();
   }, [bootstrap]);
 
-  // Load the right cart once we know whether anyone is signed in.
+  // Load the right cart once we know whether anyone is signed in. Re-runs on a
+  // language change so cart lines carry the newly translated product names.
   useEffect(() => {
     if (status === 'ready') loadCart(Boolean(user));
-  }, [status, user, loadCart]);
+  }, [status, user, loadCart, locale]);
 
   // The API client fires this when a refresh token is rejected.
   useEffect(() => {
     function onSignedOut() {
       useAuthStore.setState({ user: null });
       resetCart();
-      useToastStore.getState().info('Your session expired. Please sign in again.');
+      useToastStore.getState().info(t('auth.sessionExpired'));
     }
     window.addEventListener('auramart:signed-out', onSignedOut);
     return () => window.removeEventListener('auramart:signed-out', onSignedOut);
-  }, [resetCart]);
+  }, [resetCart, t]);
 
   const isAuthPage = AUTH_ROUTES.includes(location.pathname);
 

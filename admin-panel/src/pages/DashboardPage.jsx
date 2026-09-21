@@ -9,8 +9,10 @@ import { Badge, Spinner, StatCard, Empty } from '../components/ui';
 import { Dollar, Package, Users, TrendUp } from '../components/Icons';
 import { currency, compactNumber, formatDate } from '../utils/format';
 import { CHART_COLORS, RANGE_OPTIONS, STATUS_TONE } from '../utils/constants';
+import { useI18n } from '../i18n';
 
 export default function DashboardPage() {
+  const { t } = useI18n();
   const [range, setRange] = useState('30d');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -46,13 +48,13 @@ export default function DashboardPage() {
     };
   }, [range]);
 
-  if (loading) return <Spinner label="Loading dashboard..." />;
+  if (loading) return <Spinner label={t('dashboard.loading')} />;
 
   if (!data) {
     return (
       <Empty
-        title="Could not load the dashboard"
-        message="Check that the API is running and try again."
+        title={t('dashboard.loadFailed')}
+        message={t('toast.dashboardRetry')}
       />
     );
   }
@@ -63,8 +65,8 @@ export default function DashboardPage() {
     <>
       <div className="page-head">
         <div>
-          <h1>Dashboard</h1>
-          <p>Store performance at a glance</p>
+          <h1>{t('dashboard.title')}</h1>
+          <p>{t('dashboard.subtitle')}</p>
         </div>
         <div className="tabs">
           {RANGE_OPTIONS.map((r) => (
@@ -74,7 +76,7 @@ export default function DashboardPage() {
               className={`tab-chip ${range === r.value ? 'active' : ''}`}
               onClick={() => setRange(r.value)}
             >
-              {r.label}
+              {t(r.labelKey)}
             </button>
           ))}
         </div>
@@ -82,28 +84,28 @@ export default function DashboardPage() {
 
       <div className="grid grid-4 mb-24">
         <StatCard
-          label="Total Revenue"
+          label={t('dashboard.totalRevenue')}
           value={currency(stats.totalRevenue.value)}
           delta={stats.totalRevenue.change}
           icon={<Dollar size={18} />}
           tone="red"
         />
         <StatCard
-          label="Total Orders"
+          label={t('dashboard.totalOrders')}
           value={compactNumber(stats.totalOrders.value)}
           delta={stats.totalOrders.change}
           icon={<Package size={18} />}
           tone="blue"
         />
         <StatCard
-          label="Total Customers"
+          label={t('dashboard.totalCustomers')}
           value={compactNumber(stats.totalCustomers.value)}
           delta={stats.totalCustomers.change}
           icon={<Users size={18} />}
           tone="green"
         />
         <StatCard
-          label="Conversion Rate"
+          label={t('dashboard.conversionRate')}
           value={`${stats.conversionRate.value}%`}
           delta={stats.conversionRate.change}
           icon={<TrendUp size={18} />}
@@ -115,8 +117,8 @@ export default function DashboardPage() {
         <div className="card">
           <div className="card-header">
             <div>
-              <span className="card-title">Sales Overview</span>
-              <div className="tiny muted">Revenue per day in the selected range</div>
+              <span className="card-title">{t('dashboard.salesOverview')}</span>
+              <div className="tiny muted">{t('dashboard.salesOverviewSub')}</div>
             </div>
             <span className="bold">{currency(stats.totalRevenue.value)}</span>
           </div>
@@ -164,13 +166,13 @@ export default function DashboardPage() {
         <div className="card">
           <div className="card-header">
             <div>
-              <span className="card-title">Sales by Category</span>
-              <div className="tiny muted">Share of revenue</div>
+              <span className="card-title">{t('dashboard.salesByCategory')}</span>
+              <div className="tiny muted">{t('dashboard.shareOfRevenue')}</div>
             </div>
           </div>
           <div className="card-pad">
             {byCategory.segments.length === 0 ? (
-              <p className="muted small">No sales in this range yet.</p>
+              <p className="muted small">{t('dashboard.noSalesInRange')}</p>
             ) : (
               <>
                 <div style={{ height: 190 }}>
@@ -222,18 +224,18 @@ export default function DashboardPage() {
       <div className="grid grid-2-1">
         <div className="card">
           <div className="card-header">
-            <span className="card-title">Recent Orders</span>
-            <Link to="/orders" className="btn btn-ghost btn-sm">View All</Link>
+            <span className="card-title">{t('dashboard.recentOrders')}</span>
+            <Link to="/orders" className="btn btn-ghost btn-sm">{t('common.viewAll')}</Link>
           </div>
           <div className="table-wrap">
             <table className="data">
               <thead>
                 <tr>
-                  <th>Order ID</th>
-                  <th>Customer</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                  <th className="right">Total</th>
+                  <th>{t('orders.orderId')}</th>
+                  <th>{t('common.customer')}</th>
+                  <th>{t('common.date')}</th>
+                  <th>{t('common.status')}</th>
+                  <th className="right">{t('common.total')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -256,7 +258,7 @@ export default function DashboardPage() {
         <div className="stack gap-16">
           <div className="card">
             <div className="card-header">
-              <span className="card-title">Customer Growth</span>
+              <span className="card-title">{t('dashboard.customerGrowth')}</span>
               <span className="bold">{compactNumber(growth.total)}</span>
             </div>
             <div className="card-pad" style={{ height: 170 }}>
@@ -274,8 +276,8 @@ export default function DashboardPage() {
 
           <div className="card">
             <div className="card-header">
-              <span className="card-title">Top Products</span>
-              <Link to="/products" className="btn btn-ghost btn-sm">All</Link>
+              <span className="card-title">{t('dashboard.topProducts')}</span>
+              <Link to="/products" className="btn btn-ghost btn-sm">{t('common.all')}</Link>
             </div>
             <div className="card-pad stack gap-12">
               {top.map((p) => (
@@ -288,7 +290,7 @@ export default function DashboardPage() {
                   <span className="small bold">{currency(p.price)}</span>
                 </div>
               ))}
-              {top.length === 0 ? <p className="muted small">No products yet.</p> : null}
+              {top.length === 0 ? <p className="muted small">{t('products.empty')}</p> : null}
             </div>
           </div>
         </div>

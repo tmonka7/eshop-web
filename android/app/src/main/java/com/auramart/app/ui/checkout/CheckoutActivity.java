@@ -117,7 +117,7 @@ public class CheckoutActivity extends AppCompatActivity {
 
         if (addresses.isEmpty()) {
             b.noAddressText.setVisibility(View.VISIBLE);
-            b.noAddressText.setText("Add a shipping address to continue.");
+            b.noAddressText.setText(R.string.add_address_to_continue);
             selectedAddressId = null;
             return;
         }
@@ -160,7 +160,7 @@ public class CheckoutActivity extends AppCompatActivity {
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.save, (dialog, which) -> {
                     Address address = new Address();
-                    address.label = "Home";
+                    address.label = getString(R.string.default_address_label);
                     address.fullName = String.valueOf(d.fullNameInput.getText()).trim();
                     address.phone = String.valueOf(d.phoneInput.getText()).trim();
                     address.street = String.valueOf(d.streetInput.getText()).trim();
@@ -171,7 +171,7 @@ public class CheckoutActivity extends AppCompatActivity {
                     if (!Validators.notBlank(address.fullName) || !Validators.notBlank(address.street)
                             || !Validators.notBlank(address.city) || !Validators.notBlank(address.zipCode)
                             || !Validators.notBlank(address.country)) {
-                        Ui.snack(b.getRoot(), "Please fill in every required field");
+                        Ui.snack(b.getRoot(), getString(R.string.error_fill_required));
                         return;
                     }
 
@@ -198,7 +198,7 @@ public class CheckoutActivity extends AppCompatActivity {
         if (preview == null) return;
 
         if (selectedAddressId == null) {
-            Ui.snack(b.getRoot(), "Choose a shipping address");
+            Ui.snack(b.getRoot(), getString(R.string.choose_shipping_address));
             return;
         }
 
@@ -210,7 +210,7 @@ public class CheckoutActivity extends AppCompatActivity {
             String number = String.valueOf(b.cardNumberInput.getText()).replaceAll("\\s", "");
             String name = String.valueOf(b.cardNameInput.getText()).trim();
             if (!Validators.isCardNumber(number)) {
-                Ui.snack(b.getRoot(), "Enter a valid card number");
+                Ui.snack(b.getRoot(), getString(R.string.error_card_invalid));
                 return;
             }
             request.card = new CardDetails(number, name);

@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore, useToastStore } from '../store';
+import { useI18n } from '../i18n';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useI18n();
   const login = useAuthStore((s) => s.login);
   const toast = useToastStore();
 
@@ -20,7 +23,7 @@ export default function LoginPage() {
     setBusy(true);
     try {
       const user = await login(form.email, form.password);
-      toast.success(`Signed in as ${user.name}`);
+      toast.success(t('login.signedInAs', { name: user.name }));
       navigate(redirectTo, { replace: true });
     } catch (err) {
       setError(err.message);
@@ -32,7 +35,7 @@ export default function LoginPage() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <div className="row gap-12 mb-24">
+        <div className="row between gap-12 mb-24">
           <span
             style={{
               width: 42,
@@ -48,21 +51,22 @@ export default function LoginPage() {
           >
             A
           </span>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: '1.2rem', letterSpacing: '-0.02em' }}>AuraMart</div>
-            <div className="tiny muted">Admin Panel</div>
+          <div className="grow">
+            <div style={{ fontWeight: 800, fontSize: '1.2rem', letterSpacing: '-0.02em' }}>{t('app.brand')}</div>
+            <div className="tiny muted">{t('app.panel')}</div>
           </div>
+          <LanguageSwitcher compact />
         </div>
 
-        <h1 style={{ fontSize: '1.3rem', marginBottom: 6 }}>Sign in</h1>
-        <p className="small muted">Staff accounts only.</p>
+        <h1 style={{ fontSize: '1.3rem', marginBottom: 6 }}>{t('login.title')}</h1>
+        <p className="small muted">{t('login.staffOnly')}</p>
 
         <div className="demo-box">
-          <strong>Demo credentials</strong>
+          <strong>{t('login.demoCredentials')}</strong>
           <div className="stack gap-4 mt-8">
             {[
-              { label: 'Admin', email: 'admin@auramart.com', password: 'Admin@123' },
-              { label: 'Manager', email: 'manager@auramart.com', password: 'Manager@123' },
+              { label: t('login.demoAdmin'), email: 'admin@auramart.com', password: 'Admin@123' },
+              { label: t('login.demoManager'), email: 'manager@auramart.com', password: 'Manager@123' },
             ].map((d) => (
               <button
                 key={d.email}
@@ -81,7 +85,7 @@ export default function LoginPage() {
 
         <form onSubmit={submit}>
           <div className="field">
-            <label className="field-label" htmlFor="email">Email</label>
+            <label className="field-label" htmlFor="email">{t('login.email')}</label>
             <input
               id="email"
               type="email"
@@ -93,7 +97,7 @@ export default function LoginPage() {
             />
           </div>
           <div className="field">
-            <label className="field-label" htmlFor="password">Password</label>
+            <label className="field-label" htmlFor="password">{t('login.password')}</label>
             <input
               id="password"
               type="password"
@@ -105,7 +109,7 @@ export default function LoginPage() {
             />
           </div>
           <button type="submit" className="btn btn-primary btn-block" disabled={busy}>
-            {busy ? 'Signing in…' : 'Sign In'}
+            {busy ? t('login.signingIn') : t('login.signIn')}
           </button>
         </form>
       </div>

@@ -36,7 +36,7 @@
                 android:background="@drawable/bg_badge_green"
                 android:paddingStart="@dimen/space_sm"
                 android:paddingEnd="@dimen/space_sm"
-                android:text="Default"
+                android:text="@string/default_badge"
                 android:textColor="@color/success_dark"
                 android:textSize="@dimen/text_tiny"
                 android:textStyle="bold"
@@ -78,7 +78,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="-8dp"
-            android:text="Set as default"
+            android:text="@string/set_as_default"
             android:textSize="@dimen/text_small"
             tools:ignore="HardcodedText"
             xmlns:tools="http://schemas.android.com/tools" />

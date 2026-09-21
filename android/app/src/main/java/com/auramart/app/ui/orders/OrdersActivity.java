@@ -67,7 +67,7 @@ public class OrdersActivity extends AppCompatActivity {
         });
 
         b.empty.emptyTitle.setText(R.string.no_orders);
-        b.empty.emptyMessage.setText("When you place an order it will show up here.");
+        b.empty.emptyMessage.setText(R.string.no_orders_hint);
 
         reload(false);
     }
@@ -75,7 +75,7 @@ public class OrdersActivity extends AppCompatActivity {
     private void buildChips() {
         for (String value : STATUSES) {
             Chip chip = new Chip(this);
-            chip.setText(value.equals("all") ? "All" : Formats.label(value));
+            chip.setText(value.equals("all") ? getString(R.string.filter_all) : Formats.label(this, value));
             chip.setCheckable(true);
             chip.setChecked(value.equals(status));
             chip.setOnClickListener(v -> {

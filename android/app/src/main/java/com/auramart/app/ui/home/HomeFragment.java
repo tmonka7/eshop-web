@@ -68,8 +68,8 @@ public class HomeFragment extends Fragment implements ProductAdapter.Listener {
         b.searchBar.setOnClickListener(v -> openList(null, null, true));
         b.seeAllCategories.setOnClickListener(v ->
                 requireMainActivity().selectTab(MainActivity.TAB_CATEGORIES));
-        b.seeAllFeatured.setOnClickListener(v -> openList(null, "Featured", false, true));
-        b.seeAllBestSellers.setOnClickListener(v -> openList(null, "Best Sellers", false));
+        b.seeAllFeatured.setOnClickListener(v -> openList(null, getString(R.string.title_featured), false, true));
+        b.seeAllBestSellers.setOnClickListener(v -> openList(null, getString(R.string.best_sellers), false));
         b.wishlistIcon.setOnClickListener(v -> startActivity(new Intent(requireContext(), WishlistActivity.class)));
 
         b.swipeRefresh.setOnRefreshListener(this::load);
@@ -215,7 +215,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.Listener {
     /* -------------------------------- helpers ------------------------------- */
 
     private void promptSignIn() {
-        Ui.toast(requireContext(), "Please sign in first");
+        Ui.toast(requireContext(), getString(R.string.please_sign_in_first));
         startActivity(new Intent(requireContext(), LoginActivity.class));
     }
 

@@ -104,7 +104,7 @@ public class CartFragment extends Fragment implements Adapters.CartAdapter.Liste
 
         b.empty.getRoot().setVisibility(View.VISIBLE);
         b.empty.emptyTitle.setText(R.string.sign_in);
-        b.empty.emptyMessage.setText("Sign in to see the items in your cart.");
+        b.empty.emptyMessage.setText(R.string.cart_signed_out_hint);
         b.empty.emptyAction.setText(R.string.sign_in);
         b.empty.emptyAction.setVisibility(View.VISIBLE);
         b.empty.emptyAction.setOnClickListener(v ->
@@ -156,13 +156,13 @@ public class CartFragment extends Fragment implements Adapters.CartAdapter.Liste
             double remaining = data.rules.freeShippingThreshold - data.totals.subtotal;
             if (remaining > 0) {
                 b.shippingHint.setVisibility(View.VISIBLE);
-                b.shippingHint.setText("Add " + Formats.money(remaining) + " more for free shipping");
+                b.shippingHint.setText(getString(R.string.add_more_for_free_shipping, Formats.money(remaining)));
             } else {
                 b.shippingHint.setVisibility(View.GONE);
             }
         } else if (!empty) {
             b.shippingHint.setVisibility(View.VISIBLE);
-            b.shippingHint.setText("You have free shipping on this order");
+            b.shippingHint.setText(R.string.have_free_shipping);
         } else {
             b.shippingHint.setVisibility(View.GONE);
         }
@@ -195,7 +195,7 @@ public class CartFragment extends Fragment implements Adapters.CartAdapter.Liste
     private void applyCoupon() {
         String code = String.valueOf(b.couponInput.getText()).trim().toUpperCase();
         if (code.isEmpty()) {
-            b.couponLayout.setError("Enter a code");
+            b.couponLayout.setError(getString(R.string.error_enter_code));
             return;
         }
         b.couponLayout.setError(null);

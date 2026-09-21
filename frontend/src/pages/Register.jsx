@@ -3,9 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useCartStore } from '../store/cartStore';
 import { useToastStore } from '../store/toastStore';
+import { useI18n } from '../i18n';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function Register() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const register = useAuthStore((s) => s.register);
   const mergeCart = useCartStore((s) => s.merge);
   const toast = useToastStore();
@@ -21,7 +24,7 @@ export default function Register() {
     setFieldErrors({});
 
     if (form.password !== form.confirm) {
-      setFieldErrors({ confirm: 'Passwords do not match' });
+      setFieldErrors({ confirm: t('auth.passwordsDoNotMatch') });
       return;
     }
 
@@ -34,7 +37,7 @@ export default function Register() {
         password: form.password,
       });
       await mergeCart().catch(() => {});
-      toast.success(`Welcome to AuraMart, ${user.name.split(' ')[0]}`);
+      toast.success(t('auth.welcomeToStore', { name: user.name.split(' ')[0] }));
       navigate('/', { replace: true });
     } catch (err) {
       setError(err.message);
@@ -49,22 +52,25 @@ export default function Register() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <div className="row gap-12 mb-24">
-          <span className="brand-mark">A</span>
-          <div>
-            <div className="brand-name">AuraMart</div>
-            <div className="brand-tag">Better Products, Brighter Life</div>
+        <div className="row between gap-12 mb-24">
+          <div className="row gap-12">
+            <span className="brand-mark">A</span>
+            <div>
+              <div className="brand-name">{t('brand.name')}</div>
+              <div className="brand-tag">{t('brand.tagline')}</div>
+            </div>
           </div>
+          <LanguageSwitcher compact />
         </div>
 
-        <h1 style={{ fontSize: '1.4rem', marginBottom: 6 }}>Create your account</h1>
-        <p className="small muted">It takes less than a minute.</p>
+        <h1 style={{ fontSize: '1.4rem', marginBottom: 6 }}>{t('auth.registerTitle')}</h1>
+        <p className="small muted">{t('auth.registerSubtitle')}</p>
 
         {error ? <div className="alert alert-error">{error}</div> : null}
 
         <form onSubmit={submit}>
           <div className="field">
-            <label className="field-label" htmlFor="name">Full name</label>
+            <label className="field-label" htmlFor="name">{t('auth.fullName')}</label>
             <input
               id="name"
               className={`input ${fieldErrors.name ? 'has-error' : ''}`}
@@ -77,7 +83,7 @@ export default function Register() {
           </div>
 
           <div className="field">
-            <label className="field-label" htmlFor="email">Email</label>
+            <label className="field-label" htmlFor="email">{t('auth.email')}</label>
             <input
               id="email"
               type="email"
@@ -91,7 +97,7 @@ export default function Register() {
           </div>
 
           <div className="field">
-            <label className="field-label" htmlFor="phone">Phone (optional)</label>
+            <label className="field-label" htmlFor="phone">{t('auth.phoneOptional')}</label>
             <input
               id="phone"
               className="input"
@@ -101,7 +107,7 @@ export default function Register() {
           </div>
 
           <div className="field">
-            <label className="field-label" htmlFor="password">Password</label>
+            <label className="field-label" htmlFor="password">{t('auth.password')}</label>
             <input
               id="password"
               type="password"
@@ -112,12 +118,12 @@ export default function Register() {
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
-            <span className="field-hint">At least 6 characters.</span>
+            <span className="field-hint">{t('auth.passwordHint')}</span>
             {fieldErrors.password ? <span className="field-error">{fieldErrors.password}</span> : null}
           </div>
 
           <div className="field">
-            <label className="field-label" htmlFor="confirm">Confirm password</label>
+            <label className="field-label" htmlFor="confirm">{t('auth.confirmPassword')}</label>
             <input
               id="confirm"
               type="password"
@@ -131,12 +137,12 @@ export default function Register() {
           </div>
 
           <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={busy}>
-            {busy ? 'Creating account…' : 'Create Account'}
+            {busy ? t('auth.creatingAccount') : t('auth.createAccount')}
           </button>
         </form>
 
         <p className="small muted mt-24" style={{ textAlign: 'center' }}>
-          Already have an account? <Link to="/login" className="link">Sign in</Link>
+          {t('auth.alreadyHaveAccount')} <Link to="/login" className="link">{t('auth.signIn')}</Link>
         </p>
       </div>
     </div>

@@ -3,6 +3,7 @@ import { reviewApi } from '../api';
 import { Badge, ConfirmModal, Empty, Pagination, Spinner } from '../components/ui';
 import { Star2, StarFilled, Star, Trash, Check, X } from '../components/Icons';
 import { useToastStore } from '../store';
+import { useI18n } from '../i18n';
 import { formatDate } from '../utils/format';
 
 function Stars({ value }) {
@@ -16,6 +17,7 @@ function Stars({ value }) {
 }
 
 export default function ReviewsPage() {
+  const { t } = useI18n();
   const toast = useToastStore();
 
   const [reviews, setReviews] = useState([]);
@@ -57,7 +59,7 @@ export default function ReviewsPage() {
     setDeleting(true);
     try {
       await reviewApi.remove(deleteTarget._id);
-      toast.success('Review deleted');
+      toast.success(t('reviews.deleted'));
       setDeleteTarget(null);
       load();
     } catch (err) {
@@ -71,8 +73,8 @@ export default function ReviewsPage() {
     <>
       <div className="page-head">
         <div>
-          <h1>Reviews</h1>
-          <p>{pagination.total} review(s)</p>
+          <h1>{t('reviews.title')}</h1>
+          <p>{t('reviews.headCount', { total: pagination.total })}</p>
         </div>
       </div>
 
@@ -80,14 +82,14 @@ export default function ReviewsPage() {
         <div className="card-header">
           <div className="tabs">
             {[
-              { value: '', label: 'All' },
-              { value: 'true', label: 'Published' },
-              { value: 'false', label: 'Hidden' },
-            ].map((t) => (
+              { value: '', label: t('common.all') },
+              { value: 'true', label: t('reviews.published') },
+              { value: 'false', label: t('reviews.hidden') },
+            ].map((tab) => (
               <button
-                key={t.label}
+                key={tab.value}
                 type="button"
-                className={`tab-chip ${approved === t.value ? 'active' : ''}`}
+                className={`tab-chip ${approved === tab.value ? 'active' : ''}`}
                 onClick={() => {
                   setApproved(t.value);
                   setPage(1);
@@ -106,7 +108,7 @@ export default function ReviewsPage() {
             }}
             style={{ width: 150 }}
           >
-            <option value="">All ratings</option>
+            <option value="">{t('reviews.allRatings')}</option>
             {[5, 4, 3, 2, 1].map((r) => (
               <option key={r} value={r}>{r} stars</option>
             ))}
@@ -116,20 +118,20 @@ export default function ReviewsPage() {
         {loading ? (
           <Spinner />
         ) : reviews.length === 0 ? (
-          <Empty icon={<Star2 size={26} />} title="No reviews found" />
+          <Empty icon={<Star2 size={26} />} title={t('reviews.emptyTitle')} />
         ) : (
           <>
             <div className="table-wrap">
               <table className="data">
                 <thead>
                   <tr>
-                    <th>Product</th>
-                    <th>Customer</th>
-                    <th>Rating</th>
-                    <th>Review</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th className="right">Actions</th>
+                    <th>{t('common.product')}</th>
+                    <th>{t('common.customer')}</th>
+                    <th>{t('common.rating')}</th>
+                    <th>{t('reviews.review')}</th>
+                    <th>{t('common.date')}</th>
+                    <th>{t('common.status')}</th>
+                    <th className="right">{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -155,7 +157,7 @@ export default function ReviewsPage() {
                       <td className="muted">{formatDate(r.createdAt)}</td>
                       <td>
                         <Badge tone={r.isApproved ? 'ok' : 'muted'}>
-                          {r.isApproved ? 'Published' : 'Hidden'}
+                          {r.isApproved ? t('reviews.published') : t('reviews.hidden')}
                         </Badge>
                       </td>
                       <td>
@@ -164,8 +166,8 @@ export default function ReviewsPage() {
                             type="button"
                             className="btn btn-ghost btn-icon"
                             onClick={() => moderate(r, !r.isApproved)}
-                            aria-label={r.isApproved ? 'Hide review' : 'Publish review'}
-                            title={r.isApproved ? 'Hide review' : 'Publish review'}
+                            aria-label={r.isApproved ? t('reviews.hideReview') : t('reviews.publishReview')}
+                            title={r.isApproved ? t('reviews.hideReview') : t('reviews.publishReview')}
                           >
                             {r.isApproved ? <X size={15} /> : <Check size={15} />}
                           </button>
@@ -173,7 +175,7 @@ export default function ReviewsPage() {
                             type="button"
                             className="btn btn-danger-ghost btn-icon"
                             onClick={() => setDeleteTarget(r)}
-                            aria-label="Delete review"
+                            aria-label={t('reviews.deleteReviewAria')}
                           >
                             <Trash size={15} />
                           </button>
@@ -198,8 +200,8 @@ export default function ReviewsPage() {
 
       <ConfirmModal
         open={Boolean(deleteTarget)}
-        title="Delete review"
-        message="Delete this review permanently? The product rating will be recalculated."
+        title={t('reviews.deleteTitle')}
+        message={t('reviews.deleteMessage')}
         onConfirm={confirmDelete}
         onClose={() => setDeleteTarget(null)}
         busy={deleting}

@@ -6,10 +6,12 @@ import { Breadcrumb, EmptyState, Pagination, Rating, SkeletonGrid } from '../com
 import { Filter, Search, X } from '../components/Icons';
 import { SORT_OPTIONS, COLOR_SWATCHES } from '../utils/constants';
 import { currency } from '../utils/format';
+import { useI18n } from '../i18n';
 
 const LIST_KEYS = ['brand', 'color'];
 
 export default function Products() {
+  const { t, locale } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [products, setProducts] = useState([]);
@@ -49,7 +51,8 @@ export default function Products() {
 
   useEffect(() => {
     catalogApi.categories({ withCounts: true }).then((res) => setCategories(res.data)).catch(() => {});
-  }, []);
+    // Category names come translated from the API, so refetch on a switch.
+  }, [locale]);
 
   useEffect(() => {
     catalogApi
@@ -79,7 +82,7 @@ export default function Products() {
     return () => {
       alive = false;
     };
-  }, [query]);
+  }, [query, locale]);
 
   const activeChips = [];
   if (query.search) activeChips.push({ key: 'search', label: `“${query.search}”` });
@@ -98,7 +101,12 @@ export default function Products() {
       label: `${currency(query.minPrice || 0)} – ${currency(query.maxPrice || facets.price.max)}`,
     });
   }
-  if (query.minRating) activeChips.push({ key: 'minRating', label: `${query.minRating}★ & up` });
+  if (query.minRating) {
+    activeChips.push({
+      key: 'minRating',
+      label: t('products.ratingAndUp', { rating: query.minRating }),
+    });
+  }
 
   function clearChip(chip) {
     if (chip.key === 'price') patchParams({ minPrice: '', maxPrice: '' });
@@ -112,8 +120,12 @@ export default function Products() {
     <div className="container">
       <Breadcrumb
         items={[
-          { label: 'Home', to: '/' },
-          { label: query.category ? activeChips.find((c) => c.key === 'category')?.label : 'All Products' },
+          { label: t('common.home'), to: '/' },
+          {
+            label: query.category
+              ? activeChips.find((c) => c.key === 'category')?.label
+              : t('common.allProducts'),
+          },
         ]}
       />
 
@@ -121,20 +133,20 @@ export default function Products() {
         <aside className={`filter-panel ${showFilters ? '' : 'mobile-hidden'}`}>
           <div className="card card-pad">
             <div className="row between mb-16">
-              <h3 style={{ fontSize: '0.95rem' }}>Filters</h3>
+              <h3 style={{ fontSize: '0.95rem' }}>{t('products.filters')}</h3>
               {activeChips.length > 0 ? (
                 <button
                   type="button"
                   className="btn btn-ghost btn-sm"
                   onClick={() => setSearchParams(new URLSearchParams())}
                 >
-                  Clear all
+                  {t('products.clearAll')}
                 </button>
               ) : null}
             </div>
 
             <div className="filter-group">
-              <h4>Category</h4>
+              <h4>{t('products.category')}</h4>
               <label className="filter-option">
                 <input
                   type="radio"
@@ -142,7 +154,7 @@ export default function Products() {
                   checked={!activeCategory}
                   onChange={() => patchParams({ category: '' })}
                 />
-                All categories
+                {t('products.allCategories')}
               </label>
               {rootCategories.map((c) => (
                 <label key={c._id} className="filter-option">
@@ -159,7 +171,7 @@ export default function Products() {
             </div>
 
             <div className="filter-group">
-              <h4>Price</h4>
+              <h4>{t('products.price')}</h4>
               <div className="row gap-8">
                 <input
                   className="input"
@@ -168,7 +180,7 @@ export default function Products() {
                   placeholder={String(facets.price.min || 0)}
                   value={query.minPrice || ''}
                   onChange={(e) => patchParams({ minPrice: e.target.value })}
-                  aria-label="Minimum price"
+                  aria-label={t('products.minPriceAria')}
                 />
                 <span className="muted">–</span>
                 <input
@@ -178,14 +190,14 @@ export default function Products() {
                   placeholder={String(facets.price.max || 0)}
                   value={query.maxPrice || ''}
                   onChange={(e) => patchParams({ maxPrice: e.target.value })}
-                  aria-label="Maximum price"
+                  aria-label={t('products.maxPriceAria')}
                 />
               </div>
             </div>
 
             {facets.brands.length > 0 ? (
               <div className="filter-group">
-                <h4>Brand</h4>
+                <h4>{t('products.brand')}</h4>
                 {facets.brands.map((b) => (
                   <label key={b.value} className="filter-option">
                     <input
@@ -202,7 +214,7 @@ export default function Products() {
 
             {facets.colors.length > 0 ? (
               <div className="filter-group">
-                <h4>Color</h4>
+                <h4>{t('products.color')}</h4>
                 {facets.colors.map((c) => (
                   <label key={c.value} className="filter-option">
                     <input
@@ -227,7 +239,7 @@ export default function Products() {
             ) : null}
 
             <div className="filter-group">
-              <h4>Rating</h4>
+              <h4>{t('products.rating')}</h4>
               {(facets.ratings || [4, 3, 2, 1]).map((r) => (
                 <label key={r} className="filter-option">
                   <input
@@ -236,20 +248,20 @@ export default function Products() {
                     checked={String(query.minRating) === String(r)}
                     onChange={() => patchParams({ minRating: r })}
                   />
-                  <Rating value={r} /> &amp; up
+                  <Rating value={r} /> {t('products.andUp')}
                 </label>
               ))}
             </div>
 
             <div className="filter-group">
-              <h4>Availability</h4>
+              <h4>{t('products.availability')}</h4>
               <label className="filter-option">
                 <input
                   type="checkbox"
                   checked={query.inStock === 'true'}
                   onChange={(e) => patchParams({ inStock: e.target.checked ? 'true' : '' })}
                 />
-                In stock only
+                {t('products.inStockOnly')}
               </label>
               <label className="filter-option">
                 <input
@@ -257,7 +269,7 @@ export default function Products() {
                   checked={query.featured === 'true'}
                   onChange={(e) => patchParams({ featured: e.target.checked ? 'true' : '' })}
                 />
-                Featured only
+                {t('products.featuredOnly')}
               </label>
             </div>
           </div>
@@ -267,10 +279,16 @@ export default function Products() {
           <div className="toolbar">
             <div>
               <h2 style={{ fontSize: '1.2rem' }}>
-                {query.search ? `Results for “${query.search}”` : 'All Products'}
+                {query.search
+                  ? t('products.resultsFor', { term: query.search })
+                  : t('common.allProducts')}
               </h2>
               <p className="small muted" style={{ margin: 0 }}>
-                {loading ? 'Loading…' : `${pagination.total} product${pagination.total === 1 ? '' : 's'} found`}
+                {loading
+                  ? t('common.loading')
+                  : t(pagination.total === 1 ? 'products.foundOne' : 'products.foundMany', {
+                    count: pagination.total,
+                  })}
               </p>
             </div>
 
@@ -280,10 +298,10 @@ export default function Products() {
                 className="btn btn-outline btn-sm filters-toggle"
                 onClick={() => setShowFilters((v) => !v)}
               >
-                <Filter size={15} /> Filters
+                <Filter size={15} /> {t('products.filters')}
               </button>
               <label className="row gap-8 small muted">
-                Sort by
+                {t('products.sortBy')}
                 <select
                   className="select"
                   value={query.sort || 'best_selling'}
@@ -291,7 +309,7 @@ export default function Products() {
                   style={{ width: 180 }}
                 >
                   {SORT_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
+                    <option key={o.value} value={o.value}>{t(o.labelKey)}</option>
                   ))}
                 </select>
               </label>
@@ -303,7 +321,11 @@ export default function Products() {
               {activeChips.map((chip, i) => (
                 <span key={`${chip.key}-${chip.label}-${i}`} className="chip">
                   {chip.label}
-                  <button type="button" onClick={() => clearChip(chip)} aria-label={`Remove ${chip.label}`}>
+                  <button
+                    type="button"
+                    onClick={() => clearChip(chip)}
+                    aria-label={t('products.removeFilter', { label: chip.label })}
+                  >
                     <X size={12} />
                   </button>
                 </span>
@@ -316,15 +338,15 @@ export default function Products() {
           ) : products.length === 0 ? (
             <EmptyState
               icon={<Search size={28} />}
-              title="No products match those filters"
-              message="Try widening your price range or clearing a filter or two."
+              title={t('products.emptyTitle')}
+              message={t('products.emptyMessage')}
               action={
                 <button
                   type="button"
                   className="btn btn-primary"
                   onClick={() => setSearchParams(new URLSearchParams())}
                 >
-                  Clear all filters
+                  {t('products.clearAllFilters')}
                 </button>
               }
             />

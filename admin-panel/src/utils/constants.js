@@ -37,9 +37,10 @@ export const CHART_COLORS = [
   '#84cc16',
 ];
 
+// Labels are catalogue keys; the components resolve them with t().
 export const RANGE_OPTIONS = [
-  { value: '7d', label: '7 Days' },
-  { value: '30d', label: '30 Days' },
-  { value: '90d', label: '3 Months' },
-  { value: '12m', label: '1 Year' },
+  { value: '7d', labelKey: 'range.7d' },
+  { value: '30d', labelKey: 'range.30d' },
+  { value: '90d', labelKey: 'range.90d' },
+  { value: '12m', labelKey: 'range.12m' },
 ];

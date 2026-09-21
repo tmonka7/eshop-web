@@ -6,8 +6,10 @@ import { Search, Package, Eye, Truck } from '../components/Icons';
 import { useToastStore } from '../store';
 import { currency, formatDate, formatDateTime, statusLabel } from '../utils/format';
 import { ORDER_STATUSES, STATUS_TONE, STATUS_FLOW, PAYMENT_TONE } from '../utils/constants';
+import { useI18n } from '../i18n';
 
 export default function OrdersPage() {
+  const { t } = useI18n();
   const toast = useToastStore();
   const [searchParams] = useSearchParams();
 
@@ -80,14 +82,14 @@ export default function OrdersPage() {
     <>
       <div className="page-head">
         <div>
-          <h1>Orders Management</h1>
-          <p>{pagination.total} order(s) matching the current filter</p>
+          <h1>{t('orders.title')}</h1>
+          <p>{t('orders.headCount', { total: pagination.total })}</p>
         </div>
         <div className="search-box" style={{ minWidth: 260 }}>
           <Search size={15} />
           <input
             className="input"
-            placeholder="Search order #, customer, email…"
+            placeholder={t('orders.searchPlaceholder')}
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -98,18 +100,18 @@ export default function OrdersPage() {
       </div>
 
       <div className="tabs mb-16">
-        {tabs.map((t) => (
+        {tabs.map((tab) => (
           <button
-            key={t}
+            key={tab}
             type="button"
-            className={`tab-chip ${status === t ? 'active' : ''}`}
+            className={`tab-chip ${status === tab ? 'active' : ''}`}
             onClick={() => {
-              setStatus(t);
+              setStatus(tab);
               setPage(1);
             }}
           >
-            {t === 'all' ? 'All' : statusLabel(t)}
-            {statusCounts[t] !== undefined ? <span className="n">{statusCounts[t]}</span> : null}
+            {tab === 'all' ? t('orders.filterAll') : statusLabel(tab)}
+            {statusCounts[tab] !== undefined ? <span className="n">{statusCounts[tab]}</span> : null}
           </button>
         ))}
       </div>
@@ -118,21 +120,25 @@ export default function OrdersPage() {
         {loading ? (
           <Spinner />
         ) : orders.length === 0 ? (
-          <Empty icon={<Package size={26} />} title="No orders found" message="Try a different filter." />
+          <Empty
+            icon={<Package size={26} />}
+            title={t('orders.emptyTitle')}
+            message={t('orders.emptyMessage')}
+          />
         ) : (
           <>
             <div className="table-wrap">
               <table className="data">
                 <thead>
                   <tr>
-                    <th>Order ID</th>
-                    <th>Date</th>
-                    <th>Customer</th>
-                    <th className="right">Items</th>
-                    <th className="right">Total</th>
-                    <th>Payment</th>
-                    <th>Status</th>
-                    <th className="right">Actions</th>
+                    <th>{t('orders.orderId')}</th>
+                    <th>{t('common.date')}</th>
+                    <th>{t('common.customer')}</th>
+                    <th className="right">{t('orders.items')}</th>
+                    <th className="right">{t('common.total')}</th>
+                    <th>{t('orders.payment')}</th>
+                    <th>{t('common.status')}</th>
+                    <th className="right">{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -148,7 +154,7 @@ export default function OrdersPage() {
                       <td className="right bold">{currency(o.pricing.total)}</td>
                       <td>
                         <Badge tone={PAYMENT_TONE[o.payment.status] || 'muted'}>
-                          {statusLabel(o.payment.status)}
+                          {statusLabel(o.payment.status, 'paymentStatus')}
                         </Badge>
                       </td>
                       <td><Badge tone={STATUS_TONE[o.status] || 'muted'}>{statusLabel(o.status)}</Badge></td>
@@ -158,7 +164,7 @@ export default function OrdersPage() {
                             type="button"
                             className="btn btn-ghost btn-icon"
                             onClick={() => openDetail(o)}
-                            aria-label="View order"
+                            aria-label={t('orders.viewOrderAria')}
                           >
                             <Eye size={15} />
                           </button>
@@ -190,11 +196,11 @@ export default function OrdersPage() {
           detail ? (
             <div className="row between grow wrap gap-12">
               <span className="small muted">
-                Placed {formatDateTime(detail.createdAt)}
+                {t('orders.placedAt', { datetime: formatDateTime(detail.createdAt) })}
               </span>
               <div className="row gap-8 wrap">
                 {allowedNext.length === 0 ? (
-                  <span className="small muted">No further status changes possible</span>
+                  <span className="small muted">{t('orders.noFurtherChanges')}</span>
                 ) : (
                   allowedNext.map((s) => (
                     <button
@@ -204,7 +210,7 @@ export default function OrdersPage() {
                       onClick={() => changeStatus(s)}
                       disabled={updating}
                     >
-                      Mark as {statusLabel(s)}
+                      {t('orders.markAs', { status: statusLabel(s) })}
                     </button>
                   ))
                 )}
@@ -221,7 +227,9 @@ export default function OrdersPage() {
               <div className="row gap-8">
                 <Badge tone={STATUS_TONE[detail.status] || 'muted'}>{statusLabel(detail.status)}</Badge>
                 <Badge tone={PAYMENT_TONE[detail.payment.status] || 'muted'}>
-                  {statusLabel(detail.payment.method)} · {statusLabel(detail.payment.status)}
+                  {statusLabel(detail.payment.method, 'paymentMethod')}
+                  {' · '}
+                  {statusLabel(detail.payment.status, 'paymentStatus')}
                 </Badge>
               </div>
               <span className="row gap-6 small muted">
@@ -231,13 +239,13 @@ export default function OrdersPage() {
 
             <div className="grid grid-2 mb-16">
               <div className="card card-pad">
-                <h3 className="mb-8" style={{ fontSize: '0.85rem' }}>Customer</h3>
+                <h3 className="mb-8" style={{ fontSize: '0.85rem' }}>{t('common.customer')}</h3>
                 <div className="small">{detail.customerName}</div>
                 <div className="small muted">{detail.customerEmail}</div>
                 {detail.user?.phone ? <div className="small muted">{detail.user.phone}</div> : null}
               </div>
               <div className="card card-pad">
-                <h3 className="mb-8" style={{ fontSize: '0.85rem' }}>Shipping address</h3>
+                <h3 className="mb-8" style={{ fontSize: '0.85rem' }}>{t('orders.shippingAddress')}</h3>
                 <div className="small">{detail.shippingAddress.fullName}</div>
                 <div className="small muted">
                   {detail.shippingAddress.street}, {detail.shippingAddress.city}{' '}
@@ -253,10 +261,10 @@ export default function OrdersPage() {
               <table className="data">
                 <thead>
                   <tr>
-                    <th>Product</th>
-                    <th className="right">Price</th>
-                    <th className="right">Qty</th>
-                    <th className="right">Subtotal</th>
+                    <th>{t('common.product')}</th>
+                    <th className="right">{t('common.price')}</th>
+                    <th className="right">{t('orders.qty')}</th>
+                    <th className="right">{t('orders.subtotal')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -283,41 +291,41 @@ export default function OrdersPage() {
             </div>
 
             <div className="card card-pad mb-16">
-              <div className="row between small"><span className="muted">Subtotal</span><span>{currency(detail.pricing.subtotal)}</span></div>
+              <div className="row between small"><span className="muted">{t('orders.subtotal')}</span><span>{currency(detail.pricing.subtotal)}</span></div>
               {detail.pricing.discount > 0 ? (
                 <div className="row between small">
-                  <span className="muted">Discount {detail.couponCode ? `(${detail.couponCode})` : ''}</span>
+                  <span className="muted">{t('orders.discount')} {detail.couponCode ? `(${detail.couponCode})` : ''}</span>
                   <span style={{ color: 'var(--green-600)' }}>−{currency(detail.pricing.discount)}</span>
                 </div>
               ) : null}
-              <div className="row between small"><span className="muted">Shipping</span><span>{detail.pricing.shipping === 0 ? 'Free' : currency(detail.pricing.shipping)}</span></div>
-              <div className="row between small"><span className="muted">Tax</span><span>{currency(detail.pricing.tax)}</span></div>
+              <div className="row between small"><span className="muted">{t('orders.shipping')}</span><span>{detail.pricing.shipping === 0 ? t('common.free') : currency(detail.pricing.shipping)}</span></div>
+              <div className="row between small"><span className="muted">{t('orders.tax')}</span><span>{currency(detail.pricing.tax)}</span></div>
               <hr className="divider" />
-              <div className="row between bold"><span>Total</span><span>{currency(detail.pricing.total)}</span></div>
+              <div className="row between bold"><span>{t('common.total')}</span><span>{currency(detail.pricing.total)}</span></div>
             </div>
 
             <div className="card card-pad mb-16">
-              <h3 className="mb-8" style={{ fontSize: '0.85rem' }}>Timeline</h3>
-              {detail.timeline.map((t, i) => (
-                <div key={`${t.status}-${i}`} className="row between small" style={{ padding: '4px 0' }}>
+              <h3 className="mb-8" style={{ fontSize: '0.85rem' }}>{t('orders.timeline')}</h3>
+              {detail.timeline.map((entry, i) => (
+                <div key={`${entry.status}-${i}`} className="row between small" style={{ padding: '4px 0' }}>
                   <span className="row gap-8">
-                    <Badge tone={STATUS_TONE[t.status] || 'muted'}>{statusLabel(t.status)}</Badge>
-                    {t.note ? <span className="muted">{t.note}</span> : null}
+                    <Badge tone={STATUS_TONE[entry.status] || 'muted'}>{statusLabel(entry.status)}</Badge>
+                    {entry.note ? <span className="muted">{entry.note}</span> : null}
                   </span>
-                  <span className="muted tiny">{formatDateTime(t.at)}</span>
+                  <span className="muted tiny">{formatDateTime(entry.at)}</span>
                 </div>
               ))}
             </div>
 
             {allowedNext.length > 0 ? (
               <div className="field" style={{ marginBottom: 0 }}>
-                <label className="field-label" htmlFor="status-note">Note for the next status change</label>
+                <label className="field-label" htmlFor="status-note">{t('orders.statusNote')}</label>
                 <input
                   id="status-note"
                   className="input"
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="Optional — shown in the order timeline"
+                  placeholder={t('orders.notePlaceholder')}
                 />
               </div>
             ) : null}

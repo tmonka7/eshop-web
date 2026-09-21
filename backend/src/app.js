@@ -11,7 +11,9 @@ const mongoSanitize = require('express-mongo-sanitize');
 const env = require('./config/env');
 const routes = require('./routes');
 const { notFound, errorHandler } = require('./middleware/error');
+const { detectLocale } = require('./middleware/locale');
 const { apiLimiter } = require('./middleware/rateLimit');
+const { t } = require('./i18n');
 
 const app = express();
 
@@ -45,12 +47,16 @@ app.use(compression());
 app.use(mongoSanitize());
 app.use(morgan(env.isProd ? 'combined' : 'dev'));
 
+// Sits ahead of every route so handlers, and the error handler, can answer in
+// the caller's language. Re-runs after auth on routes that care (see locale.js).
+app.use(detectLocale);
+
 app.use('/uploads', express.static(path.resolve(__dirname, '../uploads'), { maxAge: '7d' }));
 
-app.get('/', (_req, res) => {
+app.get('/', (req, res) => {
   res.json({
     success: true,
-    message: 'AuraMart API',
+    message: t('app.name', req.locale),
     data: { version: '1.0.0', docs: env.apiPrefix + '/health' },
   });
 });

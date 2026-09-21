@@ -22,27 +22,27 @@ const {
 exports.preview = asyncHandler(async (req, res) => {
   const cart = await getOrCreateCart(req.user._id);
   const payload = await buildCartPayload(cart);
-  if (!payload.items.length) throw ApiError.badRequest('Your cart is empty');
-  return ok(res, payload, 'Checkout preview');
+  if (!payload.items.length) throw ApiError.badRequest('error.cartEmpty');
+  return ok(res, payload, 'success.checkoutPreview');
 });
 
 exports.create = asyncHandler(async (req, res) => {
   const { shippingAddress, addressId, paymentMethod, card = {}, notes = '' } = req.body;
 
   if (!PAYMENT_METHODS.includes(paymentMethod)) {
-    throw ApiError.badRequest('Unsupported payment method');
+    throw ApiError.badRequest('error.unsupportedPaymentMethod');
   }
 
   const cart = await getOrCreateCart(req.user._id);
   const payload = await buildCartPayload(cart);
-  if (!payload.items.length) throw ApiError.badRequest('Your cart is empty');
+  if (!payload.items.length) throw ApiError.badRequest('error.cartEmpty');
 
   // Address: either an explicit body payload or one of the saved addresses.
   let address = shippingAddress;
   if (!address) {
     const user = await User.findById(req.user._id);
     const saved = addressId ? user.addresses.id(addressId) : user.defaultAddress;
-    if (!saved) throw ApiError.badRequest('A shipping address is required');
+    if (!saved) throw ApiError.badRequest('error.shippingAddressRequired');
     address = {
       fullName: saved.fullName,
       phone: saved.phone,
@@ -146,7 +146,7 @@ exports.create = asyncHandler(async (req, res) => {
     }
   });
 
-  return created(res, order, 'Order placed successfully');
+  return created(res, order, 'success.orderPlaced');
 });
 
 exports.myOrders = asyncHandler(async (req, res) => {
@@ -159,12 +159,12 @@ exports.myOrders = asyncHandler(async (req, res) => {
     Order.countDocuments(filter),
   ]);
 
-  return paginated(res, items, { page, limit, total }, 'Your orders');
+  return paginated(res, items, { page, limit, total }, 'success.yourOrders');
 });
 
 exports.getOne = asyncHandler(async (req, res) => {
   const order = await findOrderForRequest(req);
-  return ok(res, order, 'Order');
+  return ok(res, order, 'success.order');
 });
 
 /** Compact payload for the "Order Tracking" screen. */
@@ -197,7 +197,7 @@ exports.track = asyncHandler(async (req, res) => {
       })),
       timeline: order.timeline,
     },
-    'Order tracking',
+    'success.orderTracking',
   );
 });
 
@@ -205,7 +205,7 @@ exports.cancel = asyncHandler(async (req, res) => {
   const order = await findOrderForRequest(req);
 
   if (![ORDER_STATUS.PENDING, ORDER_STATUS.PROCESSING].includes(order.status)) {
-    throw ApiError.badRequest('This order can no longer be cancelled');
+    throw ApiError.badRequest('error.orderNotCancellable');
   }
 
   // Put the reserved stock back.
@@ -224,7 +224,7 @@ exports.cancel = asyncHandler(async (req, res) => {
   order.timeline.push({ status: ORDER_STATUS.CANCELLED, note: order.cancelReason });
   await order.save();
 
-  return ok(res, order, 'Order cancelled');
+  return ok(res, order, 'success.orderCancelled');
 });
 
 /* -------------------------------- admin ------------------------------- */
@@ -275,17 +275,17 @@ exports.adminList = asyncHandler(async (req, res) => {
 
 exports.adminGetOne = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id).populate('user', 'name email phone avatar');
-  if (!order) throw ApiError.notFound('Order not found');
-  return ok(res, order, 'Order');
+  if (!order) throw ApiError.notFound('error.orderNotFound');
+  return ok(res, order, 'success.order');
 });
 
 exports.updateStatus = asyncHandler(async (req, res) => {
   const { status, note = '' } = req.body;
-  if (!Object.values(ORDER_STATUS).includes(status)) throw ApiError.badRequest('Unknown status');
+  if (!Object.values(ORDER_STATUS).includes(status)) throw ApiError.badRequest('error.unknownStatus');
 
   const order = await Order.findById(req.params.id);
-  if (!order) throw ApiError.notFound('Order not found');
-  if (order.status === status) return ok(res, order, 'Status unchanged');
+  if (!order) throw ApiError.notFound('error.orderNotFound');
+  if (order.status === status) return ok(res, order, 'success.statusUnchanged');
 
   const allowed = ORDER_FLOW[order.status] || [];
   if (!allowed.includes(status)) {
@@ -319,7 +319,7 @@ exports.updateStatus = asyncHandler(async (req, res) => {
   order.timeline.push({ status, note });
   await order.save();
 
-  return ok(res, order, 'Order status updated');
+  return ok(res, order, 'success.orderStatusUpdated');
 });
 
 exports.updateTracking = asyncHandler(async (req, res) => {
@@ -332,8 +332,8 @@ exports.updateTracking = asyncHandler(async (req, res) => {
     },
     { new: true },
   );
-  if (!order) throw ApiError.notFound('Order not found');
-  return ok(res, order, 'Tracking updated');
+  if (!order) throw ApiError.notFound('error.orderNotFound');
+  return ok(res, order, 'success.trackingUpdated');
 });
 
 /* ------------------------------- helpers ------------------------------ */
@@ -344,11 +344,11 @@ async function findOrderForRequest(req) {
   const query = /^[0-9a-fA-F]{24}$/.test(id) ? { _id: id } : { orderNumber: id.toUpperCase() };
 
   const order = await Order.findOne(query);
-  if (!order) throw ApiError.notFound('Order not found');
+  if (!order) throw ApiError.notFound('error.orderNotFound');
 
   const isStaff = req.user.role !== 'customer';
   if (!isStaff && String(order.user) !== String(req.user._id)) {
-    throw ApiError.forbidden('This order belongs to another account');
+    throw ApiError.forbidden('error.orderBelongsToAnother');
   }
   return order;
 }

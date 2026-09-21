@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { getActiveLocale } from '../i18n/activeLocale';
+import { translate } from '../i18n';
 
 export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 export const ASSET_URL = import.meta.env.VITE_ASSET_URL || 'http://localhost:5000';
@@ -32,6 +34,9 @@ const client = axios.create({
 client.interceptors.request.use((config) => {
   const token = tokenStore.access;
   if (token) config.headers.Authorization = `Bearer ${token}`;
+  // Tells the API which language to answer in. Admin routes still return the
+  // whole `translations` sub-document; this only affects messages.
+  config.headers['X-Language'] = getActiveLocale();
   return config;
 });
 
@@ -44,7 +49,7 @@ client.interceptors.response.use(
     const { response, config } = error;
 
     if (!response) {
-      return Promise.reject(new Error('Cannot reach the server. Is the API running?'));
+      return Promise.reject(new Error(translate(getActiveLocale(), 'toast.networkError')));
     }
 
     const isAuthCall = config.url?.includes('/auth/login') || config.url?.includes('/auth/register');
@@ -67,7 +72,7 @@ client.interceptors.response.use(
       }
     }
 
-    const message = response.data?.message || 'Something went wrong';
+    const message = response.data?.message || translate(getActiveLocale(), 'toast.genericError');
     const err = new Error(message);
     err.status = response.status;
     err.errors = response.data?.errors;

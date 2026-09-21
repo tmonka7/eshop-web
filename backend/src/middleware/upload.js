@@ -30,7 +30,7 @@ function makeUploader(folder) {
     limits: { fileSize: env.uploadMaxBytes, files: 8 },
     fileFilter: (_req, file, cb) => {
       if (!ALLOWED.includes(file.mimetype)) {
-        return cb(ApiError.badRequest('Only JPEG, PNG, WEBP, GIF or AVIF images are allowed'));
+        return cb(ApiError.badRequest('error.imageTypeNotAllowed'));
       }
       return cb(null, true);
     },

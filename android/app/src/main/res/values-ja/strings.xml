@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AuraMart</string>
+    <string name="app_tagline">良いモノで、毎日をもっと明るく</string>
+
+    <!-- auth -->
+    <string name="sign_in">ログイン</string>
+    <string name="sign_up">アカウントを作成</string>
+    <string name="sign_out">ログアウト</string>
+    <string name="email">メールアドレス</string>
+    <string name="password">パスワード</string>
+    <string name="confirm_password">パスワード（確認）</string>
+    <string name="full_name">お名前</string>
+    <string name="phone">電話番号</string>
+    <string name="welcome_back">おかえりなさい</string>
+    <string name="create_account_subtitle">1 分もかかりません</string>
+    <string name="no_account">初めてですか？アカウントを作成</string>
+    <string name="have_account">アカウントをお持ちですか？ログイン</string>
+    <string name="demo_credentials">デモ: john@example.com / Password@123</string>
+    <string name="session_expired">セッションの有効期限が切れました。再度ログインしてください。</string>
+    <string name="continue_as_guest">ゲストとして見る</string>
+    <string name="error_name_required">お名前を入力してください</string>
+    <string name="error_email_invalid">有効なメールアドレスを入力してください</string>
+    <string name="error_password_short">6 文字以上で入力してください</string>
+    <string name="error_passwords_differ">パスワードが一致しません</string>
+    <string name="please_sign_in_first">先にログインしてください</string>
+
+    <!-- navigation -->
+    <string name="nav_home">ホーム</string>
+    <string name="nav_categories">カテゴリー</string>
+    <string name="nav_cart">カート</string>
+    <string name="nav_account">アカウント</string>
+
+    <!-- home -->
+    <string name="search_hint">商品を検索…</string>
+    <string name="shop_by_category">カテゴリーから探す</string>
+    <string name="featured_products">おすすめ商品</string>
+    <string name="best_sellers">人気商品</string>
+    <string name="see_all">すべて見る</string>
+
+    <!-- product -->
+    <string name="add_to_cart">カートに追加</string>
+    <string name="buy_now">今すぐ購入</string>
+    <string name="out_of_stock">在庫切れ</string>
+    <string name="in_stock">在庫あり</string>
+    <string name="quantity">数量</string>
+    <string name="description">商品説明</string>
+    <string name="reviews">レビュー</string>
+    <string name="related_products">こちらもおすすめ</string>
+    <string name="free_shipping">送料無料</string>
+    <string name="warranty">保証</string>
+    <string name="easy_returns">かんたん返品</string>
+    <string name="write_review">レビューを書く</string>
+    <string name="submit_review">レビューを投稿</string>
+    <string name="your_rating">あなたの評価</string>
+    <string name="review_title_hint">タイトル</string>
+    <string name="review_body_hint">良かった点、気になった点を教えてください</string>
+    <string name="no_reviews_yet">まだレビューはありません。最初のレビューを投稿しませんか。</string>
+    <string name="only_n_left">残り %1$d 点</string>
+    <string name="verified">確認済み</string>
+    <string name="customer">お客様</string>
+    <string name="star_rating">星 %1$d つ</string>
+    <string name="star_1">星 1 つ</string>
+    <string name="star_2">星 2 つ</string>
+    <string name="star_3">星 3 つ</string>
+    <string name="star_4">星 4 つ</string>
+    <string name="star_5">星 5 つ</string>
+    <string name="stars_rating">星 %1$d つ</string>
+
+    <!-- product list -->
+    <string name="no_products_found">商品が見つかりません</string>
+    <string name="no_products_hint">別のキーワードやカテゴリーでお試しください。</string>
+    <string name="no_categories_yet">カテゴリーがまだありません</string>
+    <string name="sort_best_selling">人気順</string>
+    <string name="sort_newest">新着順</string>
+    <string name="sort_price_asc">価格の安い順</string>
+    <string name="sort_price_desc">価格の高い順</string>
+    <string name="sort_rating">評価の高い順</string>
+    <string name="sort_name_asc">名前順（A-Z）</string>
+    <string name="title_featured">おすすめ</string>
+
+    <!-- cart -->
+    <string name="your_cart">カート</string>
+    <string name="cart_empty">カートは空です</string>
+    <string name="cart_empty_hint">商品一覧から、お気に入りを追加してください。</string>
+    <string name="cart_signed_out_hint">ログインするとカートの中身を確認できます。</string>
+    <string name="start_shopping">買い物を始める</string>
+    <string name="subtotal">小計</string>
+    <string name="shipping">送料</string>
+    <string name="tax">税</string>
+    <string name="discount">割引</string>
+    <string name="total">合計</string>
+    <string name="free">無料</string>
+    <string name="promo_code">クーポンコード</string>
+    <string name="apply">適用</string>
+    <string name="checkout">レジに進む</string>
+    <string name="clear_cart">カートを空にする</string>
+    <string name="add_more_for_free_shipping">あと %1$s で送料無料</string>
+    <string name="have_free_shipping">このご注文は送料無料です</string>
+    <string name="error_enter_code">コードを入力してください</string>
+    <string name="qty_and_price">数量 %1$d · %2$s</string>
+
+    <!-- checkout -->
+    <string name="shipping_address">お届け先住所</string>
+    <string name="payment_method">お支払い方法</string>
+    <string name="place_order">注文を確定する</string>
+    <string name="order_summary">ご注文内容</string>
+    <string name="add_new_address">新しい住所を追加</string>
+    <string name="payment_successful">お支払いが完了しました</string>
+    <string name="order_placed_message">ご注文を承りました。</string>
+    <string name="view_order">注文を見る</string>
+    <string name="continue_shopping">買い物を続ける</string>
+    <string name="card_number">カード番号</string>
+    <string name="name_on_card">カード名義</string>
+    <string name="demo_gateway_note">デモ用の決済ゲートウェイです。実際の請求は発生しません。下 4 桁が 0000 のカードは決済が拒否されます。</string>
+    <string name="pay_card">クレジット / デビットカード</string>
+    <string name="pay_paypal">PayPal</string>
+    <string name="pay_applepay">Apple Pay</string>
+    <string name="pay_cod">代金引換</string>
+    <string name="add_address_to_continue">お届け先住所を追加してください。</string>
+    <string name="choose_shipping_address">お届け先を選択してください</string>
+    <string name="error_card_invalid">有効なカード番号を入力してください</string>
+    <string name="error_fill_required">必須項目をすべて入力してください</string>
+
+    <!-- address -->
+    <string name="street_address">住所</string>
+    <string name="city">市区町村</string>
+    <string name="zip_code">郵便番号</string>
+    <string name="country">国・地域</string>
+    <string name="default_country">フィンランド</string>
+    <string name="default_address_label">自宅</string>
+    <string name="address">住所</string>
+    <string name="default_badge">既定</string>
+    <string name="set_as_default">既定にする</string>
+    <string name="no_saved_addresses">保存された住所はありません</string>
+    <string name="no_saved_addresses_hint">登録しておくと、お会計がワンタップで済みます。</string>
+    <string name="remove_address_confirm">この住所を削除しますか？</string>
+
+    <!-- orders -->
+    <string name="my_orders">注文履歴</string>
+    <string name="order_tracking">配送状況</string>
+    <string name="track_package">配送を追跡</string>
+    <string name="no_orders">まだ注文がありません</string>
+    <string name="no_orders_hint">ご注文いただくと、ここに表示されます。</string>
+    <string name="cancel_order">注文をキャンセル</string>
+    <string name="order_details">注文の詳細</string>
+    <string name="order_cancelled_notice">この注文はキャンセルされました。</string>
+    <string name="placed_on">注文日時 %1$s</string>
+    <string name="estimated_delivery">お届け予定 %1$s</string>
+    <string name="cancel_order_confirm">この注文をキャンセルしますか？在庫は戻され、お支払い済みの金額は返金されます。</string>
+    <string name="cancelled_by_customer">お客様によるキャンセル</string>
+    <string name="status_pending_step">受付済み</string>
+
+    <!-- order status -->
+    <string name="status_pending">受付済み</string>
+    <string name="status_processing">処理中</string>
+    <string name="status_shipped">発送済み</string>
+    <string name="status_delivered">お届け済み</string>
+    <string name="status_cancelled">キャンセル済み</string>
+
+    <!-- payment status -->
+    <string name="payment_unpaid">未払い</string>
+    <string name="payment_paid">支払い済み</string>
+    <string name="payment_failed">支払い失敗</string>
+    <string name="payment_refunded">返金済み</string>
+
+    <!-- account -->
+    <string name="my_account">アカウント</string>
+    <string name="addresses">お届け先</string>
+    <string name="wishlist">ほしい物リスト</string>
+    <string name="settings">設定</string>
+    <string name="profile">プロフィール</string>
+    <string name="save_changes">変更を保存</string>
+    <string name="wishlist_empty">ほしい物リストは空です</string>
+    <string name="wishlist_empty_hint">商品のハートをタップすると保存できます。</string>
+    <string name="app_version">AuraMart v%1$s</string>
+
+    <!-- language -->
+    <string name="language">言語</string>
+    <string name="choose_language">言語を選択</string>
+    <string name="language_system">システムの設定に従う</string>
+    <string name="language_english">English</string>
+    <string name="language_chinese">简体中文</string>
+    <string name="language_japanese">日本語</string>
+
+    <!-- network errors -->
+    <string name="error_network">サーバーに接続できません。API が起動しているか確認してください。</string>
+    <string name="error_timeout">サーバーの応答に時間がかかりすぎました。</string>
+    <string name="error_generic">エラーが発生しました</string>
+    <string name="error_unauthorized">続けるにはログインしてください</string>
+    <string name="error_forbidden">この操作を行う権限がありません</string>
+    <string name="error_not_found">見つかりません</string>
+    <string name="error_conflict">既に存在するデータと競合しています</string>
+
+    <!-- generic -->
+    <string name="retry">再試行</string>
+    <string name="cancel">キャンセル</string>
+    <string name="save">保存</string>
+    <string name="delete">削除</string>
+    <string name="edit">編集</string>
+    <string name="loading">読み込み中…</string>
+    <string name="nothing_here">まだ何もありません</string>
+    <string name="filter_all">すべて</string>
+    <string name="filters">絞り込み</string>
+    <string name="sort_by">並び替え</string>
+    <string name="product_image">商品画像</string>
+    <string name="back">戻る</string>
+</resources>

@@ -6,8 +6,10 @@ import { useAuthStore } from '../store/authStore';
 import { useCartStore } from '../store/cartStore';
 import { useToastStore } from '../store/toastStore';
 import { userApi } from '../api';
+import { useI18n } from '../i18n';
 
 export default function ProductCard({ product }) {
+  const { t } = useI18n();
   const user = useAuthStore((s) => s.user);
   const toggleLocal = useAuthStore((s) => s.toggleWishlistLocal);
   const addToCart = useCartStore((s) => s.add);
@@ -21,7 +23,7 @@ export default function ProductCard({ product }) {
   async function handleWishlist(e) {
     e.preventDefault();
     if (!user) {
-      toast.info('Sign in to save items to your wishlist');
+      toast.info(t('toast.signInForWishlist'));
       return;
     }
     try {
@@ -38,7 +40,7 @@ export default function ProductCard({ product }) {
     if (outOfStock) return;
     try {
       const message = await addToCart(product, 1, null, Boolean(user));
-      toast.success(message || 'Added to cart');
+      toast.success(message || t('toast.addedToCart'));
     } catch (err) {
       toast.error(err.message);
     }
@@ -56,9 +58,9 @@ export default function ProductCard({ product }) {
           }}
         />
         {outOfStock ? (
-          <span className="product-flag out">Out of stock</span>
+          <span className="product-flag out">{t('common.outOfStock')}</span>
         ) : off > 0 ? (
-          <span className="product-flag">{off}% OFF</span>
+          <span className="product-flag">{t('common.percentOff', { percent: off })}</span>
         ) : null}
       </Link>
 
@@ -66,7 +68,7 @@ export default function ProductCard({ product }) {
         type="button"
         className={`wish-btn ${wished ? 'on' : ''}`}
         onClick={handleWishlist}
-        aria-label={wished ? 'Remove from wishlist' : 'Add to wishlist'}
+        aria-label={wished ? t('a11y.removeFromWishlist') : t('a11y.addToWishlist')}
       >
         {wished ? <HeartFilled size={16} /> : <Heart size={16} />}
       </button>
@@ -96,7 +98,7 @@ export default function ProductCard({ product }) {
           disabled={outOfStock}
         >
           <Cart size={15} />
-          {outOfStock ? 'Out of stock' : 'Add to Cart'}
+          {outOfStock ? t('common.outOfStock') : t('product.addToCart')}
         </button>
       </div>
     </article>

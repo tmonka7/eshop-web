@@ -82,7 +82,7 @@ public class OrderDetailActivity extends AppCompatActivity {
                 trackingAdapter.submit(data.steps);
                 if (data.cancelled) {
                     b.cancelledNotice.setVisibility(View.VISIBLE);
-                    b.cancelledNotice.setText("This order was cancelled.");
+                    b.cancelledNotice.setText(R.string.order_cancelled_notice);
                 } else {
                     b.cancelledNotice.setVisibility(View.GONE);
                 }
@@ -97,14 +97,14 @@ public class OrderDetailActivity extends AppCompatActivity {
 
     private void bind() {
         b.orderNumberText.setText("#" + order.orderNumber);
-        b.placedText.setText("Placed " + Formats.dateTime(order.createdAt));
+        b.placedText.setText(getString(R.string.placed_on, Formats.dateTime(order.createdAt)));
 
-        b.statusBadge.setText(Formats.label(order.status));
+        b.statusBadge.setText(Formats.label(this, order.status));
         b.statusBadge.setBackgroundResource(Adapters.StatusStyle.background(order.status));
         b.statusBadge.setTextColor(getColor(Adapters.StatusStyle.textColor(order.status)));
 
         b.trackingText.setText(order.carrier + " · " + order.trackingNumber);
-        b.etaText.setText("Estimated delivery " + Formats.date(order.estimatedDelivery));
+        b.etaText.setText(getString(R.string.estimated_delivery, Formats.date(order.estimatedDelivery)));
 
         itemAdapter.submit(order.items);
         b.itemsTitle.setText("Items (" + order.items.size() + ")");
@@ -123,7 +123,8 @@ public class OrderDetailActivity extends AppCompatActivity {
             b.discountRow.setVisibility(View.GONE);
         }
 
-        String payment = Formats.label(order.payment.method) + " · " + Formats.label(order.payment.status);
+        String payment = Formats.label(this, order.payment.method)
+                + " · " + Formats.label(this, order.payment.status);
         if (order.payment.cardLast4 != null && !order.payment.cardLast4.isEmpty()) {
             payment += " (ending " + order.payment.cardLast4 + ")";
         }
@@ -141,7 +142,7 @@ public class OrderDetailActivity extends AppCompatActivity {
     private void confirmCancel() {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.cancel_order)
-                .setMessage("Cancel this order? Stock is returned and any payment is refunded.")
+                .setMessage(R.string.cancel_order_confirm)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.cancel_order, (dialog, which) -> cancelOrder())
                 .show();
@@ -150,7 +151,7 @@ public class OrderDetailActivity extends AppCompatActivity {
     private void cancelOrder() {
         b.cancelOrderButton.setEnabled(false);
         Repo.call(
-                Repo.api().cancelOrder(orderId, new CancelOrderRequest("Cancelled by customer")),
+                Repo.api().cancelOrder(orderId, new CancelOrderRequest(getString(R.string.cancelled_by_customer))),
                 new Repo.OnResult<Order>() {
                     @Override
                     public void onSuccess(Order data, String message) {

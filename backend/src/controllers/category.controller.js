@@ -1,6 +1,7 @@
 'use strict';
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
+const { buildTranslations } = require('../utils/localize');
 const { ok, created } = require('../utils/response');
 const Category = require('../models/Category');
 const Product = require('../models/Product');
@@ -23,7 +24,7 @@ exports.list = asyncHandler(async (req, res) => {
     });
   }
 
-  return ok(res, categories, 'Categories');
+  return ok(res, categories, 'success.categories');
 });
 
 exports.tree = asyncHandler(async (_req, res) => {
@@ -37,35 +38,43 @@ exports.tree = asyncHandler(async (_req, res) => {
       roots.push(node);
     }
   });
-  return ok(res, roots, 'Category tree');
+  return ok(res, roots, 'success.categoryTree');
 });
 
 exports.getBySlug = asyncHandler(async (req, res) => {
   const category = await Category.findOne({ slug: req.params.slug }).lean();
-  if (!category) throw ApiError.notFound('Category not found');
+  if (!category) throw ApiError.notFound('error.categoryNotFound');
   category.productCount = await Product.countDocuments({ category: category._id, isActive: true });
-  return ok(res, category, 'Category');
+  return ok(res, category, 'success.category');
 });
 
 exports.create = asyncHandler(async (req, res) => {
-  const category = await Category.create(req.body);
-  return created(res, category, 'Category created');
+  const category = await Category.create({
+    ...req.body,
+    translations: buildTranslations(req.body.translations),
+  });
+  return created(res, category, 'success.categoryCreated');
 });
 
 exports.update = asyncHandler(async (req, res) => {
   const category = await Category.findById(req.params.id);
-  if (!category) throw ApiError.notFound('Category not found');
+  if (!category) throw ApiError.notFound('error.categoryNotFound');
   if (req.body.parent && String(req.body.parent) === String(category._id)) {
-    throw ApiError.badRequest('A category cannot be its own parent');
+    throw ApiError.badRequest('error.categoryOwnParent');
   }
-  Object.assign(category, req.body);
+  const { translations, ...rest } = req.body;
+  Object.assign(category, rest);
+  // Merge rather than assign: a PATCH carrying only `ja` must not wipe en/zh.
+  if (translations) {
+    category.translations = buildTranslations(translations, category.toObject().translations);
+  }
   await category.save();
-  return ok(res, category, 'Category updated');
+  return ok(res, category, 'success.categoryUpdated');
 });
 
 exports.remove = asyncHandler(async (req, res) => {
   const category = await Category.findById(req.params.id);
-  if (!category) throw ApiError.notFound('Category not found');
+  if (!category) throw ApiError.notFound('error.categoryNotFound');
 
   const productCount = await Product.countDocuments({ category: category._id });
   if (productCount > 0) {
@@ -74,8 +83,8 @@ exports.remove = asyncHandler(async (req, res) => {
     );
   }
   const childCount = await Category.countDocuments({ parent: category._id });
-  if (childCount > 0) throw ApiError.conflict('Cannot delete: category has sub-categories');
+  if (childCount > 0) throw ApiError.conflict('error.categoryHasChildren');
 
   await category.deleteOne();
-  return ok(res, null, 'Category deleted');
+  return ok(res, null, 'success.categoryDeleted');
 });

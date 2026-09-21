@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { authApi } from '../api';
+import { translate } from '../i18n';
+import { getActiveLocale } from '../i18n/activeLocale';
 import { tokenStore } from '../api/client';
 
 export const useAuthStore = create((set, get) => ({
@@ -30,7 +32,7 @@ export const useAuthStore = create((set, get) => ({
   async login(email, password) {
     const res = await authApi.login({ email, password });
     if (res.data.user.role === 'customer') {
-      throw new Error('This account does not have admin access');
+      throw new Error(translate(getActiveLocale(), 'toast.noAdminAccess'));
     }
     tokenStore.set(res.data);
     set({ user: res.data.user });

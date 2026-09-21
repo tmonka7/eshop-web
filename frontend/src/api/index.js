@@ -54,6 +54,7 @@ export const orderApi = {
 
 export const userApi = {
   updateProfile: (payload) => client.patch('/users/profile', payload),
+  updateLanguage: (language) => client.patch('/users/language', { language }),
   addresses: () => client.get('/users/addresses'),
   addAddress: (payload) => client.post('/users/addresses', payload),
   updateAddress: (id, payload) => client.patch(`/users/addresses/${id}`, payload),

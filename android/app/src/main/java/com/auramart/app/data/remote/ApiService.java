@@ -24,6 +24,7 @@ import com.auramart.app.data.model.Models.ReviewSummary;
 import com.auramart.app.data.model.Models.TokenData;
 import com.auramart.app.data.model.Models.Tracking;
 import com.auramart.app.data.model.Models.UpdateCartItemRequest;
+import com.auramart.app.data.model.Models.UpdateLanguageRequest;
 import com.auramart.app.data.model.Models.UpdateProfileRequest;
 import com.auramart.app.data.model.Models.User;
 import com.auramart.app.data.model.Models.WishlistToggle;
@@ -143,6 +144,9 @@ public interface ApiService {
 
     @PATCH("users/profile")
     Call<ApiResponse<User>> updateProfile(@Body UpdateProfileRequest body);
+
+    @PATCH("users/language")
+    Call<ApiResponse<User>> updateLanguage(@Body UpdateLanguageRequest body);
 
     @GET("users/addresses")
     Call<ApiResponse<List<Address>>> addresses();

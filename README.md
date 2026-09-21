@@ -20,6 +20,19 @@ native Android app.
 - **MongoDB 6.0** running locally on `27017`
 - **JDK 17** + **Gradle 8.13** (or Android Studio) for the Android app
 
+### Install everything at once
+
+The repo root is an npm workspace, so one install covers all three Node
+projects and hoists shared packages into a single `node_modules/`:
+
+```bash
+npm install         # from the repo root
+```
+
+You can still install a project on its own (`cd backend && npm install`) if you
+prefer; the per-project instructions below assume you have not run the root
+install.
+
 ### 1. Backend
 
 ```bash
@@ -128,6 +141,49 @@ All three clients speak the same REST API and the same JSON envelope:
 
 Order maths lives in exactly one place — `backend/src/services/pricing.service.js` — so the
 cart, the checkout preview and the saved order can never disagree.
+
+---
+
+## Languages
+
+All four projects ship in **English, Simplified Chinese and Japanese**.
+
+Each client has a language picker — the storefront header, the admin topbar and
+the Android account screen — and remembers the choice locally. For a signed-in
+user it is also saved on the account (`PATCH /users/language`), so the same
+person sees the same language on the next device.
+
+**How a request picks its language.** The API resolves, most explicit first:
+`?lang=ja` → the `X-Language` header the clients send → the signed-in user's
+saved preference → `Accept-Language` → English. The resolved tag comes back in
+`Content-Language`, and `GET /api/v1/languages` lists what is on offer.
+
+**Two layers are translated.**
+
+- *Interface copy* lives in catalogues: `backend/src/i18n/locales/*.json`,
+  `frontend/src/i18n/locales/*.js`, `admin-panel/src/i18n/locales/*.js` and
+  `android/app/src/main/res/values{,-zh,-ja}/strings.xml`. Components reference
+  keys, never English prose.
+- *Catalogue content* — product, category and banner copy — lives in a
+  `translations.{en,zh,ja}` sub-document on the document itself. The canonical
+  top-level fields stay the English original and the fallback, so an
+  untranslated product still renders its English name rather than a blank.
+  The admin forms have a per-language tab for editing them, and `npm run seed`
+  loads trilingual copy from `backend/src/seed/translations.js`.
+
+Storefront responses fold the right language into the flat fields, so clients
+still receive `{ name, description }` and never see the storage shape. Admin
+responses keep the whole sub-document so the panel can edit every language.
+
+**Prices stay in USD** in every language; only number and date formatting
+follows the locale. Adding a currency layer would mean exchange rates and a
+`currency` field on stored orders — deliberately out of scope.
+
+**Adding a language** means adding a locale file to each of the four catalogues
+(keep the key sets identical), extending `LOCALES` in `backend/src/i18n/index.js`
+and `frontend/src/i18n/constants.js`, adding a `values-xx/` folder plus an entry
+in `android/app/src/main/res/xml/locales_config.xml`, and adding the copy to
+`backend/src/seed/translations.js`.
 
 ---
 

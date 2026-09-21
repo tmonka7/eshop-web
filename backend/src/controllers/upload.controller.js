@@ -8,7 +8,7 @@ const { publicUrl, UPLOAD_ROOT } = require('../middleware/upload');
 
 exports.uploadImages = (folder) => asyncHandler(async (req, res) => {
   const files = req.files || (req.file ? [req.file] : []);
-  if (!files.length) throw ApiError.badRequest('No image uploaded');
+  if (!files.length) throw ApiError.badRequest('error.noImageUploaded');
 
   const urls = files.map((f) => ({
     url: publicUrl(folder, f.filename),
@@ -17,30 +17,30 @@ exports.uploadImages = (folder) => asyncHandler(async (req, res) => {
     mimetype: f.mimetype,
   }));
 
-  return created(res, urls, urls.length + ' image(s) uploaded');
+  return created(res, urls, 'success.imagesUploaded', { count: urls.length });
 });
 
 exports.deleteImage = asyncHandler(async (req, res) => {
   const { folder, filename } = req.params;
   if (!['products', 'avatars', 'banners'].includes(folder)) {
-    throw ApiError.badRequest('Unknown upload folder');
+    throw ApiError.badRequest('error.unknownUploadFolder');
   }
   // Reject traversal attempts such as ..%2F..%2Fetc%2Fpasswd.
   if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
-    throw ApiError.badRequest('Invalid filename');
+    throw ApiError.badRequest('error.invalidFilename');
   }
 
   const target = path.join(UPLOAD_ROOT, folder, filename);
   if (!target.startsWith(path.join(UPLOAD_ROOT, folder))) {
-    throw ApiError.badRequest('Invalid filename');
+    throw ApiError.badRequest('error.invalidFilename');
   }
 
   try {
     await fs.unlink(target);
   } catch (err) {
-    if (err.code === 'ENOENT') throw ApiError.notFound('File not found');
+    if (err.code === 'ENOENT') throw ApiError.notFound('error.fileNotFound');
     throw err;
   }
 
-  return ok(res, null, 'Image deleted');
+  return ok(res, null, 'success.imageDeleted');
 });

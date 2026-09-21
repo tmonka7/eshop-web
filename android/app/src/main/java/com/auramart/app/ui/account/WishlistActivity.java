@@ -42,7 +42,7 @@ public class WishlistActivity extends AppCompatActivity implements ProductAdapte
         b.list.setAdapter(adapter);
 
         b.empty.emptyTitle.setText(R.string.wishlist_empty);
-        b.empty.emptyMessage.setText("Tap the heart on any product to save it for later.");
+        b.empty.emptyMessage.setText(R.string.wishlist_empty_hint);
 
         b.swipeRefresh.setOnRefreshListener(this::load);
 

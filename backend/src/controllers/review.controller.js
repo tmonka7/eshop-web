@@ -12,7 +12,7 @@ exports.listForProduct = asyncHandler(async (req, res) => {
   const { page, limit, skip } = getPagination(req.query, 10);
 
   const product = await Product.findOne({ slug: req.params.slug }).select('_id').lean();
-  if (!product) throw ApiError.notFound('Product not found');
+  if (!product) throw ApiError.notFound('error.productNotFound');
 
   const filter = { product: product._id, isApproved: true };
   if (req.query.rating) filter.rating = Number.parseInt(req.query.rating, 10);
@@ -28,13 +28,13 @@ exports.listForProduct = asyncHandler(async (req, res) => {
     Review.countDocuments(filter),
   ]);
 
-  return paginated(res, items, { page, limit, total }, 'Reviews');
+  return paginated(res, items, { page, limit, total }, 'success.reviews');
 });
 
 /** Star-bucket breakdown for the rating bars on a product page. */
 exports.summaryForProduct = asyncHandler(async (req, res) => {
   const product = await Product.findOne({ slug: req.params.slug }).select('_id rating reviewCount').lean();
-  if (!product) throw ApiError.notFound('Product not found');
+  if (!product) throw ApiError.notFound('error.productNotFound');
 
   const rows = await Review.aggregate([
     { $match: { product: product._id, isApproved: true } },
@@ -49,7 +49,7 @@ exports.summaryForProduct = asyncHandler(async (req, res) => {
   return ok(
     res,
     { average: product.rating, total: product.reviewCount, buckets },
-    'Review summary',
+    'success.reviewSummary',
   );
 });
 
@@ -57,10 +57,10 @@ exports.create = asyncHandler(async (req, res) => {
   const { productId, rating, title = '', comment = '' } = req.body;
 
   const product = await Product.findById(productId);
-  if (!product) throw ApiError.notFound('Product not found');
+  if (!product) throw ApiError.notFound('error.productNotFound');
 
   const existing = await Review.findOne({ product: productId, user: req.user._id });
-  if (existing) throw ApiError.conflict('You have already reviewed this product');
+  if (existing) throw ApiError.conflict('error.alreadyReviewed');
 
   // A review counts as verified when the user actually received the item.
   const purchase = await Order.findOne({
@@ -82,14 +82,14 @@ exports.create = asyncHandler(async (req, res) => {
   await Review.syncProductRating(productId);
   await review.populate('user', 'name avatar');
 
-  return created(res, review, 'Review submitted');
+  return created(res, review, 'success.reviewSubmitted');
 });
 
 exports.update = asyncHandler(async (req, res) => {
   const review = await Review.findById(req.params.id);
-  if (!review) throw ApiError.notFound('Review not found');
+  if (!review) throw ApiError.notFound('error.reviewNotFound');
   if (String(review.user) !== String(req.user._id)) {
-    throw ApiError.forbidden('You can only edit your own review');
+    throw ApiError.forbidden('error.editOwnReviewOnly');
   }
 
   ['rating', 'title', 'comment'].forEach((f) => {
@@ -98,23 +98,23 @@ exports.update = asyncHandler(async (req, res) => {
   await review.save();
   await Review.syncProductRating(review.product);
 
-  return ok(res, review, 'Review updated');
+  return ok(res, review, 'success.reviewUpdated');
 });
 
 exports.remove = asyncHandler(async (req, res) => {
   const review = await Review.findById(req.params.id);
-  if (!review) throw ApiError.notFound('Review not found');
+  if (!review) throw ApiError.notFound('error.reviewNotFound');
 
   const isStaff = req.user.role !== 'customer';
   if (!isStaff && String(review.user) !== String(req.user._id)) {
-    throw ApiError.forbidden('You can only delete your own review');
+    throw ApiError.forbidden('error.deleteOwnReviewOnly');
   }
 
   const productId = review.product;
   await review.deleteOne();
   await Review.syncProductRating(productId);
 
-  return ok(res, null, 'Review deleted');
+  return ok(res, null, 'success.reviewDeleted');
 });
 
 exports.markHelpful = asyncHandler(async (req, res) => {
@@ -123,8 +123,8 @@ exports.markHelpful = asyncHandler(async (req, res) => {
     { $inc: { helpfulCount: 1 } },
     { new: true },
   );
-  if (!review) throw ApiError.notFound('Review not found');
-  return ok(res, { helpfulCount: review.helpfulCount }, 'Thanks for the feedback');
+  if (!review) throw ApiError.notFound('error.reviewNotFound');
+  return ok(res, { helpfulCount: review.helpfulCount }, 'success.thanksForFeedback');
 });
 
 /* -------------------------------- admin ------------------------------- */
@@ -139,19 +139,19 @@ exports.adminList = asyncHandler(async (req, res) => {
   const [items, total] = await Promise.all([
     Review.find(filter)
       .populate('user', 'name email avatar')
-      .populate('product', 'name slug images')
+      .populate('product', 'name slug images translations')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit),
     Review.countDocuments(filter),
   ]);
 
-  return paginated(res, items, { page, limit, total }, 'Reviews');
+  return paginated(res, items, { page, limit, total }, 'success.reviews');
 });
 
 exports.moderate = asyncHandler(async (req, res) => {
   const review = await Review.findById(req.params.id);
-  if (!review) throw ApiError.notFound('Review not found');
+  if (!review) throw ApiError.notFound('error.reviewNotFound');
 
   review.isApproved = req.body.isApproved !== undefined
     ? Boolean(req.body.isApproved)
@@ -159,5 +159,5 @@ exports.moderate = asyncHandler(async (req, res) => {
   await review.save();
   await Review.syncProductRating(review.product);
 
-  return ok(res, review, review.isApproved ? 'Review approved' : 'Review hidden');
+  return ok(res, review, review.isApproved ? 'success.reviewApproved' : 'success.reviewHidden');
 });

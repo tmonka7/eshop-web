@@ -4,8 +4,10 @@ import { Badge, Empty, Pagination, Spinner, StatCard } from '../components/ui';
 import { AlertTriangle, Boxes, Check, Package } from '../components/Icons';
 import { useToastStore } from '../store';
 import { currency } from '../utils/format';
+import { useI18n } from '../i18n';
 
 export default function InventoryPage() {
+  const { t } = useI18n();
   const toast = useToastStore();
 
   const [items, setItems] = useState([]);
@@ -36,13 +38,13 @@ export default function InventoryPage() {
   async function saveStock(product) {
     const stock = Number(drafts[product._id]);
     if (!Number.isFinite(stock) || stock < 0) {
-      toast.error('Enter a stock number of 0 or more');
+      toast.error(t('inventory.stockError'));
       return;
     }
     setSavingId(product._id);
     try {
       await productApi.updateStock(product._id, stock);
-      toast.success(`${product.name} restocked to ${stock}`);
+      toast.success(t('inventory.restockedTo', { name: product.name, stock }));
       load();
     } catch (err) {
       toast.error(err.message);
@@ -55,26 +57,26 @@ export default function InventoryPage() {
     <>
       <div className="page-head">
         <div>
-          <h1>Inventory</h1>
-          <p>Products at or below {summary.threshold} units</p>
+          <h1>{t('inventory.title')}</h1>
+          <p>{t('inventory.headSubtitle', { threshold: summary.threshold })}</p>
         </div>
       </div>
 
       <div className="grid grid-3 mb-24">
         <StatCard
-          label="Out of stock"
+          label={t('inventory.outOfStock')}
           value={summary.outOfStock}
           icon={<AlertTriangle size={18} />}
           tone="red"
         />
         <StatCard
-          label="Low stock"
+          label={t('inventory.lowStock')}
           value={summary.lowStock}
           icon={<Boxes size={18} />}
           tone="amber"
         />
         <StatCard
-          label="Needs attention"
+          label={t('inventory.needsAttention')}
           value={pagination.total}
           icon={<Package size={18} />}
           tone="blue"
@@ -83,8 +85,8 @@ export default function InventoryPage() {
 
       <div className="card">
         <div className="card-header">
-          <span className="card-title">Restock list</span>
-          <span className="small muted">Edit a number and press Save to update stock</span>
+          <span className="card-title">{t('dashboard.restockList')}</span>
+          <span className="small muted">{t('inventory.subtitle')}</span>
         </div>
 
         {loading ? (
@@ -92,8 +94,8 @@ export default function InventoryPage() {
         ) : items.length === 0 ? (
           <Empty
             icon={<Check size={26} />}
-            title="Everything is well stocked"
-            message="No product is below the low-stock threshold."
+            title={t('inventory.wellStockedTitle')}
+            message={t('inventory.wellStockedMessage')}
           />
         ) : (
           <>
@@ -101,12 +103,12 @@ export default function InventoryPage() {
               <table className="data">
                 <thead>
                   <tr>
-                    <th>Product</th>
-                    <th>Category</th>
-                    <th className="right">Price</th>
-                    <th className="right">Current</th>
-                    <th>Status</th>
-                    <th style={{ width: 210 }}>New stock</th>
+                    <th>{t('common.product')}</th>
+                    <th>{t('common.category')}</th>
+                    <th className="right">{t('common.price')}</th>
+                    <th className="right">{t('inventory.current')}</th>
+                    <th>{t('common.status')}</th>
+                    <th style={{ width: 210 }}>{t('inventory.newStock')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -126,8 +128,8 @@ export default function InventoryPage() {
                       <td className="right bold">{p.stock}</td>
                       <td>
                         {p.stock <= 0
-                          ? <Badge tone="danger">Out of Stock</Badge>
-                          : <Badge tone="warn">Low Stock</Badge>}
+                          ? <Badge tone="danger">{t('inventory.statusOutOfStock')}</Badge>
+                          : <Badge tone="warn">{t('inventory.statusLowStock')}</Badge>}
                       </td>
                       <td>
                         <div className="row gap-6">
@@ -138,7 +140,7 @@ export default function InventoryPage() {
                             value={drafts[p._id] ?? p.stock}
                             onChange={(e) => setDrafts({ ...drafts, [p._id]: e.target.value })}
                             style={{ width: 90 }}
-                            aria-label={`Stock for ${p.name}`}
+                            aria-label={t('inventory.stockForAria', { name: p.name })}
                           />
                           <button
                             type="button"
@@ -146,7 +148,7 @@ export default function InventoryPage() {
                             onClick={() => saveStock(p)}
                             disabled={savingId === p._id}
                           >
-                            {savingId === p._id ? 'Saving…' : 'Save'}
+                            {savingId === p._id ? t('common.saving') : t('common.save')}
                           </button>
                         </div>
                       </td>

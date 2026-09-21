@@ -18,18 +18,21 @@ import ReportsPage from './pages/ReportsPage';
 import SettingsPage from './pages/SettingsPage';
 
 import { useAuthStore, useToastStore } from './store';
+import { useI18n } from './i18n';
 
 function RequireStaff({ children }) {
+  const { t } = useI18n();
   const user = useAuthStore((s) => s.user);
   const status = useAuthStore((s) => s.status);
   const location = useLocation();
 
-  if (status !== 'ready') return <Spinner label="Checking your session..." />;
+  if (status !== 'ready') return <Spinner label={t('toast.checkingSession')} />;
   if (!user) return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   return children;
 }
 
 export default function App() {
+  const { t } = useI18n();
   const bootstrap = useAuthStore((s) => s.bootstrap);
 
   useEffect(() => {
@@ -67,7 +70,10 @@ export default function App() {
         <Route path="content" element={<ContentPage />} />
         <Route path="reports" element={<ReportsPage />} />
         <Route path="settings" element={<SettingsPage />} />
-        <Route path="*" element={<Empty title="404 — Page not found" message="That admin page does not exist." />} />
+        <Route
+          path="*"
+          element={<Empty title={t('toast.notFoundTitle')} message={t('toast.notFoundMessage')} />}
+        />
       </Route>
     </Routes>
   );

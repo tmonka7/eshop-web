@@ -19,6 +19,11 @@
     <string name="demo_credentials">Demo: john@example.com / Password@123</string>
     <string name="session_expired">Your session expired. Please sign in again.</string>
     <string name="continue_as_guest">Browse as guest</string>
+    <string name="error_name_required">Enter your name</string>
+    <string name="error_email_invalid">Enter a valid email</string>
+    <string name="error_password_short">At least 6 characters</string>
+    <string name="error_passwords_differ">Passwords do not match</string>
+    <string name="please_sign_in_first">Please sign in first</string>
 
     <!-- navigation -->
     <string name="nav_home">Home</string>
@@ -47,11 +52,38 @@
     <string name="easy_returns">Easy Returns</string>
     <string name="write_review">Write a review</string>
     <string name="submit_review">Submit review</string>
+    <string name="your_rating">Your rating</string>
+    <string name="review_title_hint">Title</string>
+    <string name="review_body_hint">What did you like or dislike?</string>
+    <string name="no_reviews_yet">No reviews yet. Be the first to review this product.</string>
+    <string name="only_n_left">Only %1$d left</string>
+    <string name="verified">Verified</string>
+    <string name="customer">Customer</string>
+    <string name="star_rating">%1$d star</string>
+    <string name="star_1">1 star</string>
+    <string name="star_2">2 stars</string>
+    <string name="star_3">3 stars</string>
+    <string name="star_4">4 stars</string>
+    <string name="star_5">5 stars</string>
+    <string name="stars_rating">%1$d stars</string>
+
+    <!-- product list -->
+    <string name="no_products_found">No products found</string>
+    <string name="no_products_hint">Try a different search or category.</string>
+    <string name="no_categories_yet">No categories yet</string>
+    <string name="sort_best_selling">Best Selling</string>
+    <string name="sort_newest">Newest Arrivals</string>
+    <string name="sort_price_asc">Price: Low to High</string>
+    <string name="sort_price_desc">Price: High to Low</string>
+    <string name="sort_rating">Top Rated</string>
+    <string name="sort_name_asc">Name: A to Z</string>
+    <string name="title_featured">Featured</string>
 
     <!-- cart -->
     <string name="your_cart">Your Cart</string>
     <string name="cart_empty">Your cart is empty</string>
     <string name="cart_empty_hint">Browse the catalogue and add something you like.</string>
+    <string name="cart_signed_out_hint">Sign in to see the items in your cart.</string>
     <string name="start_shopping">Start Shopping</string>
     <string name="subtotal">Subtotal</string>
     <string name="shipping">Shipping</string>
@@ -63,6 +95,10 @@
     <string name="apply">Apply</string>
     <string name="checkout">Checkout</string>
     <string name="clear_cart">Clear cart</string>
+    <string name="add_more_for_free_shipping">Add %1$s more for free shipping</string>
+    <string name="have_free_shipping">You have free shipping on this order</string>
+    <string name="error_enter_code">Enter a code</string>
+    <string name="qty_and_price">Qty %1$d · %2$s</string>
 
     <!-- checkout -->
     <string name="shipping_address">Shipping Address</string>
@@ -77,14 +113,56 @@
     <string name="card_number">Card Number</string>
     <string name="name_on_card">Name on Card</string>
     <string name="demo_gateway_note">Demo gateway — no real charge is made. A card number ending in 0000 is declined.</string>
+    <string name="pay_card">Credit / Debit Card</string>
+    <string name="pay_paypal">PayPal</string>
+    <string name="pay_applepay">Apple Pay</string>
+    <string name="pay_cod">Cash on Delivery</string>
+    <string name="add_address_to_continue">Add a shipping address to continue.</string>
+    <string name="choose_shipping_address">Choose a shipping address</string>
+    <string name="error_card_invalid">Enter a valid card number</string>
+    <string name="error_fill_required">Please fill in every required field</string>
+
+    <!-- address -->
+    <string name="street_address">Street address</string>
+    <string name="city">City</string>
+    <string name="zip_code">Zip code</string>
+    <string name="country">Country</string>
+    <string name="default_country">Finland</string>
+    <string name="default_address_label">Home</string>
+    <string name="address">Address</string>
+    <string name="default_badge">Default</string>
+    <string name="set_as_default">Set as default</string>
+    <string name="no_saved_addresses">No saved addresses</string>
+    <string name="no_saved_addresses_hint">Add one so checkout is a single tap.</string>
+    <string name="remove_address_confirm">Remove this address?</string>
 
     <!-- orders -->
     <string name="my_orders">My Orders</string>
     <string name="order_tracking">Order Tracking</string>
     <string name="track_package">Track Package</string>
     <string name="no_orders">No orders yet</string>
+    <string name="no_orders_hint">When you place an order it will show up here.</string>
     <string name="cancel_order">Cancel order</string>
     <string name="order_details">Order Details</string>
+    <string name="order_cancelled_notice">This order was cancelled.</string>
+    <string name="placed_on">Placed %1$s</string>
+    <string name="estimated_delivery">Estimated delivery %1$s</string>
+    <string name="cancel_order_confirm">Cancel this order? Stock is returned and any payment is refunded.</string>
+    <string name="cancelled_by_customer">Cancelled by customer</string>
+    <string name="status_pending_step">Pending</string>
+
+    <!-- order status -->
+    <string name="status_pending">Pending</string>
+    <string name="status_processing">Processing</string>
+    <string name="status_shipped">Shipped</string>
+    <string name="status_delivered">Delivered</string>
+    <string name="status_cancelled">Cancelled</string>
+
+    <!-- payment status -->
+    <string name="payment_unpaid">Unpaid</string>
+    <string name="payment_paid">Paid</string>
+    <string name="payment_failed">Failed</string>
+    <string name="payment_refunded">Refunded</string>
 
     <!-- account -->
     <string name="my_account">My Account</string>
@@ -94,6 +172,25 @@
     <string name="profile">Profile</string>
     <string name="save_changes">Save changes</string>
     <string name="wishlist_empty">Your wishlist is empty</string>
+    <string name="wishlist_empty_hint">Tap the heart on any product to save it for later.</string>
+    <string name="app_version">AuraMart v%1$s</string>
+
+    <!-- language -->
+    <string name="language">Language</string>
+    <string name="choose_language">Choose a language</string>
+    <string name="language_system">System default</string>
+    <string name="language_english">English</string>
+    <string name="language_chinese">简体中文</string>
+    <string name="language_japanese">日本語</string>
+
+    <!-- network errors -->
+    <string name="error_network">Cannot reach the server. Is the API running?</string>
+    <string name="error_timeout">The server took too long to respond.</string>
+    <string name="error_generic">Something went wrong</string>
+    <string name="error_unauthorized">Please sign in to continue</string>
+    <string name="error_forbidden">You do not have permission to do that</string>
+    <string name="error_not_found">Not found</string>
+    <string name="error_conflict">That conflicts with something that already exists</string>
 
     <!-- generic -->
     <string name="retry">Retry</string>
@@ -103,6 +200,7 @@
     <string name="edit">Edit</string>
     <string name="loading">Loading…</string>
     <string name="nothing_here">Nothing here yet</string>
+    <string name="filter_all">All</string>
     <string name="filters">Filters</string>
     <string name="sort_by">Sort by</string>
     <string name="product_image">Product image</string>

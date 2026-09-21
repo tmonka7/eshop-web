@@ -7,6 +7,8 @@ import { useToastStore } from '../store/toastStore';
 import { Breadcrumb, EmptyState, Badge } from '../components/ui';
 import { User, MapPin, Package, Heart, Settings, LogOut, Plus, Trash, Check } from '../components/Icons';
 import { formatDate } from '../utils/format';
+import { useI18n } from '../i18n';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const emptyAddress = {
   label: 'Home',
@@ -20,6 +22,7 @@ const emptyAddress = {
 };
 
 function Profile() {
+  const { t } = useI18n();
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
   const toast = useToastStore();
@@ -33,7 +36,7 @@ function Profile() {
     try {
       const res = await userApi.updateProfile(form);
       setUser(res.data);
-      toast.success('Profile updated');
+      toast.success(t('toast.profileUpdated'));
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -43,10 +46,10 @@ function Profile() {
 
   return (
     <div className="card card-pad">
-      <h2 style={{ fontSize: '1.1rem', marginBottom: 18 }}>Profile</h2>
+      <h2 style={{ fontSize: '1.1rem', marginBottom: 18 }}>{t('account.profile')}</h2>
       <form onSubmit={save} style={{ maxWidth: 480 }}>
         <div className="field">
-          <label className="field-label" htmlFor="name">Full name</label>
+          <label className="field-label" htmlFor="name">{t('account.fullName')}</label>
           <input
             id="name"
             className="input"
@@ -55,12 +58,12 @@ function Profile() {
           />
         </div>
         <div className="field">
-          <label className="field-label" htmlFor="email">Email</label>
+          <label className="field-label" htmlFor="email">{t('account.email')}</label>
           <input id="email" className="input" value={user?.email || ''} disabled />
-          <span className="field-hint">Your email address cannot be changed.</span>
+          <span className="field-hint">{t('account.emailReadOnly')}</span>
         </div>
         <div className="field">
-          <label className="field-label" htmlFor="phone">Phone</label>
+          <label className="field-label" htmlFor="phone">{t('account.phone')}</label>
           <input
             id="phone"
             className="input"
@@ -69,11 +72,16 @@ function Profile() {
           />
         </div>
         <div className="field">
-          <span className="field-label">Member since</span>
+          <span className="field-label">{t('account.preferredLanguage')}</span>
+          <LanguageSwitcher />
+          <span className="field-hint">{t('account.preferredLanguageHint')}</span>
+        </div>
+        <div className="field">
+          <span className="field-label">{t('account.memberSince')}</span>
           <span className="small muted">{formatDate(user?.createdAt)}</span>
         </div>
         <button type="submit" className="btn btn-primary" disabled={saving}>
-          {saving ? 'Saving…' : 'Save changes'}
+          {saving ? t('account.saving') : t('common.saveChanges')}
         </button>
       </form>
     </div>
@@ -81,6 +89,7 @@ function Profile() {
 }
 
 function Addresses() {
+  const { t } = useI18n();
   const setUser = useAuthStore((s) => s.setUser);
   const user = useAuthStore((s) => s.user);
   const toast = useToastStore();
@@ -109,7 +118,7 @@ function Addresses() {
       setForm(emptyAddress);
       setEditingId(null);
       setShowForm(false);
-      toast.success(editingId ? 'Address updated' : 'Address added');
+      toast.success(editingId ? t('account.addressUpdated') : t('account.addressAdded'));
     } catch (err) {
       toast.error(err.message);
     }
@@ -119,7 +128,7 @@ function Addresses() {
     try {
       const res = await userApi.deleteAddress(id);
       sync(res.data);
-      toast.success('Address removed');
+      toast.success(t('toast.addressRemoved'));
     } catch (err) {
       toast.error(err.message);
     }
@@ -129,7 +138,7 @@ function Addresses() {
     try {
       const res = await userApi.setDefaultAddress(id);
       sync(res.data);
-      toast.success('Default address updated');
+      toast.success(t('account.defaultAddressUpdated'));
     } catch (err) {
       toast.error(err.message);
     }
@@ -138,7 +147,7 @@ function Addresses() {
   return (
     <div className="card card-pad">
       <div className="row between mb-16">
-        <h2 style={{ fontSize: '1.1rem' }}>Addresses</h2>
+        <h2 style={{ fontSize: '1.1rem' }}>{t('account.addresses')}</h2>
         <button
           type="button"
           className="btn btn-primary btn-sm"
@@ -148,7 +157,7 @@ function Addresses() {
             setShowForm((v) => !v);
           }}
         >
-          <Plus size={14} /> Add address
+          <Plus size={14} /> {t('account.addAddress')}
         </button>
       </div>
 
@@ -156,59 +165,63 @@ function Addresses() {
         <form onSubmit={submit} className="card card-pad mb-24" style={{ background: 'var(--ink-50)' }}>
           <div className="form-row">
             <div className="field">
-              <label className="field-label" htmlFor="a-label">Label</label>
+              <label className="field-label" htmlFor="a-label">{t('account.addressLabel')}</label>
               <input id="a-label" className="input" value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} />
             </div>
             <div className="field">
-              <label className="field-label" htmlFor="a-name">Full name *</label>
+              <label className="field-label" htmlFor="a-name">{t('account.fullNameRequired')}</label>
               <input id="a-name" className="input" required value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} />
             </div>
           </div>
           <div className="field">
-            <label className="field-label" htmlFor="a-street">Street *</label>
+            <label className="field-label" htmlFor="a-street">{t('account.streetRequired')}</label>
             <input id="a-street" className="input" required value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} />
           </div>
           <div className="form-row">
             <div className="field">
-              <label className="field-label" htmlFor="a-city">City *</label>
+              <label className="field-label" htmlFor="a-city">{t('account.cityRequired')}</label>
               <input id="a-city" className="input" required value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
             </div>
             <div className="field">
-              <label className="field-label" htmlFor="a-state">State</label>
+              <label className="field-label" htmlFor="a-state">{t('account.state')}</label>
               <input id="a-state" className="input" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
             </div>
           </div>
           <div className="form-row">
             <div className="field">
-              <label className="field-label" htmlFor="a-zip">Zip *</label>
+              <label className="field-label" htmlFor="a-zip">{t('account.zipRequired')}</label>
               <input id="a-zip" className="input" required value={form.zipCode} onChange={(e) => setForm({ ...form, zipCode: e.target.value })} />
             </div>
             <div className="field">
-              <label className="field-label" htmlFor="a-country">Country *</label>
+              <label className="field-label" htmlFor="a-country">{t('account.countryRequired')}</label>
               <input id="a-country" className="input" required value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} />
             </div>
           </div>
           <div className="field">
-            <label className="field-label" htmlFor="a-phone">Phone</label>
+            <label className="field-label" htmlFor="a-phone">{t('account.phone')}</label>
             <input id="a-phone" className="input" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           </div>
           <div className="row gap-8">
-            <button type="submit" className="btn btn-primary">{editingId ? 'Update' : 'Save'} address</button>
-            <button type="button" className="btn btn-ghost" onClick={() => setShowForm(false)}>Cancel</button>
+            <button type="submit" className="btn btn-primary">
+              {editingId ? t('account.updateAddress') : t('account.saveAddress')}
+            </button>
+            <button type="button" className="btn btn-ghost" onClick={() => setShowForm(false)}>
+              {t('common.cancel')}
+            </button>
           </div>
         </form>
       ) : null}
 
       {addresses.length === 0 ? (
-        <p className="muted">No saved addresses yet.</p>
+        <p className="muted">{t('account.noAddresses')}</p>
       ) : (
         addresses.map((a) => (
           <div key={a._id} className={`address-option ${a.isDefault ? 'active' : ''}`}>
             <div className="row between wrap gap-12">
               <div>
                 <div className="row gap-8">
-                  <span className="bold small">{a.label || 'Address'}</span>
-                  {a.isDefault ? <Badge tone="ok"><Check size={11} /> Default</Badge> : null}
+                  <span className="bold small">{a.label || t('account.addressFallbackLabel')}</span>
+                  {a.isDefault ? <Badge tone="ok"><Check size={11} /> {t('common.default')}</Badge> : null}
                 </div>
                 <div className="small">{a.fullName}</div>
                 <div className="small muted">{a.street}, {a.city} {a.zipCode}, {a.country}</div>
@@ -217,7 +230,7 @@ function Addresses() {
               <div className="row gap-8">
                 {!a.isDefault ? (
                   <button type="button" className="btn btn-ghost btn-sm" onClick={() => makeDefault(a._id)}>
-                    Make default
+                    {t('account.makeDefault')}
                   </button>
                 ) : null}
                 <button
@@ -229,7 +242,7 @@ function Addresses() {
                     setShowForm(true);
                   }}
                 >
-                  Edit
+                  {t('common.edit')}
                 </button>
                 <button type="button" className="btn btn-danger-ghost btn-sm" onClick={() => remove(a._id)}>
                   <Trash size={14} />
@@ -244,6 +257,7 @@ function Addresses() {
 }
 
 function SecuritySettings() {
+  const { t } = useI18n();
   const toast = useToastStore();
   const logout = useAuthStore((s) => s.logout);
   const navigate = useNavigate();
@@ -254,7 +268,7 @@ function SecuritySettings() {
   async function submit(e) {
     e.preventDefault();
     if (form.newPassword !== form.confirm) {
-      toast.error('The new passwords do not match');
+      toast.error(t('account.passwordsDoNotMatch'));
       return;
     }
     setSaving(true);
@@ -263,7 +277,7 @@ function SecuritySettings() {
         currentPassword: form.currentPassword,
         newPassword: form.newPassword,
       });
-      toast.success('Password changed — please sign in again');
+      toast.success(t('account.passwordChanged'));
       await logout();
       navigate('/login');
     } catch (err) {
@@ -275,10 +289,10 @@ function SecuritySettings() {
 
   return (
     <div className="card card-pad">
-      <h2 style={{ fontSize: '1.1rem', marginBottom: 18 }}>Security</h2>
+      <h2 style={{ fontSize: '1.1rem', marginBottom: 18 }}>{t('account.security')}</h2>
       <form onSubmit={submit} style={{ maxWidth: 420 }}>
         <div className="field">
-          <label className="field-label" htmlFor="cur">Current password</label>
+          <label className="field-label" htmlFor="cur">{t('account.currentPassword')}</label>
           <input
             id="cur"
             type="password"
@@ -289,7 +303,7 @@ function SecuritySettings() {
           />
         </div>
         <div className="field">
-          <label className="field-label" htmlFor="new">New password</label>
+          <label className="field-label" htmlFor="new">{t('account.newPassword')}</label>
           <input
             id="new"
             type="password"
@@ -301,7 +315,7 @@ function SecuritySettings() {
           />
         </div>
         <div className="field">
-          <label className="field-label" htmlFor="confirm">Confirm new password</label>
+          <label className="field-label" htmlFor="confirm">{t('account.confirmNewPassword')}</label>
           <input
             id="confirm"
             type="password"
@@ -312,7 +326,7 @@ function SecuritySettings() {
           />
         </div>
         <button type="submit" className="btn btn-primary" disabled={saving}>
-          {saving ? 'Updating…' : 'Change password'}
+          {saving ? t('account.updating') : t('account.changePassword')}
         </button>
       </form>
     </div>
@@ -320,17 +334,18 @@ function SecuritySettings() {
 }
 
 export default function Account() {
+  const { t } = useI18n();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const resetCart = useCartStore((s) => s.reset);
   const navigate = useNavigate();
 
   const links = [
-    { to: '/account', end: true, icon: <User size={16} />, label: 'Profile' },
-    { to: '/account/addresses', icon: <MapPin size={16} />, label: 'Addresses' },
-    { to: '/orders', icon: <Package size={16} />, label: 'My Orders' },
-    { to: '/wishlist', icon: <Heart size={16} />, label: 'Wishlist' },
-    { to: '/account/settings', icon: <Settings size={16} />, label: 'Security' },
+    { to: '/account', end: true, icon: <User size={16} />, label: t('account.tabProfile') },
+    { to: '/account/addresses', icon: <MapPin size={16} />, label: t('account.tabAddresses') },
+    { to: '/orders', icon: <Package size={16} />, label: t('orders.title') },
+    { to: '/wishlist', icon: <Heart size={16} />, label: t('wishlist.breadcrumb') },
+    { to: '/account/settings', icon: <Settings size={16} />, label: t('account.tabSecurity') },
   ];
 
   async function handleLogout() {
@@ -341,7 +356,7 @@ export default function Account() {
 
   return (
     <div className="container">
-      <Breadcrumb items={[{ label: 'Home', to: '/' }, { label: 'My Account' }]} />
+      <Breadcrumb items={[{ label: t('common.home'), to: '/' }, { label: t('account.breadcrumb') }]} />
 
       <div className="account-layout">
         <aside>
@@ -364,7 +379,7 @@ export default function Account() {
               </NavLink>
             ))}
             <button type="button" className="btn btn-danger-ghost btn-sm mt-8" onClick={handleLogout}>
-              <LogOut size={15} /> Sign out
+              <LogOut size={15} /> {t('header.signOut')}
             </button>
           </nav>
         </aside>
@@ -378,8 +393,8 @@ export default function Account() {
               path="*"
               element={
                 <EmptyState
-                  title="Page not found"
-                  action={<Link to="/account" className="btn btn-primary">Back to account</Link>}
+                  title={t('account.pageNotFound')}
+                  action={<Link to="/account" className="btn btn-primary">{t('account.backToAccount')}</Link>}
                 />
               }
             />

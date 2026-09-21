@@ -23,6 +23,7 @@ import com.auramart.app.databinding.FragmentAccountBinding;
 import com.auramart.app.databinding.ItemAccountRowBinding;
 import com.auramart.app.ui.auth.LoginActivity;
 import com.auramart.app.ui.orders.OrdersActivity;
+import com.auramart.app.util.LocaleManager;
 import com.auramart.app.util.Ui;
 
 public class AccountFragment extends Fragment {
@@ -47,6 +48,8 @@ public class AccountFragment extends Fragment {
                 v -> startActivity(new Intent(requireContext(), AddressListActivity.class)));
         setupRow(b.rowWishlist, R.drawable.ic_heart, R.string.wishlist,
                 v -> startActivity(new Intent(requireContext(), WishlistActivity.class)));
+        setupRow(b.rowLanguage, R.drawable.ic_globe, R.string.language,
+                v -> showLanguagePicker());
         setupRow(b.rowSettings, R.drawable.ic_settings, R.string.settings,
                 v -> showSettings());
 
@@ -55,7 +58,7 @@ public class AccountFragment extends Fragment {
         b.signInButton.setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), LoginActivity.class)));
 
-        b.versionText.setText("AuraMart v" + BuildConfig.VERSION_NAME);
+        b.versionText.setText(getString(R.string.app_version, BuildConfig.VERSION_NAME));
         render();
     }
 
@@ -66,6 +69,9 @@ public class AccountFragment extends Fragment {
     }
 
     private void render() {
+        // The row's trailing value shows which language is active right now.
+        b.rowLanguage.rowValue.setText(LocaleManager.currentLabelRes(requireContext()));
+
         User user = SessionManager.get().getUser();
         boolean signedIn = SessionManager.get().isLoggedIn() && user != null;
 
@@ -90,6 +96,33 @@ public class AccountFragment extends Fragment {
         row.rowIcon.setImageResource(iconRes);
         row.rowTitle.setText(titleRes);
         row.rowRoot.setOnClickListener(onClick);
+    }
+
+    /**
+     * Language picker. Choosing an entry recreates every activity, so the whole
+     * app — including this screen — redraws in the new language, and the next
+     * API call carries the matching X-Language header.
+     */
+    private void showLanguagePicker() {
+        String[] tags = LocaleManager.SUPPORTED;
+        String[] labels = new String[tags.length];
+        int selected = 0;
+        String current = LocaleManager.getStoredTag(requireContext());
+
+        for (int i = 0; i < tags.length; i++) {
+            labels[i] = getString(LocaleManager.labelRes(tags[i]));
+            if (tags[i].equals(current)) selected = i;
+        }
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.choose_language)
+                .setSingleChoiceItems(labels, selected, (dialog, which) -> {
+                    dialog.dismiss();
+                    LocaleManager.setLanguage(requireContext(), tags[which]);
+                    persistLanguagePreference();
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
     }
 
     private void showEditProfile() {
@@ -138,11 +171,37 @@ public class AccountFragment extends Fragment {
                 .show();
     }
 
+    /**
+     * Mirrors the choice onto the account so the storefront and this app agree
+     * on the next device. Best-effort: the local switch has already applied,
+     * and a signed-out browser has nothing to save to.
+     */
+    private void persistLanguagePreference() {
+        if (!SessionManager.get().isLoggedIn()) return;
+        Repo.call(
+                Repo.api().updateLanguage(
+                        new com.auramart.app.data.model.Models.UpdateLanguageRequest(
+                                LocaleManager.apiLanguageTag())),
+                new Repo.OnResult<User>() {
+                    @Override
+                    public void onSuccess(User data, String message) {
+                        SessionManager.get().saveUser(data);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        // Ignored: the app is already showing the new language.
+                    }
+                });
+    }
+
     private void showSettings() {
+        // Developer-facing detail: deliberately left untranslated.
         new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.settings)
                 .setMessage("API: " + BuildConfig.API_BASE_URL
                         + "\nVersion: " + BuildConfig.VERSION_NAME
+                        + "\nLanguage: " + LocaleManager.apiLanguageTag()
                         + "\n\nChange API_BASE_URL in app/build.gradle to point at another server.")
                 .setPositiveButton(android.R.string.ok, null)
                 .show();

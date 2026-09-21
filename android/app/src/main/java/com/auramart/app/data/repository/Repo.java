@@ -1,8 +1,11 @@
 package com.auramart.app.data.repository;
 
+import android.content.Context;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.auramart.app.R;
 import com.auramart.app.data.model.Models.ApiResponse;
 import com.auramart.app.data.model.Models.FieldError;
 import com.auramart.app.data.model.Models.PagedResponse;
@@ -23,6 +26,24 @@ import retrofit2.Response;
 public final class Repo {
 
     private static final Gson GSON = new Gson();
+
+    /**
+     * Application context, used only to resolve the fallback error strings.
+     * The API itself already answers in the caller's language (see the
+     * X-Language header in ApiClient), so these are for failures that never
+     * reached it — no connection, a timeout, an unreadable body.
+     */
+    @Nullable
+    private static Context appContext;
+
+    /** Called once from AuraMartApp.onCreate(). */
+    public static void init(@NonNull Context context) {
+        appContext = context.getApplicationContext();
+    }
+
+    private static String string(int res, String fallback) {
+        return appContext == null ? fallback : appContext.getString(res);
+    }
 
     public interface OnResult<T> {
         void onSuccess(T data, String message);
@@ -85,12 +106,14 @@ public final class Repo {
 
     private static String networkMessage(Throwable t) {
         if (t instanceof java.net.ConnectException || t instanceof java.net.UnknownHostException) {
-            return "Cannot reach the server. Is the API running?";
+            return string(R.string.error_network, "Cannot reach the server. Is the API running?");
         }
         if (t instanceof java.net.SocketTimeoutException) {
-            return "The server took too long to respond.";
+            return string(R.string.error_timeout, "The server took too long to respond.");
         }
-        return t.getMessage() == null ? "Something went wrong" : t.getMessage();
+        return t.getMessage() == null
+                ? string(R.string.error_generic, "Something went wrong")
+                : t.getMessage();
     }
 
     /** Pulls `message` (and the first field error) out of the API error body. */
@@ -111,10 +134,11 @@ public final class Repo {
             // Fall through to the generic message below.
         }
         return switch (response.code()) {
-            case 401 -> "Please sign in to continue";
-            case 403 -> "You do not have permission to do that";
-            case 404 -> "Not found";
-            case 409 -> "That conflicts with something that already exists";
+            case 401 -> string(R.string.error_unauthorized, "Please sign in to continue");
+            case 403 -> string(R.string.error_forbidden, "You do not have permission to do that");
+            case 404 -> string(R.string.error_not_found, "Not found");
+            case 409 -> string(R.string.error_conflict,
+                    "That conflicts with something that already exists");
             default -> "Request failed (" + response.code() + ")";
         };
     }

@@ -8,6 +8,7 @@ import com.auramart.app.data.local.SessionManager;
 import com.auramart.app.data.model.Models.ApiResponse;
 import com.auramart.app.data.model.Models.RefreshRequest;
 import com.auramart.app.data.model.Models.TokenData;
+import com.auramart.app.util.LocaleManager;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -78,9 +79,9 @@ public final class ApiClient {
     }
 
     /**
-     * Attaches the bearer token, and on a 401 performs one synchronous refresh
-     * before replaying the original request. The lock keeps parallel requests
-     * from each firing their own refresh.
+     * Attaches the bearer token and the language header, and on a 401 performs
+     * one synchronous refresh before replaying the original request. The lock
+     * keeps parallel requests from each firing their own refresh.
      */
     private static class AuthInterceptor implements Interceptor {
 
@@ -97,7 +98,7 @@ public final class ApiClient {
                     || path.endsWith("/auth/register")
                     || path.endsWith("/auth/refresh");
 
-            Request request = isAuthCall ? original : withToken(original);
+            Request request = withLanguage(isAuthCall ? original : withToken(original));
             Response response = chain.proceed(request);
 
             if (response.code() != 401 || isAuthCall) {
@@ -127,15 +128,22 @@ public final class ApiClient {
                 return chain.proceed(request);
             }
 
-            return chain.proceed(original.newBuilder()
+            return chain.proceed(withLanguage(original.newBuilder()
                     .header("Authorization", "Bearer " + refreshed)
-                    .build());
+                    .build()));
         }
 
         private Request withToken(Request request) {
             String token = SessionManager.get().getAccessToken();
             if (token == null) return request;
             return request.newBuilder().header("Authorization", "Bearer " + token).build();
+        }
+
+        /** Asks the API for messages and catalogue copy in the app's language. */
+        private Request withLanguage(Request request) {
+            return request.newBuilder()
+                    .header("X-Language", LocaleManager.apiLanguageTag())
+                    .build();
         }
 
         @Nullable

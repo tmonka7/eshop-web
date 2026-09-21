@@ -66,7 +66,10 @@ html, body, #root { height: 100%; }
 
 body {
   margin: 0;
-  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Inter carries no CJK glyphs, so the Noto families follow it for zh and ja;
+     the platform fallbacks keep things sane if Google Fonts is unreachable. */
+  font-family: Inter, 'Noto Sans SC', 'Noto Sans JP', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', 'Microsoft YaHei', 'Hiragino Sans', 'Yu Gothic UI', Roboto, sans-serif;
   font-size: 15px;
   line-height: 1.55;
   color: var(--text);
@@ -589,3 +592,42 @@ ul { margin: 0; padding: 0; list-style: none; }
   .filters-toggle { display: inline-flex; }
   .filter-panel.mobile-hidden { display: none; }
 }
+
+/* ---------------------------- language switcher --------------------------- */
+/* Sits in the header actions row, in the auth cards and in account settings,
+   so it styles as a plain trigger plus a small popover rather than a select. */
+.lang-switcher { position: relative; }
+
+.lang-trigger {
+  display: inline-flex; align-items: center; gap: 6px; width: auto;
+  padding: 6px 8px; font-size: 0.82rem; white-space: nowrap;
+}
+
+.lang-trigger .lang-name { font-weight: 600; }
+
+.lang-menu {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 40;
+  min-width: 168px; margin: 0; padding: 6px; list-style: none;
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+}
+
+.lang-menu button {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 8px 10px; border: 0; border-radius: 6px; background: none;
+  font: inherit; font-size: 0.86rem; color: var(--ink-600); cursor: pointer; text-align: left;
+}
+
+.lang-menu button:hover { background: var(--ink-50); color: var(--ink-900); }
+.lang-menu button.active { color: var(--primary); font-weight: 600; }
+
+/* The trigger keeps its label on desktop and drops to the flag on phones,
+   where the header actions row is already tight. */
+@media (max-width: 720px) {
+  .lang-trigger .lang-name { display: none; }
+}
+
+/* CJK text has no spaces to break on, so long translated labels need to be
+   allowed to wrap rather than overflow their buttons and chips. */
+:root:lang(zh) .btn, :root:lang(ja) .btn,
+html[lang='zh'] .btn, html[lang='ja'] .btn { white-space: normal; }

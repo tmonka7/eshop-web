@@ -10,6 +10,7 @@ export const authApi = {
   logout: (refreshToken) => client.post('/auth/logout', { refreshToken }),
   me: () => client.get('/auth/me'),
   changePassword: (payload) => client.patch('/auth/password', payload),
+  updateLanguage: (language) => client.patch('/users/language', { language }),
 };
 
 export const dashboardApi = {

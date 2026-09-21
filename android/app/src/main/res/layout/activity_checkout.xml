@@ -140,7 +140,7 @@
                             android:checked="true"
                             android:paddingStart="@dimen/space_sm"
                             android:paddingEnd="0dp"
-                            android:text="Credit / Debit Card"
+                            android:text="@string/pay_card"
                             android:textSize="@dimen/text_body"
                             tools:ignore="HardcodedText"
                             xmlns:tools="http://schemas.android.com/tools" />
@@ -151,7 +151,7 @@
                             android:layout_height="wrap_content"
                             android:paddingStart="@dimen/space_sm"
                             android:paddingEnd="0dp"
-                            android:text="PayPal"
+                            android:text="@string/pay_paypal"
                             android:textSize="@dimen/text_body" />
 
                         <RadioButton
@@ -160,7 +160,7 @@
                             android:layout_height="wrap_content"
                             android:paddingStart="@dimen/space_sm"
                             android:paddingEnd="0dp"
-                            android:text="Apple Pay"
+                            android:text="@string/pay_applepay"
                             android:textSize="@dimen/text_body" />
 
                         <RadioButton
@@ -169,7 +169,7 @@
                             android:layout_height="wrap_content"
                             android:paddingStart="@dimen/space_sm"
                             android:paddingEnd="0dp"
-                            android:text="Cash on Delivery"
+                            android:text="@string/pay_cod"
                             android:textSize="@dimen/text_body" />
                     </RadioGroup>
 

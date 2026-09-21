@@ -116,15 +116,15 @@ async function buildCartPayload(cart) {
 
 exports.getCart = asyncHandler(async (req, res) => {
   const cart = await getOrCreateCart(req.user._id);
-  return ok(res, await buildCartPayload(cart), 'Cart');
+  return ok(res, await buildCartPayload(cart), 'success.cart');
 });
 
 exports.addItem = asyncHandler(async (req, res) => {
   const { productId, quantity = 1, variant = null } = req.body;
 
   const product = await Product.findById(productId);
-  if (!product || !product.isActive) throw ApiError.notFound('Product not found');
-  if (product.stock <= 0) throw ApiError.badRequest('Product is out of stock');
+  if (!product || !product.isActive) throw ApiError.notFound('error.productNotFound');
+  if (product.stock <= 0) throw ApiError.badRequest('error.productOutOfStock');
 
   const qty = Math.max(1, Number.parseInt(quantity, 10) || 1);
   const cart = await getOrCreateCart(req.user._id);
@@ -136,7 +136,7 @@ exports.addItem = asyncHandler(async (req, res) => {
 
   const alreadyIn = existing ? existing.quantity : 0;
   if (alreadyIn + qty > product.stock) {
-    throw ApiError.badRequest('Only ' + product.stock + ' unit(s) available');
+    throw ApiError.badRequest('error.onlyNUnitsAvailable', undefined, { count: product.stock });
   }
 
   if (existing) {
@@ -152,39 +152,39 @@ exports.addItem = asyncHandler(async (req, res) => {
   }
 
   await cart.save();
-  return ok(res, await buildCartPayload(cart), 'Added to cart');
+  return ok(res, await buildCartPayload(cart), 'success.addedToCart');
 });
 
 exports.updateItem = asyncHandler(async (req, res) => {
   const quantity = Number.parseInt(req.body.quantity, 10);
   if (!Number.isFinite(quantity) || quantity < 0) {
-    throw ApiError.badRequest('quantity must be 0 or more');
+    throw ApiError.badRequest('error.quantityMin');
   }
 
   const cart = await getOrCreateCart(req.user._id);
   const item = cart.items.id(req.params.itemId);
-  if (!item) throw ApiError.notFound('Cart item not found');
+  if (!item) throw ApiError.notFound('error.cartItemNotFound');
 
   if (quantity === 0) {
     item.deleteOne();
   } else {
     const product = await Product.findById(item.product);
-    if (!product) throw ApiError.notFound('Product no longer exists');
-    if (quantity > product.stock) throw ApiError.badRequest('Only ' + product.stock + ' unit(s) available');
+    if (!product) throw ApiError.notFound('error.productGone');
+    if (quantity > product.stock) throw ApiError.badRequest('error.onlyNUnitsAvailable', undefined, { count: product.stock });
     item.quantity = quantity;
   }
 
   await cart.save();
-  return ok(res, await buildCartPayload(cart), 'Cart updated');
+  return ok(res, await buildCartPayload(cart), 'success.cartUpdated');
 });
 
 exports.removeItem = asyncHandler(async (req, res) => {
   const cart = await getOrCreateCart(req.user._id);
   const item = cart.items.id(req.params.itemId);
-  if (!item) throw ApiError.notFound('Cart item not found');
+  if (!item) throw ApiError.notFound('error.cartItemNotFound');
   item.deleteOne();
   await cart.save();
-  return ok(res, await buildCartPayload(cart), 'Item removed');
+  return ok(res, await buildCartPayload(cart), 'success.itemRemoved');
 });
 
 exports.clearCart = asyncHandler(async (req, res) => {
@@ -192,19 +192,19 @@ exports.clearCart = asyncHandler(async (req, res) => {
   cart.items = [];
   cart.coupon = { code: '', discountType: '', discountValue: 0 };
   await cart.save();
-  return ok(res, await buildCartPayload(cart), 'Cart cleared');
+  return ok(res, await buildCartPayload(cart), 'success.cartCleared');
 });
 
 exports.applyCoupon = asyncHandler(async (req, res) => {
   const code = String(req.body.code || '').trim().toUpperCase();
-  if (!code) throw ApiError.badRequest('Coupon code is required');
+  if (!code) throw ApiError.badRequest('error.couponCodeRequired');
 
   const cart = await getOrCreateCart(req.user._id);
   const payload = await buildCartPayload(cart);
-  if (!payload.items.length) throw ApiError.badRequest('Your cart is empty');
+  if (!payload.items.length) throw ApiError.badRequest('error.cartEmpty');
 
   const coupon = await Coupon.findOne({ code });
-  if (!coupon) throw ApiError.notFound('Coupon code is not valid');
+  if (!coupon) throw ApiError.notFound('error.couponInvalid');
 
   const check = coupon.isRedeemable(payload.totals.subtotal);
   if (!check.ok) throw ApiError.badRequest(check.reason);
@@ -216,14 +216,14 @@ exports.applyCoupon = asyncHandler(async (req, res) => {
   };
   await cart.save();
 
-  return ok(res, await buildCartPayload(cart), 'Coupon applied');
+  return ok(res, await buildCartPayload(cart), 'success.couponApplied');
 });
 
 exports.removeCoupon = asyncHandler(async (req, res) => {
   const cart = await getOrCreateCart(req.user._id);
   cart.coupon = { code: '', discountType: '', discountValue: 0 };
   await cart.save();
-  return ok(res, await buildCartPayload(cart), 'Coupon removed');
+  return ok(res, await buildCartPayload(cart), 'success.couponRemoved');
 });
 
 /** Merges a guest (localStorage) cart into the signed-in cart after login. */
@@ -254,7 +254,7 @@ exports.mergeCart = asyncHandler(async (req, res) => {
   }
 
   await cart.save();
-  return ok(res, await buildCartPayload(cart), 'Cart merged');
+  return ok(res, await buildCartPayload(cart), 'success.cartMerged');
 });
 
 module.exports.getOrCreateCart = getOrCreateCart;

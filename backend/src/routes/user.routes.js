@@ -5,19 +5,26 @@ const validate = require('../middleware/validate');
 const { protect } = require('../middleware/auth');
 const { uploadAvatar } = require('../middleware/upload');
 const c = require('../controllers/user.controller');
+const { LOCALES } = require('../i18n');
 
 const router = express.Router();
 router.use(protect);
 
 router.patch('/profile', [body('name').optional().trim().isLength({ min: 2 })], validate, c.updateProfile);
 router.post('/avatar', uploadAvatar.single('image'), c.uploadAvatar);
+router.patch(
+  '/language',
+  [body('language').isIn(LOCALES).withMessage('validation.languageEnum')],
+  validate,
+  c.updateLanguage,
+);
 
 const addressRules = [
-  body('fullName').trim().notEmpty().withMessage('Full name is required'),
-  body('street').trim().notEmpty().withMessage('Street address is required'),
-  body('city').trim().notEmpty().withMessage('City is required'),
-  body('zipCode').trim().notEmpty().withMessage('Zip / postal code is required'),
-  body('country').trim().notEmpty().withMessage('Country is required'),
+  body('fullName').trim().notEmpty().withMessage('validation.fullNameRequired'),
+  body('street').trim().notEmpty().withMessage('validation.streetRequired'),
+  body('city').trim().notEmpty().withMessage('validation.cityRequired'),
+  body('zipCode').trim().notEmpty().withMessage('validation.zipRequired'),
+  body('country').trim().notEmpty().withMessage('validation.countryRequired'),
 ];
 
 router.get('/addresses', c.listAddresses);

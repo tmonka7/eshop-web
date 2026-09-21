@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AuraMart</string>
+    <string name="app_tagline">好物相伴，生活更亮</string>
+
+    <!-- auth -->
+    <string name="sign_in">登录</string>
+    <string name="sign_up">创建账号</string>
+    <string name="sign_out">退出登录</string>
+    <string name="email">邮箱</string>
+    <string name="password">密码</string>
+    <string name="confirm_password">确认密码</string>
+    <string name="full_name">姓名</string>
+    <string name="phone">电话</string>
+    <string name="welcome_back">欢迎回来</string>
+    <string name="create_account_subtitle">用时不到一分钟</string>
+    <string name="no_account">还没有账号？立即注册</string>
+    <string name="have_account">已有账号？直接登录</string>
+    <string name="demo_credentials">演示账号：john@example.com / Password@123</string>
+    <string name="session_expired">登录已过期，请重新登录。</string>
+    <string name="continue_as_guest">以游客身份浏览</string>
+    <string name="error_name_required">请输入姓名</string>
+    <string name="error_email_invalid">请输入有效的邮箱地址</string>
+    <string name="error_password_short">至少 6 个字符</string>
+    <string name="error_passwords_differ">两次输入的密码不一致</string>
+    <string name="please_sign_in_first">请先登录</string>
+
+    <!-- navigation -->
+    <string name="nav_home">首页</string>
+    <string name="nav_categories">分类</string>
+    <string name="nav_cart">购物车</string>
+    <string name="nav_account">我的</string>
+
+    <!-- home -->
+    <string name="search_hint">搜索商品…</string>
+    <string name="shop_by_category">按分类选购</string>
+    <string name="featured_products">精选商品</string>
+    <string name="best_sellers">热销商品</string>
+    <string name="see_all">查看全部</string>
+
+    <!-- product -->
+    <string name="add_to_cart">加入购物车</string>
+    <string name="buy_now">立即购买</string>
+    <string name="out_of_stock">已售罄</string>
+    <string name="in_stock">有货</string>
+    <string name="quantity">数量</string>
+    <string name="description">商品详情</string>
+    <string name="reviews">评价</string>
+    <string name="related_products">您可能还喜欢</string>
+    <string name="free_shipping">免运费</string>
+    <string name="warranty">保修</string>
+    <string name="easy_returns">轻松退货</string>
+    <string name="write_review">撰写评价</string>
+    <string name="submit_review">提交评价</string>
+    <string name="your_rating">您的评分</string>
+    <string name="review_title_hint">标题</string>
+    <string name="review_body_hint">您喜欢或不喜欢哪些地方？</string>
+    <string name="no_reviews_yet">暂无评价，来做第一个评价的人吧。</string>
+    <string name="only_n_left">仅剩 %1$d 件</string>
+    <string name="verified">已验证</string>
+    <string name="customer">顾客</string>
+    <string name="star_rating">%1$d 星</string>
+    <string name="star_1">1 星</string>
+    <string name="star_2">2 星</string>
+    <string name="star_3">3 星</string>
+    <string name="star_4">4 星</string>
+    <string name="star_5">5 星</string>
+    <string name="stars_rating">%1$d 星</string>
+
+    <!-- product list -->
+    <string name="no_products_found">未找到商品</string>
+    <string name="no_products_hint">请尝试其他关键词或分类。</string>
+    <string name="no_categories_yet">暂无分类</string>
+    <string name="sort_best_selling">销量优先</string>
+    <string name="sort_newest">最新上架</string>
+    <string name="sort_price_asc">价格从低到高</string>
+    <string name="sort_price_desc">价格从高到低</string>
+    <string name="sort_rating">评分最高</string>
+    <string name="sort_name_asc">名称 A-Z</string>
+    <string name="title_featured">精选</string>
+
+    <!-- cart -->
+    <string name="your_cart">我的购物车</string>
+    <string name="cart_empty">购物车是空的</string>
+    <string name="cart_empty_hint">去逛逛，把喜欢的商品加进来吧。</string>
+    <string name="cart_signed_out_hint">登录后即可查看购物车中的商品。</string>
+    <string name="start_shopping">开始购物</string>
+    <string name="subtotal">商品小计</string>
+    <string name="shipping">运费</string>
+    <string name="tax">税费</string>
+    <string name="discount">优惠</string>
+    <string name="total">合计</string>
+    <string name="free">免费</string>
+    <string name="promo_code">优惠码</string>
+    <string name="apply">使用</string>
+    <string name="checkout">去结算</string>
+    <string name="clear_cart">清空购物车</string>
+    <string name="add_more_for_free_shipping">再买 %1$s 即可免运费</string>
+    <string name="have_free_shipping">本单已享免运费</string>
+    <string name="error_enter_code">请输入优惠码</string>
+    <string name="qty_and_price">数量 %1$d · %2$s</string>
+
+    <!-- checkout -->
+    <string name="shipping_address">收货地址</string>
+    <string name="payment_method">支付方式</string>
+    <string name="place_order">提交订单</string>
+    <string name="order_summary">订单摘要</string>
+    <string name="add_new_address">新增地址</string>
+    <string name="payment_successful">支付成功！</string>
+    <string name="order_placed_message">您的订单已提交成功。</string>
+    <string name="view_order">查看订单</string>
+    <string name="continue_shopping">继续购物</string>
+    <string name="card_number">卡号</string>
+    <string name="name_on_card">持卡人姓名</string>
+    <string name="demo_gateway_note">演示支付网关，不会产生真实扣款。卡号以 0000 结尾的银行卡会被拒付。</string>
+    <string name="pay_card">信用卡 / 借记卡</string>
+    <string name="pay_paypal">PayPal</string>
+    <string name="pay_applepay">Apple Pay</string>
+    <string name="pay_cod">货到付款</string>
+    <string name="add_address_to_continue">请先添加收货地址。</string>
+    <string name="choose_shipping_address">请选择收货地址</string>
+    <string name="error_card_invalid">请输入有效的卡号</string>
+    <string name="error_fill_required">请填写所有必填项</string>
+
+    <!-- address -->
+    <string name="street_address">详细地址</string>
+    <string name="city">城市</string>
+    <string name="zip_code">邮政编码</string>
+    <string name="country">国家或地区</string>
+    <string name="default_country">芬兰</string>
+    <string name="default_address_label">家</string>
+    <string name="address">地址</string>
+    <string name="default_badge">默认</string>
+    <string name="set_as_default">设为默认</string>
+    <string name="no_saved_addresses">暂无保存的地址</string>
+    <string name="no_saved_addresses_hint">添加一个地址，结算时一键即可完成。</string>
+    <string name="remove_address_confirm">确定要删除该地址吗？</string>
+
+    <!-- orders -->
+    <string name="my_orders">我的订单</string>
+    <string name="order_tracking">物流跟踪</string>
+    <string name="track_package">查看物流</string>
+    <string name="no_orders">暂无订单</string>
+    <string name="no_orders_hint">下单后，订单会显示在这里。</string>
+    <string name="cancel_order">取消订单</string>
+    <string name="order_details">订单详情</string>
+    <string name="order_cancelled_notice">该订单已取消。</string>
+    <string name="placed_on">下单于 %1$s</string>
+    <string name="estimated_delivery">预计送达 %1$s</string>
+    <string name="cancel_order_confirm">确定要取消该订单吗？库存将恢复，已支付的金额将退回。</string>
+    <string name="cancelled_by_customer">用户取消</string>
+    <string name="status_pending_step">待处理</string>
+
+    <!-- order status -->
+    <string name="status_pending">待处理</string>
+    <string name="status_processing">处理中</string>
+    <string name="status_shipped">已发货</string>
+    <string name="status_delivered">已送达</string>
+    <string name="status_cancelled">已取消</string>
+
+    <!-- payment status -->
+    <string name="payment_unpaid">未支付</string>
+    <string name="payment_paid">已支付</string>
+    <string name="payment_failed">支付失败</string>
+    <string name="payment_refunded">已退款</string>
+
+    <!-- account -->
+    <string name="my_account">我的账户</string>
+    <string name="addresses">收货地址</string>
+    <string name="wishlist">心愿单</string>
+    <string name="settings">设置</string>
+    <string name="profile">个人资料</string>
+    <string name="save_changes">保存修改</string>
+    <string name="wishlist_empty">心愿单是空的</string>
+    <string name="wishlist_empty_hint">点击商品上的爱心即可收藏。</string>
+    <string name="app_version">AuraMart v%1$s</string>
+
+    <!-- language -->
+    <string name="language">语言</string>
+    <string name="choose_language">选择语言</string>
+    <string name="language_system">跟随系统</string>
+    <string name="language_english">English</string>
+    <string name="language_chinese">简体中文</string>
+    <string name="language_japanese">日本語</string>
+
+    <!-- network errors -->
+    <string name="error_network">无法连接服务器，请确认 API 是否已启动。</string>
+    <string name="error_timeout">服务器响应超时。</string>
+    <string name="error_generic">出错了，请稍后再试</string>
+    <string name="error_unauthorized">请先登录后再继续</string>
+    <string name="error_forbidden">您没有权限执行该操作</string>
+    <string name="error_not_found">未找到</string>
+    <string name="error_conflict">与已存在的数据冲突</string>
+
+    <!-- generic -->
+    <string name="retry">重试</string>
+    <string name="cancel">取消</string>
+    <string name="save">保存</string>
+    <string name="delete">删除</string>
+    <string name="edit">编辑</string>
+    <string name="loading">加载中…</string>
+    <string name="nothing_here">这里还什么都没有</string>
+    <string name="filter_all">全部</string>
+    <string name="filters">筛选</string>
+    <string name="sort_by">排序方式</string>
+    <string name="product_image">商品图片</string>
+    <string name="back">返回</string>
+</resources>

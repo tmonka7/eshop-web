@@ -2,6 +2,7 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 const { LOW_STOCK_THRESHOLD, PRODUCT_STATUS } = require('../config/constants');
+const { translationsField } = require('./translations');
 
 const variantSchema = new mongoose.Schema(
   {
@@ -21,6 +22,8 @@ const productSchema = new mongoose.Schema(
     sku: { type: String, unique: true, index: true },
     description: { type: String, default: '', trim: true },
     shortDescription: { type: String, default: '', trim: true, maxlength: 300 },
+    // Localised name/description/shortDescription; English fields above are the fallback.
+    translations: translationsField(),
     brand: { type: String, default: 'Generic', trim: true, index: true },
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true, index: true },
     images: { type: [String], default: [] },

@@ -263,7 +263,7 @@ public final class Adapters {
             b.dateText.setText(Formats.date(order.createdAt));
             b.totalText.setText(Formats.money(order.pricing.total));
 
-            b.statusBadge.setText(Formats.label(order.status));
+            b.statusBadge.setText(Formats.label(holder.itemView.getContext(), order.status));
             b.statusBadge.setBackgroundResource(StatusStyle.background(order.status));
             b.statusBadge.setTextColor(b.getRoot().getContext().getColor(StatusStyle.textColor(order.status)));
 
@@ -295,7 +295,8 @@ public final class Adapters {
             Images.load(holder.binding.productImage, item.image);
             holder.binding.nameText.setText(item.name);
 
-            String meta = "Qty " + item.quantity + " · " + Formats.money(item.price);
+            String meta = holder.itemView.getContext()
+                    .getString(R.string.qty_and_price, item.quantity, Formats.money(item.price));
             if (item.variant != null && item.variant.value != null && !item.variant.value.isEmpty()) {
                 meta += " · " + item.variant.value;
             }
@@ -319,7 +320,8 @@ public final class Adapters {
             CartItem item = items.get(position);
             Images.load(holder.binding.productImage, item.product.image);
             holder.binding.nameText.setText(item.product.name);
-            holder.binding.metaText.setText("Qty " + item.quantity + " · " + Formats.money(item.price));
+            holder.binding.metaText.setText(holder.itemView.getContext()
+                    .getString(R.string.qty_and_price, item.quantity, Formats.money(item.price)));
             holder.binding.subtotalText.setText(Formats.money(item.subtotal));
         }
     }
@@ -340,8 +342,10 @@ public final class Adapters {
             TrackingStep step = items.get(position);
             ItemTrackingStepBinding b = holder.binding;
 
-            b.stepTitle.setText(Formats.label(step.status));
-            b.stepDate.setText(step.at != null ? Formats.dateTime(step.at) : "Pending");
+            b.stepTitle.setText(Formats.label(holder.itemView.getContext(), step.status));
+            b.stepDate.setText(step.at != null
+                    ? Formats.dateTime(step.at)
+                    : holder.itemView.getContext().getString(R.string.status_pending_step));
 
             int bg = step.reached ? R.drawable.bg_badge_green : R.drawable.bg_badge_grey;
             int tint = step.reached ? R.color.success_dark : R.color.ink_400;
@@ -369,7 +373,9 @@ public final class Adapters {
             Review r = items.get(position);
             ItemReviewBinding b = holder.binding;
 
-            String name = r.user != null && r.user.name != null ? r.user.name : "Customer";
+            String name = r.user != null && r.user.name != null
+                    ? r.user.name
+                    : holder.itemView.getContext().getString(R.string.customer);
             b.nameText.setText(name);
             b.avatarText.setText(name.substring(0, 1).toUpperCase(Locale.US));
             b.ratingText.setText(String.valueOf(r.rating));
@@ -415,7 +421,9 @@ public final class Adapters {
             Address a = items.get(position);
             ItemAddressBinding b = holder.binding;
 
-            b.labelText.setText(a.label == null || a.label.isEmpty() ? "Address" : a.label);
+            b.labelText.setText(a.label == null || a.label.isEmpty()
+                    ? holder.itemView.getContext().getString(R.string.address)
+                    : a.label);
             b.nameText.setText(a.fullName);
             b.addressText.setText(a.oneLine());
             b.defaultBadge.setVisibility(a.isDefault ? View.VISIBLE : View.GONE);

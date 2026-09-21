@@ -15,7 +15,7 @@ exports.listPublic = asyncHandler(async (_req, res) => {
   })
     .select('code description discountType discountValue minPurchase expiresAt')
     .sort({ createdAt: -1 });
-  return ok(res, coupons, 'Available promotions');
+  return ok(res, coupons, 'success.availablePromotions');
 });
 
 exports.validate = asyncHandler(async (req, res) => {
@@ -23,7 +23,7 @@ exports.validate = asyncHandler(async (req, res) => {
   const subtotal = Number.parseFloat(req.query.subtotal) || 0;
 
   const coupon = await Coupon.findOne({ code });
-  if (!coupon) throw ApiError.notFound('Coupon code is not valid');
+  if (!coupon) throw ApiError.notFound('error.couponInvalid');
 
   const check = coupon.isRedeemable(subtotal);
   if (!check.ok) throw ApiError.badRequest(check.reason);
@@ -31,7 +31,7 @@ exports.validate = asyncHandler(async (req, res) => {
   return ok(
     res,
     { code: coupon.code, discount: coupon.computeDiscount(subtotal), description: coupon.description },
-    'Coupon is valid',
+    'success.couponValid',
   );
 });
 
@@ -48,12 +48,12 @@ exports.adminList = asyncHandler(async (req, res) => {
     Coupon.countDocuments(filter),
   ]);
 
-  return paginated(res, items, { page, limit, total }, 'Coupons');
+  return paginated(res, items, { page, limit, total }, 'success.coupons');
 });
 
 exports.create = asyncHandler(async (req, res) => {
   const coupon = await Coupon.create(req.body);
-  return created(res, coupon, 'Coupon created');
+  return created(res, coupon, 'success.couponCreated');
 });
 
 exports.update = asyncHandler(async (req, res) => {
@@ -61,12 +61,12 @@ exports.update = asyncHandler(async (req, res) => {
     new: true,
     runValidators: true,
   });
-  if (!coupon) throw ApiError.notFound('Coupon not found');
-  return ok(res, coupon, 'Coupon updated');
+  if (!coupon) throw ApiError.notFound('error.couponNotFound');
+  return ok(res, coupon, 'success.couponUpdated');
 });
 
 exports.remove = asyncHandler(async (req, res) => {
   const coupon = await Coupon.findByIdAndDelete(req.params.id);
-  if (!coupon) throw ApiError.notFound('Coupon not found');
-  return ok(res, null, 'Coupon deleted');
+  if (!coupon) throw ApiError.notFound('error.couponNotFound');
+  return ok(res, null, 'success.couponDeleted');
 });

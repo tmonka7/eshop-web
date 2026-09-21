@@ -11,10 +11,12 @@ import { useCartStore } from '../store/cartStore';
 import { useToastStore } from '../store/toastStore';
 import { currency, discountPercent, imageUrl, relativeDate } from '../utils/format';
 import { COLOR_SWATCHES } from '../utils/constants';
+import { useI18n } from '../i18n';
 
 export default function ProductDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { t, locale } = useI18n();
 
   const user = useAuthStore((s) => s.user);
   const toggleLocal = useAuthStore((s) => s.toggleWishlistLocal);
@@ -68,17 +70,18 @@ export default function ProductDetail() {
     return () => {
       alive = false;
     };
-  }, [slug]);
+    // Product copy is localised server-side, so refetch when the language flips.
+  }, [slug, locale]);
 
-  if (loading) return <Spinner label="Loading product..." />;
+  if (loading) return <Spinner label={t('product.loading')} />;
 
   if (notFound || !product) {
     return (
       <div className="container">
         <EmptyState
-          title="Product not found"
-          message="This product may have been removed or renamed."
-          action={<Link to="/products" className="btn btn-primary">Browse products</Link>}
+          title={t('product.notFoundTitle')}
+          message={t('product.notFoundMessage')}
+          action={<Link to="/products" className="btn btn-primary">{t('common.browseProducts')}</Link>}
         />
       </div>
     );
@@ -100,7 +103,7 @@ export default function ProductDetail() {
         ? { name: variant.name, value: variant.value, hex: variant.hex || '' }
         : null;
       await addToCart(product, quantity, payload, Boolean(user));
-      toast.success(`${product.name} added to cart`);
+      toast.success(t('toast.addedToCartNamed', { name: product.name }));
       if (buyNow) navigate('/cart');
     } catch (err) {
       toast.error(err.message);
@@ -111,7 +114,7 @@ export default function ProductDetail() {
 
   async function handleWishlist() {
     if (!user) {
-      toast.info('Sign in to save items to your wishlist');
+      toast.info(t('toast.signInForWishlist'));
       return;
     }
     try {
@@ -126,7 +129,7 @@ export default function ProductDetail() {
   async function submitReview(e) {
     e.preventDefault();
     if (!user) {
-      toast.info('Sign in to write a review');
+      toast.info(t('toast.signInForReview'));
       return;
     }
     setSubmittingReview(true);
@@ -134,7 +137,7 @@ export default function ProductDetail() {
       const res = await reviewApi.create({ productId: product._id, ...reviewForm });
       setReviews((prev) => [res.data, ...prev]);
       setReviewForm({ rating: 5, title: '', comment: '' });
-      toast.success('Thanks for your review');
+      toast.success(t('toast.thanksForReview'));
       const fresh = await catalogApi.reviewSummary(slug);
       setSummary(fresh.data);
     } catch (err) {
@@ -148,8 +151,8 @@ export default function ProductDetail() {
     <div className="container">
       <Breadcrumb
         items={[
-          { label: 'Home', to: '/' },
-          { label: product.category?.name || 'Products', to: `/products?category=${product.category?.slug || ''}` },
+          { label: t('common.home'), to: '/' },
+          { label: product.category?.name || t('common.products'), to: `/products?category=${product.category?.slug || ''}` },
           { label: product.name },
         ]}
       />
@@ -163,7 +166,7 @@ export default function ProductDetail() {
                 type="button"
                 className={`gallery-thumb ${i === imageIndex ? 'active' : ''}`}
                 onClick={() => setImageIndex(i)}
-                aria-label={`View image ${i + 1}`}
+                aria-label={t('product.viewImage', { index: i + 1 })}
               >
                 <img src={imageUrl(src)} alt="" />
               </button>
@@ -178,17 +181,19 @@ export default function ProductDetail() {
           <div className="row gap-8 mb-16 wrap">
             <span className="small muted">{product.brand}</span>
             <span className="muted">·</span>
-            <span className="small muted">SKU {product.sku}</span>
-            {product.isFeatured ? <Badge tone="danger">Featured</Badge> : null}
+            <span className="small muted">{t('product.sku', { sku: product.sku })}</span>
+            {product.isFeatured ? <Badge tone="danger">{t('product.featured')}</Badge> : null}
           </div>
 
           <h1 style={{ fontSize: '1.8rem', marginBottom: 12 }}>{product.name}</h1>
 
           <div className="row gap-12 mb-16 wrap">
             <Rating value={summary.average || product.rating} showValue />
-            <span className="small muted">({summary.total || product.reviewCount} reviews)</span>
+            <span className="small muted">
+              {t('product.reviewsParen', { count: summary.total || product.reviewCount })}
+            </span>
             <span className="muted">·</span>
-            <span className="small muted">{product.soldCount} sold</span>
+            <span className="small muted">{t('product.soldCount', { count: product.soldCount })}</span>
           </div>
 
           <div className="row gap-12 wrap mb-16">
@@ -196,7 +201,7 @@ export default function ProductDetail() {
             {product.comparePrice > product.price ? (
               <>
                 <span className="price-old" style={{ fontSize: '1.1rem' }}>{currency(product.comparePrice)}</span>
-                <Badge tone="danger">{off}% OFF</Badge>
+                <Badge tone="danger">{t('common.percentOff', { percent: off })}</Badge>
               </>
             ) : null}
           </div>
@@ -206,7 +211,7 @@ export default function ProductDetail() {
           {colorVariants.length > 0 ? (
             <div className="field mt-24">
               <span className="field-label">
-                Color: <strong>{variant?.name === 'Color' ? variant.value : colorVariants[0].value}</strong>
+                {t('product.colorLabel')} <strong>{variant?.name === 'Color' ? variant.value : colorVariants[0].value}</strong>
               </span>
               <div className="swatches">
                 {colorVariants.map((v) => (
@@ -226,7 +231,7 @@ export default function ProductDetail() {
 
           {sizeVariants.length > 0 ? (
             <div className="field">
-              <span className="field-label">Size</span>
+              <span className="field-label">{t('product.size')}</span>
               <div className="row gap-8 wrap">
                 {sizeVariants.map((v) => (
                   <button
@@ -244,14 +249,14 @@ export default function ProductDetail() {
           ) : null}
 
           <div className="field">
-            <span className="field-label">Quantity</span>
+            <span className="field-label">{t('product.quantity')}</span>
             <div className="row gap-12 wrap">
               <div className="qty">
                 <button
                   type="button"
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                   disabled={quantity <= 1}
-                  aria-label="Decrease quantity"
+                  aria-label={t('product.decreaseQty')}
                 >
                   <Minus size={14} />
                 </button>
@@ -260,17 +265,17 @@ export default function ProductDetail() {
                   type="button"
                   onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
                   disabled={quantity >= product.stock}
-                  aria-label="Increase quantity"
+                  aria-label={t('product.increaseQty')}
                 >
                   <Plus size={14} />
                 </button>
               </div>
               {outOfStock ? (
-                <Badge tone="danger">Out of stock</Badge>
+                <Badge tone="danger">{t('common.outOfStock')}</Badge>
               ) : product.stock <= 10 ? (
-                <Badge tone="warn">Only {product.stock} left</Badge>
+                <Badge tone="warn">{t('product.onlyNLeft', { count: product.stock })}</Badge>
               ) : (
-                <Badge tone="ok"><Check size={12} /> In stock</Badge>
+                <Badge tone="ok"><Check size={12} /> {t('common.inStock')}</Badge>
               )}
             </div>
           </div>
@@ -282,7 +287,7 @@ export default function ProductDetail() {
               onClick={() => handleAdd(false)}
               disabled={outOfStock || busy}
             >
-              <Cart size={17} /> Add to Cart
+              <Cart size={17} /> {t('product.addToCart')}
             </button>
             <button
               type="button"
@@ -290,13 +295,13 @@ export default function ProductDetail() {
               onClick={() => handleAdd(true)}
               disabled={outOfStock || busy}
             >
-              Buy Now
+              {t('product.buyNow')}
             </button>
             <button
               type="button"
               className="btn btn-outline btn-lg"
               onClick={handleWishlist}
-              aria-label="Toggle wishlist"
+              aria-label={t('product.toggleWishlist')}
             >
               {wished ? <HeartFilled size={17} style={{ color: 'var(--primary)' }} /> : <Heart size={17} />}
             </button>
@@ -306,22 +311,26 @@ export default function ProductDetail() {
             <div className="trust-item">
               <span className="ico"><Truck size={17} /></span>
               <div>
-                <strong>{product.freeShipping ? 'Free Shipping' : 'Fast Shipping'}</strong>
-                <span>{product.freeShipping ? 'On this item' : 'Free over $50'}</span>
+                <strong>{product.freeShipping ? t('product.freeShipping') : t('product.fastShipping')}</strong>
+                <span>
+                  {product.freeShipping
+                    ? t('product.onThisItem')
+                    : t('product.freeOver', { amount: currency(50) })}
+                </span>
               </div>
             </div>
             <div className="trust-item">
               <span className="ico"><Shield size={17} /></span>
               <div>
-                <strong>{product.warrantyMonths || 12} Month Warranty</strong>
-                <span>Free replacement</span>
+                <strong>{t('product.warrantyMonths', { count: product.warrantyMonths || 12 })}</strong>
+                <span>{t('product.freeReplacement')}</span>
               </div>
             </div>
             <div className="trust-item">
               <span className="ico"><Refresh size={17} /></span>
               <div>
-                <strong>{product.returnDays || 30} Days Return</strong>
-                <span>Hassle free</span>
+                <strong>{t('product.returnDays', { count: product.returnDays || 30 })}</strong>
+                <span>{t('product.hassleFree')}</span>
               </div>
             </div>
           </div>
@@ -329,14 +338,18 @@ export default function ProductDetail() {
       </div>
 
       <div className="tabs">
-        {['description', 'specs', 'reviews'].map((t) => (
+        {['description', 'specs', 'reviews'].map((tabKey) => (
           <button
-            key={t}
+            key={tabKey}
             type="button"
-            className={`tab ${tab === t ? 'active' : ''}`}
-            onClick={() => setTab(t)}
+            className={`tab ${tab === tabKey ? 'active' : ''}`}
+            onClick={() => setTab(tabKey)}
           >
-            {t === 'description' ? 'Description' : t === 'specs' ? 'Specifications' : `Reviews (${summary.total || 0})`}
+            {tabKey === 'description'
+              ? t('product.tabDescription')
+              : tabKey === 'specs'
+                ? t('product.tabSpecs')
+                : t('product.tabReviews', { count: summary.total || 0 })}
           </button>
         ))}
       </div>
@@ -347,8 +360,8 @@ export default function ProductDetail() {
             <p>{product.description}</p>
             {product.tags?.length ? (
               <div className="chips mt-16">
-                {product.tags.map((t) => (
-                  <Link key={t} to={`/products?tag=${t}`} className="chip">#{t}</Link>
+                {product.tags.map((tag) => (
+                  <Link key={tag} to={`/products?tag=${tag}`} className="chip">#{tag}</Link>
                 ))}
               </div>
             ) : null}
@@ -359,14 +372,14 @@ export default function ProductDetail() {
           <table style={{ width: '100%', maxWidth: 560, borderCollapse: 'collapse' }}>
             <tbody>
               {[
-                ['Brand', product.brand],
-                ['SKU', product.sku],
-                ['Category', product.category?.name],
-                ['Available stock', product.stock],
-                ['Colors', product.colors?.join(', ') || '-'],
-                ['Warranty', `${product.warrantyMonths || 12} months`],
-                ['Returns', `${product.returnDays || 30} days`],
-                ['Shipping', product.freeShipping ? 'Free' : 'Standard rates apply'],
+                [t('product.specBrand'), product.brand],
+                [t('product.specSku'), product.sku],
+                [t('product.specCategory'), product.category?.name],
+                [t('product.specStock'), product.stock],
+                [t('product.specColors'), product.colors?.join(', ') || '-'],
+                [t('product.specWarranty'), t('product.specMonths', { count: product.warrantyMonths || 12 })],
+                [t('product.specReturns'), t('product.specDays', { count: product.returnDays || 30 })],
+                [t('product.specShipping'), product.freeShipping ? t('product.specFree') : t('product.specStandardRates')],
               ].map(([label, value]) => (
                 <tr key={label} style={{ borderBottom: '1px solid var(--border)' }}>
                   <td style={{ padding: '10px 0', color: 'var(--text-muted)', width: 180 }}>{label}</td>
@@ -385,7 +398,7 @@ export default function ProductDetail() {
                   {(summary.average || 0).toFixed(1)}
                 </span>
                 <Rating value={summary.average} size={16} />
-                <span className="small muted">{summary.total} reviews</span>
+                <span className="small muted">{t('product.totalReviews', { count: summary.total })}</span>
               </div>
               <div className="stack gap-6 mt-16">
                 {[5, 4, 3, 2, 1].map((star) => {
@@ -404,14 +417,16 @@ export default function ProductDetail() {
 
             <div>
               <form className="card card-pad mb-24" onSubmit={submitReview}>
-                <h3 style={{ fontSize: '1rem', marginBottom: 12 }}>Write a review</h3>
+                <h3 style={{ fontSize: '1rem', marginBottom: 12 }}>{t('product.writeReview')}</h3>
                 {!user ? (
                   <div className="alert alert-info">
-                    <Link to="/login" className="link">Sign in</Link> to share your experience.
+                    <Link to="/login" className="link">{t('auth.signIn')}</Link>
+                    {' '}
+                    {t('product.signInToReview')}
                   </div>
                 ) : null}
                 <div className="field">
-                  <span className="field-label">Your rating</span>
+                  <span className="field-label">{t('product.yourRating')}</span>
                   <div className="row gap-4">
                     {[1, 2, 3, 4, 5].map((r) => (
                       <button
@@ -420,7 +435,7 @@ export default function ProductDetail() {
                         className="btn btn-ghost btn-sm"
                         onClick={() => setReviewForm((f) => ({ ...f, rating: r }))}
                         style={{ padding: 4 }}
-                        aria-label={`${r} star${r > 1 ? 's' : ''}`}
+                        aria-label={t(r > 1 ? 'product.starsAria' : 'product.starAria', { count: r })}
                       >
                         {reviewForm.rating >= r
                           ? <StarFilled size={20} className="star-on" />
@@ -431,32 +446,32 @@ export default function ProductDetail() {
                   </div>
                 </div>
                 <div className="field">
-                  <label className="field-label" htmlFor="review-title">Title</label>
+                  <label className="field-label" htmlFor="review-title">{t('product.reviewTitle')}</label>
                   <input
                     id="review-title"
                     className="input"
                     value={reviewForm.title}
                     onChange={(e) => setReviewForm((f) => ({ ...f, title: e.target.value }))}
-                    placeholder="Sum it up in a few words"
+                    placeholder={t('product.reviewTitlePlaceholder')}
                   />
                 </div>
                 <div className="field">
-                  <label className="field-label" htmlFor="review-comment">Review</label>
+                  <label className="field-label" htmlFor="review-comment">{t('product.reviewBody')}</label>
                   <textarea
                     id="review-comment"
                     className="textarea"
                     value={reviewForm.comment}
                     onChange={(e) => setReviewForm((f) => ({ ...f, comment: e.target.value }))}
-                    placeholder="What did you like or dislike?"
+                    placeholder={t('product.reviewBodyPlaceholder')}
                   />
                 </div>
                 <button type="submit" className="btn btn-primary" disabled={submittingReview || !user}>
-                  {submittingReview ? 'Submitting…' : 'Submit review'}
+                  {submittingReview ? t('product.submitting') : t('product.submitReview')}
                 </button>
               </form>
 
               {reviews.length === 0 ? (
-                <p className="muted">No reviews yet. Be the first to review this product.</p>
+                <p className="muted">{t('product.noReviews')}</p>
               ) : (
                 reviews.map((r) => (
                   <div key={r._id} className="review-item">
@@ -465,10 +480,10 @@ export default function ProductDetail() {
                       <div className="grow">
                         <div className="row between wrap gap-8">
                           <div>
-                            <span className="bold small">{r.user?.name || 'Customer'}</span>
+                            <span className="bold small">{r.user?.name || t('product.customer')}</span>
                             {r.isVerifiedPurchase ? (
                               <span className="badge badge-ok" style={{ marginLeft: 8 }}>
-                                <Check size={11} /> Verified purchase
+                                <Check size={11} /> {t('product.verifiedPurchase')}
                               </span>
                             ) : null}
                           </div>
@@ -490,7 +505,7 @@ export default function ProductDetail() {
       {related.length > 0 ? (
         <section className="section">
           <div className="section-head">
-            <h2>You might also like</h2>
+            <h2>{t('product.youMightLike')}</h2>
           </div>
           <div className="product-grid">
             {related.map((p) => <ProductCard key={p._id} product={p} />)}

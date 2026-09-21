@@ -45,8 +45,8 @@ public class AddressListActivity extends AppCompatActivity
         adapter = new Adapters.AddressAdapter(this);
         b.list.setAdapter(adapter);
 
-        b.empty.emptyTitle.setText("No saved addresses");
-        b.empty.emptyMessage.setText("Add one so checkout is a single tap.");
+        b.empty.emptyTitle.setText(R.string.no_saved_addresses);
+        b.empty.emptyMessage.setText(R.string.no_saved_addresses_hint);
         b.empty.emptyAction.setVisibility(View.VISIBLE);
         b.empty.emptyAction.setText(R.string.add_new_address);
         b.empty.emptyAction.setOnClickListener(v -> showDialog(null));
@@ -94,7 +94,7 @@ public class AddressListActivity extends AppCompatActivity
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.save, (dialog, which) -> {
                     Address address = new Address();
-                    address.label = existing != null ? existing.label : "Home";
+                    address.label = existing != null ? existing.label : getString(R.string.default_address_label);
                     address.fullName = String.valueOf(d.fullNameInput.getText()).trim();
                     address.phone = String.valueOf(d.phoneInput.getText()).trim();
                     address.street = String.valueOf(d.streetInput.getText()).trim();
@@ -107,7 +107,7 @@ public class AddressListActivity extends AppCompatActivity
                             || !Validators.notBlank(address.city)
                             || !Validators.notBlank(address.zipCode)
                             || !Validators.notBlank(address.country)) {
-                        Ui.snack(b.getRoot(), "Please fill in every required field");
+                        Ui.snack(b.getRoot(), getString(R.string.error_fill_required));
                         return;
                     }
 
@@ -129,7 +129,7 @@ public class AddressListActivity extends AppCompatActivity
     public void onDelete(Address address) {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.delete)
-                .setMessage("Remove this address?")
+                .setMessage(R.string.remove_address_confirm)
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.delete, (dialog, which) ->
                         Repo.call(Repo.api().deleteAddress(address.id), callback()))

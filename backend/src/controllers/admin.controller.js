@@ -4,6 +4,7 @@ const ApiError = require('../utils/ApiError');
 const { ok, paginated } = require('../utils/response');
 const { getPagination } = require('../utils/pagination');
 const { round2 } = require('../utils/money');
+const { pickTranslated } = require('../utils/localize');
 const User = require('../models/User');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
@@ -79,7 +80,7 @@ exports.stats = asyncHandler(async (req, res) => {
       activeProducts: products,
       averageOrderValue: cur.orders ? round2(cur.revenue / cur.orders) : 0,
     },
-    'Dashboard stats',
+    'success.dashboardStats',
   );
 });
 
@@ -120,7 +121,7 @@ exports.salesOverview = asyncHandler(async (req, res) => {
     else cursor.setDate(cursor.getDate() + 1);
   }
 
-  return ok(res, series, 'Sales overview');
+  return ok(res, series, 'success.salesOverview');
 });
 
 /** Donut data for "Sales by Category". */
@@ -150,19 +151,22 @@ exports.salesByCategory = asyncHandler(async (req, res) => {
   ]);
 
   const categories = await Category.find({ _id: { $in: rows.map((r) => r._id) } })
-    .select('name slug')
+    .select('name slug translations')
     .lean();
-  const nameById = new Map(categories.map((c) => [String(c._id), c.name]));
+  // Chart labels are plain strings, so the response-layer fold never sees them.
+  const nameById = new Map(
+    categories.map((c) => [String(c._id), pickTranslated(c, 'name', req.locale)]),
+  );
 
   const total = rows.reduce((s, r) => s + r.revenue, 0);
   const data = rows.map((r) => ({
-    category: nameById.get(String(r._id)) || 'Uncategorised',
+    category: nameById.get(String(r._id)) || req.t('common.uncategorised'),
     revenue: round2(r.revenue),
     units: r.units,
     percent: total > 0 ? round2((r.revenue / total) * 100) : 0,
   }));
 
-  return ok(res, { total: round2(total), segments: data }, 'Sales by category');
+  return ok(res, { total: round2(total), segments: data }, 'success.salesByCategory');
 });
 
 /** Monthly new-customer bars. */
@@ -186,14 +190,14 @@ exports.customerGrowth = asyncHandler(async (req, res) => {
     const key = cursor.toISOString().slice(0, 7);
     series.push({
       month: key,
-      label: cursor.toLocaleString('en-US', { month: 'short' }),
+      label: cursor.toLocaleString(req.t('language.intlLocale'), { month: 'short' }),
       count: byKey.get(key) || 0,
     });
     cursor.setMonth(cursor.getMonth() + 1);
   }
 
   const total = await User.countDocuments({ role: ROLES.CUSTOMER });
-  return ok(res, { total, series }, 'Customer growth');
+  return ok(res, { total, series }, 'success.customerGrowth');
 });
 
 exports.recentOrders = asyncHandler(async (req, res) => {
@@ -203,7 +207,7 @@ exports.recentOrders = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 })
     .limit(limit)
     .select('orderNumber customerName status pricing.total createdAt items');
-  return ok(res, orders, 'Recent orders');
+  return ok(res, orders, 'success.recentOrders');
 });
 
 exports.topProducts = asyncHandler(async (req, res) => {
@@ -211,8 +215,8 @@ exports.topProducts = asyncHandler(async (req, res) => {
   const products = await Product.find({ isActive: true })
     .sort({ soldCount: -1 })
     .limit(limit)
-    .select('name slug images price soldCount stock rating');
-  return ok(res, products, 'Top products');
+    .select('name slug images price soldCount stock rating translations');
+  return ok(res, products, 'success.topProducts');
 });
 
 /** Inventory screen: what needs restocking. */
@@ -222,11 +226,11 @@ exports.inventoryAlerts = asyncHandler(async (req, res) => {
 
   const [items, total, outOfStock] = await Promise.all([
     Product.find(filter)
-      .populate('category', 'name')
+      .populate('category', 'name translations')
       .sort({ stock: 1 })
       .skip(skip)
       .limit(limit)
-      .select('name sku images stock price category'),
+      .select('name sku images stock price category translations'),
     Product.countDocuments(filter),
     Product.countDocuments({ isActive: true, stock: 0 }),
   ]);
@@ -276,12 +280,12 @@ exports.listCustomers = asyncHandler(async (req, res) => {
     };
   });
 
-  return paginated(res, data, { page, limit, total }, 'Customers');
+  return paginated(res, data, { page, limit, total }, 'success.customers');
 });
 
 exports.getCustomer = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
-  if (!user) throw ApiError.notFound('Customer not found');
+  if (!user) throw ApiError.notFound('error.customerNotFound');
 
   const [orders, agg, reviews] = await Promise.all([
     Order.find({ user: user._id }).sort({ createdAt: -1 }).limit(10),
@@ -306,20 +310,20 @@ exports.getCustomer = asyncHandler(async (req, res) => {
       },
       recentOrders: orders,
     },
-    'Customer detail',
+    'success.customerDetail',
   );
 });
 
 exports.toggleCustomerActive = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
-  if (!user) throw ApiError.notFound('Customer not found');
-  if (user.role !== ROLES.CUSTOMER) throw ApiError.forbidden('Cannot deactivate a staff account here');
+  if (!user) throw ApiError.notFound('error.customerNotFound');
+  if (user.role !== ROLES.CUSTOMER) throw ApiError.forbidden('error.cannotDeactivateStaff');
 
   user.isActive = req.body.isActive !== undefined ? Boolean(req.body.isActive) : !user.isActive;
   if (!user.isActive) user.refreshTokens = [];
   await user.save();
 
-  return ok(res, user, user.isActive ? 'Customer activated' : 'Customer deactivated');
+  return ok(res, user, user.isActive ? 'success.customerActivated' : 'success.customerDeactivated');
 });
 
 exports.exportCustomers = asyncHandler(async (req, res) => {
@@ -331,7 +335,9 @@ exports.exportCustomers = asyncHandler(async (req, res) => {
   const byUser = new Map(stats.map((s) => [String(s._id), s]));
 
   const esc = (v) => '"' + String(v === undefined || v === null ? '' : v).replace(/"/g, '""') + '"';
-  const header = ['Name', 'Email', 'Phone', 'Orders', 'Total Spent', 'Status', 'Joined'];
+  const header = ['name', 'email', 'phone', 'orders', 'totalSpent', 'status', 'joined'].map((k) =>
+    req.t('csv.' + k),
+  );
   const lines = [header.join(',')];
 
   users.forEach((u) => {
@@ -343,7 +349,7 @@ exports.exportCustomers = asyncHandler(async (req, res) => {
         esc(u.phone),
         s ? s.orders : 0,
         s ? round2(s.spent) : 0,
-        u.isActive ? 'Active' : 'Inactive',
+        esc(u.isActive ? req.t('csv.active') : req.t('csv.inactive')),
         esc(new Date(u.createdAt).toISOString().slice(0, 10)),
       ].join(','),
     );
@@ -351,5 +357,7 @@ exports.exportCustomers = asyncHandler(async (req, res) => {
 
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
   res.setHeader('Content-Disposition', 'attachment; filename="customers.csv"');
-  return res.status(200).send(lines.join('\n'));
+  // Excel only reads a UTF-8 CSV as UTF-8 when it starts with a BOM; without
+  // it the Chinese and Japanese columns open as mojibake.
+  return res.status(200).send('﻿' + lines.join('\n'));
 });

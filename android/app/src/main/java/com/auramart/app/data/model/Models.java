@@ -159,6 +159,15 @@ public final class Models {
         }
     }
 
+    /** Body for PATCH /users/language: "en", "zh" or "ja". */
+    public static class UpdateLanguageRequest {
+        public String language;
+
+        public UpdateLanguageRequest(String language) {
+            this.language = language;
+        }
+    }
+
     /* ------------------------------- catalog ------------------------------ */
 
     public static class Category implements Serializable {

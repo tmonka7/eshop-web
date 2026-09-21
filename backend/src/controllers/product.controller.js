@@ -3,6 +3,8 @@ const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const { ok, created, paginated } = require('../utils/response');
 const { getPagination } = require('../utils/pagination');
+const { buildTranslations } = require('../utils/localize');
+const { LOCALES } = require('../i18n');
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const Review = require('../models/Review');
@@ -18,9 +20,14 @@ const SORTS = {
   popular: { viewCount: -1 },
 };
 
+// `translations` must stay selected or the response-layer fold has nothing to
+// work with and every locale falls back to the English columns.
 const LIST_FIELDS =
   'name slug sku brand price comparePrice stock images rating reviewCount soldCount ' +
-  'category isActive isFeatured freeShipping shortDescription colors tags createdAt';
+  'category isActive isFeatured freeShipping shortDescription colors tags createdAt translations';
+
+/** Category fields to populate; `translations` for the same reason as above. */
+const CATEGORY_FIELDS = 'name slug translations';
 
 const csv = (v) => String(v || '').split(',').map((s) => s.trim()).filter(Boolean);
 
@@ -38,7 +45,7 @@ async function buildFilter(query, { adminView = false } = {}) {
     const cat = /^[0-9a-fA-F]{24}$/.test(query.category)
       ? await Category.findById(query.category).lean()
       : await Category.findOne({ slug: query.category }).lean();
-    if (!cat) throw ApiError.notFound('Category not found');
+    if (!cat) throw ApiError.notFound('error.categoryNotFound');
     const children = await Category.find({ parent: cat._id }).select('_id').lean();
     filter.category = { $in: [cat._id, ...children.map((c) => c._id)] };
   }
@@ -70,7 +77,15 @@ async function buildFilter(query, { adminView = false } = {}) {
 
   if (query.search) {
     const rx = new RegExp(escapeRegex(query.search), 'i');
-    filter.$or = [{ name: rx }, { brand: rx }, { sku: rx }, { tags: rx }];
+    // Search the translated names as well, so a Japanese shopper typing
+    // "ヘッドホン" finds a product whose canonical name is English.
+    filter.$or = [
+      { name: rx },
+      { brand: rx },
+      { sku: rx },
+      { tags: rx },
+      ...LOCALES.map((locale) => ({ [`translations.${locale}.name`]: rx })),
+    ];
   }
 
   return filter;
@@ -84,14 +99,14 @@ exports.list = asyncHandler(async (req, res) => {
   const [items, total] = await Promise.all([
     Product.find(filter)
       .select(LIST_FIELDS)
-      .populate('category', 'name slug')
+      .populate('category', CATEGORY_FIELDS)
       .sort(sort)
       .skip(skip)
       .limit(limit),
     Product.countDocuments(filter),
   ]);
 
-  return paginated(res, items, { page, limit, total }, 'Products');
+  return paginated(res, items, { page, limit, total }, 'success.products');
 });
 
 /** Facet values so the storefront sidebar can render real filter options. */
@@ -129,7 +144,7 @@ exports.filters = asyncHandler(async (req, res) => {
         : { min: 0, max: 0 },
       ratings: [4, 3, 2, 1],
     },
-    'Product filters',
+    'success.productFilters',
   );
 });
 
@@ -137,20 +152,20 @@ exports.featured = asyncHandler(async (req, res) => {
   const limit = Math.min(Number.parseInt(req.query.limit, 10) || 8, 50);
   const items = await Product.find({ isActive: true, isFeatured: true })
     .select(LIST_FIELDS)
-    .populate('category', 'name slug')
+    .populate('category', CATEGORY_FIELDS)
     .sort({ soldCount: -1 })
     .limit(limit);
-  return ok(res, items, 'Featured products');
+  return ok(res, items, 'success.featuredProducts');
 });
 
 exports.bestSellers = asyncHandler(async (req, res) => {
   const limit = Math.min(Number.parseInt(req.query.limit, 10) || 8, 50);
   const items = await Product.find({ isActive: true })
     .select(LIST_FIELDS)
-    .populate('category', 'name slug')
+    .populate('category', CATEGORY_FIELDS)
     .sort({ soldCount: -1, rating: -1 })
     .limit(limit);
-  return ok(res, items, 'Best sellers');
+  return ok(res, items, 'success.bestSellers');
 });
 
 exports.getBySlug = asyncHandler(async (req, res) => {
@@ -158,19 +173,19 @@ exports.getBySlug = asyncHandler(async (req, res) => {
   const query = /^[0-9a-fA-F]{24}$/.test(slug) ? { _id: slug } : { slug };
 
   const product = await Product.findOneAndUpdate(query, { $inc: { viewCount: 1 } }, { new: true })
-    .populate('category', 'name slug');
+    .populate('category', CATEGORY_FIELDS);
 
-  if (!product) throw ApiError.notFound('Product not found');
+  if (!product) throw ApiError.notFound('error.productNotFound');
   // Deactivated products stay reachable for admins previewing a draft.
   const isStaff = req.user && req.user.role !== 'customer';
-  if (!product.isActive && !isStaff) throw ApiError.notFound('Product not found');
+  if (!product.isActive && !isStaff) throw ApiError.notFound('error.productNotFound');
 
-  return ok(res, product, 'Product');
+  return ok(res, product, 'success.product');
 });
 
 exports.related = asyncHandler(async (req, res) => {
   const product = await Product.findOne({ slug: req.params.slug }).lean();
-  if (!product) throw ApiError.notFound('Product not found');
+  if (!product) throw ApiError.notFound('error.productNotFound');
 
   const items = await Product.find({
     _id: { $ne: product._id },
@@ -178,11 +193,11 @@ exports.related = asyncHandler(async (req, res) => {
     $or: [{ category: product.category }, { brand: product.brand }],
   })
     .select(LIST_FIELDS)
-    .populate('category', 'name slug')
+    .populate('category', CATEGORY_FIELDS)
     .sort({ rating: -1, soldCount: -1 })
     .limit(8);
 
-  return ok(res, items, 'Related products');
+  return ok(res, items, 'success.relatedProducts');
 });
 
 /* -------------------------------- admin ------------------------------- */
@@ -193,56 +208,64 @@ exports.adminList = asyncHandler(async (req, res) => {
 
   const [items, total] = await Promise.all([
     Product.find(filter)
-      .populate('category', 'name slug')
+      .populate('category', CATEGORY_FIELDS)
       .sort(SORTS[req.query.sort] || { createdAt: -1 })
       .skip(skip)
       .limit(limit),
     Product.countDocuments(filter),
   ]);
 
-  return paginated(res, items, { page, limit, total }, 'Products');
+  return paginated(res, items, { page, limit, total }, 'success.products');
 });
 
 exports.create = asyncHandler(async (req, res) => {
   const category = await Category.findById(req.body.category);
-  if (!category) throw ApiError.badRequest('Category does not exist');
-  const product = await Product.create(req.body);
-  return created(res, product, 'Product created');
+  if (!category) throw ApiError.badRequest('error.categoryNotExist');
+  const product = await Product.create({
+    ...req.body,
+    translations: buildTranslations(req.body.translations),
+  });
+  return created(res, product, 'success.productCreated');
 });
 
 exports.update = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
-  if (!product) throw ApiError.notFound('Product not found');
+  if (!product) throw ApiError.notFound('error.productNotFound');
   if (req.body.category) {
     const category = await Category.findById(req.body.category);
-    if (!category) throw ApiError.badRequest('Category does not exist');
+    if (!category) throw ApiError.badRequest('error.categoryNotExist');
   }
-  Object.assign(product, req.body);
+  const { translations, ...rest } = req.body;
+  Object.assign(product, rest);
+  // Merge rather than assign: a PATCH carrying only `ja` must not wipe en/zh.
+  if (translations) {
+    product.translations = buildTranslations(translations, product.toObject().translations);
+  }
   await product.save();
-  return ok(res, product, 'Product updated');
+  return ok(res, product, 'success.productUpdated');
 });
 
 exports.toggleActive = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
-  if (!product) throw ApiError.notFound('Product not found');
+  if (!product) throw ApiError.notFound('error.productNotFound');
   product.isActive =
     req.body.isActive !== undefined ? Boolean(req.body.isActive) : !product.isActive;
   await product.save();
-  return ok(res, product, product.isActive ? 'Product activated' : 'Product deactivated');
+  return ok(res, product, product.isActive ? 'success.productActivated' : 'success.productDeactivated');
 });
 
 exports.updateStock = asyncHandler(async (req, res) => {
   const stock = Number.parseInt(req.body.stock, 10);
-  if (!Number.isFinite(stock) || stock < 0) throw ApiError.badRequest('stock must be >= 0');
+  if (!Number.isFinite(stock) || stock < 0) throw ApiError.badRequest('error.stockMin');
   const product = await Product.findByIdAndUpdate(req.params.id, { stock }, { new: true });
-  if (!product) throw ApiError.notFound('Product not found');
-  return ok(res, product, 'Stock updated');
+  if (!product) throw ApiError.notFound('error.productNotFound');
+  return ok(res, product, 'success.stockUpdated');
 });
 
 exports.remove = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
-  if (!product) throw ApiError.notFound('Product not found');
+  if (!product) throw ApiError.notFound('error.productNotFound');
   await Review.deleteMany({ product: product._id });
   await product.deleteOne();
-  return ok(res, null, 'Product deleted');
+  return ok(res, null, 'success.productDeleted');
 });

@@ -2,6 +2,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const { ROLES } = require('../config/constants');
+const { LOCALES, DEFAULT_LOCALE } = require('../i18n');
 
 const addressSchema = new mongoose.Schema(
   {
@@ -20,10 +21,10 @@ const addressSchema = new mongoose.Schema(
 
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, required: [true, 'Name is required'], trim: true, maxlength: 80 },
+    name: { type: String, required: [true, 'validation.nameLength'], trim: true, maxlength: 80 },
     email: {
       type: String,
-      required: [true, 'Email is required'],
+      required: [true, 'validation.emailValid'],
       unique: true,
       lowercase: true,
       trim: true,
@@ -37,6 +38,7 @@ const userSchema = new mongoose.Schema(
     addresses: { type: [addressSchema], default: [] },
     wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
     refreshTokens: { type: [String], default: [], select: false },
+    language: { type: String, enum: LOCALES, default: DEFAULT_LOCALE },
     lastLoginAt: { type: Date, default: null },
   },
   {

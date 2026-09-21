@@ -60,7 +60,7 @@ public class CategoriesFragment extends Fragment {
                 adapter.submit(data);
                 b.swipeRefresh.setRefreshing(false);
                 b.empty.getRoot().setVisibility(data.isEmpty() ? View.VISIBLE : View.GONE);
-                b.empty.emptyTitle.setText("No categories yet");
+                b.empty.emptyTitle.setText(R.string.no_categories_yet);
             }
 
             @Override

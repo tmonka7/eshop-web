@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Star, StarFilled, X } from './Icons';
 import { useToastStore } from '../store/toastStore';
+import { useI18n } from '../i18n';
 
 export function Spinner({ label }) {
   return (
@@ -14,9 +15,10 @@ export function Spinner({ label }) {
 }
 
 export function Rating({ value = 0, count, size = 13, showValue = false }) {
+  const { t } = useI18n();
   const rounded = Math.round(value);
   return (
-    <span className="rating" title={`${value} out of 5`}>
+    <span className="rating" title={t('product.ratingOutOf', { value })}>
       {[1, 2, 3, 4, 5].map((i) =>
         i <= rounded ? (
           <StarFilled key={i} size={size} className="star-on" />
@@ -46,8 +48,9 @@ export function EmptyState({ icon, title, message, action }) {
 }
 
 export function Breadcrumb({ items }) {
+  const { t } = useI18n();
   return (
-    <nav className="breadcrumb" aria-label="Breadcrumb">
+    <nav className="breadcrumb" aria-label={t('a11y.breadcrumb')}>
       {items.map((item, i) => (
         <span key={`${item.label}-${i}`} className="row gap-6">
           {item.to ? <Link to={item.to}>{item.label}</Link> : <span className="bold">{item.label}</span>}
@@ -59,6 +62,7 @@ export function Breadcrumb({ items }) {
 }
 
 export function Pagination({ page, totalPages, onChange }) {
+  const { t } = useI18n();
   if (!totalPages || totalPages <= 1) return null;
 
   // Show a sliding window of 5 pages around the current one.
@@ -68,7 +72,7 @@ export function Pagination({ page, totalPages, onChange }) {
   return (
     <div className="pagination">
       <button type="button" onClick={() => onChange(page - 1)} disabled={page <= 1}>
-        Prev
+        {t('common.prev')}
       </button>
       {start > 1 ? (
         <>
@@ -93,23 +97,24 @@ export function Pagination({ page, totalPages, onChange }) {
         </>
       ) : null}
       <button type="button" onClick={() => onChange(page + 1)} disabled={page >= totalPages}>
-        Next
+        {t('common.next')}
       </button>
     </div>
   );
 }
 
 export function Toasts() {
+  const { t } = useI18n();
   const toasts = useToastStore((s) => s.toasts);
   const dismiss = useToastStore((s) => s.dismiss);
 
   if (!toasts.length) return null;
   return (
     <div className="toast-stack" role="status" aria-live="polite">
-      {toasts.map((t) => (
-        <div key={t.id} className={`toast ${t.type}`}>
-          <span className="grow">{t.message}</span>
-          <button type="button" onClick={() => dismiss(t.id)} aria-label="Dismiss">
+      {toasts.map((item) => (
+        <div key={item.id} className={`toast ${item.type}`}>
+          <span className="grow">{item.message}</span>
+          <button type="button" onClick={() => dismiss(item.id)} aria-label={t('common.dismiss')}>
             <X size={15} />
           </button>
         </div>

@@ -1,22 +1,26 @@
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin } from './Icons';
+import { useI18n } from '../i18n';
+import { currency } from '../utils/format';
 
 const shopLinks = [
-  { to: '/products?sort=best_selling', label: 'Best Sellers' },
-  { to: '/products?sort=newest', label: 'New Arrivals' },
-  { to: '/products?featured=true', label: 'Featured' },
-  { to: '/products?category=electronics', label: 'Electronics' },
-  { to: '/products?category=fashion', label: 'Fashion' },
+  { to: '/products?sort=best_selling', labelKey: 'footer.bestSellers' },
+  { to: '/products?sort=newest', labelKey: 'footer.newArrivals' },
+  { to: '/products?featured=true', labelKey: 'footer.featured' },
+  { to: '/products?category=electronics', labelKey: 'footer.electronics' },
+  { to: '/products?category=fashion', labelKey: 'footer.fashion' },
 ];
 
 const helpLinks = [
-  { to: '/orders', label: 'Track My Order' },
-  { to: '/account', label: 'My Account' },
-  { to: '/cart', label: 'Shopping Cart' },
-  { to: '/wishlist', label: 'Wishlist' },
+  { to: '/orders', labelKey: 'footer.trackMyOrder' },
+  { to: '/account', labelKey: 'footer.myAccount' },
+  { to: '/cart', labelKey: 'footer.shoppingCart' },
+  { to: '/wishlist', labelKey: 'footer.wishlist' },
 ];
 
 export default function Footer() {
+  const { t } = useI18n();
+
   return (
     <footer className="footer">
       <div className="container">
@@ -25,13 +29,12 @@ export default function Footer() {
             <div className="row gap-8 mb-16">
               <span className="brand-mark">A</span>
               <div>
-                <div className="brand-name" style={{ color: '#fff' }}>AuraMart</div>
-                <div className="tiny" style={{ color: 'var(--ink-400)' }}>Better Products, Brighter Life</div>
+                <div className="brand-name" style={{ color: '#fff' }}>{t('brand.name')}</div>
+                <div className="tiny" style={{ color: 'var(--ink-400)' }}>{t('brand.tagline')}</div>
               </div>
             </div>
             <p style={{ fontSize: '0.86rem', maxWidth: '38ch' }}>
-              A modern commerce platform with a fast storefront, a full admin panel and a native
-              Android app — all running on one API.
+              {t('footer.blurb')}
             </p>
             <div className="stack gap-8 mt-16 small">
               <span className="row gap-8"><MapPin size={14} /> Mannerheimintie 1, Helsinki</span>
@@ -41,27 +44,27 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4>Shop</h4>
+            <h4>{t('footer.shop')}</h4>
             <ul className="stack gap-8">
               {shopLinks.map((l) => (
-                <li key={l.label}><Link to={l.to}>{l.label}</Link></li>
+                <li key={l.labelKey}><Link to={l.to}>{t(l.labelKey)}</Link></li>
               ))}
             </ul>
           </div>
 
           <div>
-            <h4>Help</h4>
+            <h4>{t('footer.help')}</h4>
             <ul className="stack gap-8">
               {helpLinks.map((l) => (
-                <li key={l.label}><Link to={l.to}>{l.label}</Link></li>
+                <li key={l.labelKey}><Link to={l.to}>{t(l.labelKey)}</Link></li>
               ))}
             </ul>
           </div>
 
           <div>
-            <h4>We accept</h4>
+            <h4>{t('footer.weAccept')}</h4>
             <div className="chips" style={{ gap: 8 }}>
-              {['Visa', 'Mastercard', 'PayPal', 'Apple Pay', 'COD'].map((m) => (
+              {['Visa', 'Mastercard', 'PayPal', 'Apple Pay', t('payment.cod')].map((m) => (
                 <span
                   key={m}
                   className="tiny"
@@ -76,16 +79,16 @@ export default function Footer() {
                 </span>
               ))}
             </div>
-            <h4 className="mt-24">Free shipping</h4>
+            <h4 className="mt-24">{t('footer.freeShipping')}</h4>
             <p className="small" style={{ color: 'var(--ink-400)' }}>
-              On every order over $50. 30-day returns on everything.
+              {t('footer.freeShippingNote', { amount: currency(50) })}
             </p>
           </div>
         </div>
 
         <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} AuraMart. Demo project.</span>
-          <span>Built with React, Express and MongoDB.</span>
+          <span>{t('footer.copyright', { year: new Date().getFullYear() })}</span>
+          <span>{t('footer.builtWith')}</span>
         </div>
       </div>
     </footer>

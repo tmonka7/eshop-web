@@ -4,71 +4,75 @@ import {
   LogOut, Menu, Globe, AlertTriangle,
 } from './Icons';
 import { Toasts } from './ui';
+import LanguageSwitcher from './LanguageSwitcher';
 import { useAuthStore, useUiStore } from '../store';
+import { useI18n } from '../i18n';
 
+// Section and item labels are catalogue keys, resolved at render time so the
+// sidebar follows a language switch without a reload.
 const NAV = [
   {
-    section: 'Overview',
-    items: [{ to: '/', end: true, icon: <Dashboard size={17} />, label: 'Dashboard' }],
+    sectionKey: 'nav.overview',
+    items: [{ to: '/', end: true, icon: <Dashboard size={17} />, labelKey: 'nav.dashboard' }],
   },
   {
-    section: 'Catalog',
+    sectionKey: 'nav.catalog',
     items: [
-      { to: '/products', icon: <Boxes size={17} />, label: 'Products' },
-      { to: '/categories', icon: <Layers size={17} />, label: 'Categories' },
-      { to: '/inventory', icon: <AlertTriangle size={17} />, label: 'Inventory' },
+      { to: '/products', icon: <Boxes size={17} />, labelKey: 'nav.products' },
+      { to: '/categories', icon: <Layers size={17} />, labelKey: 'nav.categories' },
+      { to: '/inventory', icon: <AlertTriangle size={17} />, labelKey: 'nav.inventory' },
     ],
   },
   {
-    section: 'Sales',
+    sectionKey: 'nav.sales',
     items: [
-      { to: '/orders', icon: <Package size={17} />, label: 'Orders' },
-      { to: '/customers', icon: <Users size={17} />, label: 'Customers' },
+      { to: '/orders', icon: <Package size={17} />, labelKey: 'nav.orders' },
+      { to: '/customers', icon: <Users size={17} />, labelKey: 'nav.customers' },
     ],
   },
   {
-    section: 'Engagement',
+    sectionKey: 'nav.engagement',
     items: [
-      { to: '/promotions', icon: <Megaphone size={17} />, label: 'Promotions' },
-      { to: '/reviews', icon: <Star2 size={17} />, label: 'Reviews' },
-      { to: '/content', icon: <Image size={17} />, label: 'Content' },
+      { to: '/promotions', icon: <Megaphone size={17} />, labelKey: 'nav.promotions' },
+      { to: '/reviews', icon: <Star2 size={17} />, labelKey: 'nav.reviews' },
+      { to: '/content', icon: <Image size={17} />, labelKey: 'nav.content' },
     ],
   },
   {
-    section: 'Insights',
+    sectionKey: 'nav.insights',
     items: [
-      { to: '/reports', icon: <Chart size={17} />, label: 'Reports' },
-      { to: '/settings', icon: <Settings size={17} />, label: 'Settings' },
+      { to: '/reports', icon: <Chart size={17} />, labelKey: 'nav.reports' },
+      { to: '/settings', icon: <Settings size={17} />, labelKey: 'nav.settings' },
     ],
   },
 ];
 
-const TITLES = {
-  '/': 'Dashboard',
-  '/products': 'Products Management',
-  '/categories': 'Categories',
-  '/inventory': 'Inventory',
-  '/orders': 'Orders Management',
-  '/customers': 'Customers',
-  '/promotions': 'Promotions',
-  '/reviews': 'Reviews',
-  '/content': 'Content',
-  '/reports': 'Reports',
-  '/settings': 'Settings',
+const TITLE_KEYS = {
+  '/': 'dashboard.title',
+  '/products': 'products.title',
+  '/categories': 'categories.title',
+  '/inventory': 'inventory.title',
+  '/orders': 'orders.title',
+  '/customers': 'customers.title',
+  '/promotions': 'promotions.title',
+  '/reviews': 'reviews.title',
+  '/content': 'content.title',
+  '/reports': 'reports.title',
+  '/settings': 'settings.title',
 };
 
 export default function Layout() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { t } = useI18n();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const sidebarOpen = useUiStore((s) => s.sidebarOpen);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
   const closeSidebar = useUiStore((s) => s.closeSidebar);
 
-  const title = TITLES[pathname]
-    || TITLES[`/${pathname.split('/')[1]}`]
-    || 'Admin';
+  const titleKey = TITLE_KEYS[pathname] || TITLE_KEYS[`/${pathname.split('/')[1]}`];
+  const title = titleKey ? t(titleKey) : t('app.panel');
 
   async function handleLogout() {
     await logout();
@@ -81,15 +85,15 @@ export default function Layout() {
         <div className="sidebar-brand">
           <span className="mark">A</span>
           <div>
-            <div className="name">AuraMart</div>
-            <div className="sub">Admin Panel</div>
+            <div className="name">{t('app.brand')}</div>
+            <div className="sub">{t('app.panel')}</div>
           </div>
         </div>
 
         <nav className="sidebar-nav">
           {NAV.map((group) => (
-            <div key={group.section}>
-              <div className="sidebar-section">{group.section}</div>
+            <div key={group.sectionKey}>
+              <div className="sidebar-section">{t(group.sectionKey)}</div>
               {group.items.map((item) => (
                 <NavLink
                   key={item.to}
@@ -99,7 +103,7 @@ export default function Layout() {
                   onClick={closeSidebar}
                 >
                   {item.icon}
-                  {item.label}
+                  {t(item.labelKey)}
                 </NavLink>
               ))}
             </div>
@@ -113,10 +117,10 @@ export default function Layout() {
             target="_blank"
             rel="noreferrer"
           >
-            <Globe size={17} /> View storefront
+            <Globe size={17} /> {t('nav.storefront')}
           </a>
           <button type="button" className="sidebar-link" style={{ width: '100%' }} onClick={handleLogout}>
-            <LogOut size={17} /> Sign out
+            <LogOut size={17} /> {t('nav.signOut')}
           </button>
         </div>
       </aside>
@@ -129,16 +133,17 @@ export default function Layout() {
             type="button"
             className="btn btn-ghost btn-icon sidebar-toggle"
             onClick={toggleSidebar}
-            aria-label="Toggle navigation"
+            aria-label={t('nav.toggleNavigation')}
           >
             <Menu size={19} />
           </button>
           <h1>{title}</h1>
           <span className="spacer" />
           <div className="row gap-8">
+            <LanguageSwitcher />
             <div className="right" style={{ lineHeight: 1.3 }}>
               <div className="small bold">{user?.name}</div>
-              <div className="tiny muted">{user?.role}</div>
+              <div className="tiny muted">{user?.role ? t(`roles.${user.role}`) : ''}</div>
             </div>
             <span className="avatar-circle">{(user?.name || 'A').charAt(0)}</span>
           </div>
