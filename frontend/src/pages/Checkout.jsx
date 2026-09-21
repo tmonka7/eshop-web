@@ -492,7 +492,7 @@ export default function Checkout() {
             {totals.discount > 0 ? (
               <div className="summary-row">
                 <span className="muted">{t('checkout.discount')}</span>
-                <span className="bold" style={{ color: 'var(--green-600)' }}>−{currency(totals.discount)}</span>
+                <span className="bold" style={{ color: 'var(--primary-ink)' }}>−{currency(totals.discount)}</span>
               </div>
             ) : null}
             <div className="summary-row">

@@ -3,9 +3,10 @@
 
     <style name="Theme.AuraMart" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
-        <item name="colorOnPrimary">@color/white</item>
+        <!-- Dark, not white: nothing legible sits on #9DC209 in white. -->
+        <item name="colorOnPrimary">@color/on_primary</item>
         <item name="colorPrimaryContainer">@color/primary_light</item>
-        <item name="colorOnPrimaryContainer">@color/primary_dark</item>
+        <item name="colorOnPrimaryContainer">@color/primary_ink</item>
 
         <item name="colorSecondary">@color/success</item>
         <item name="colorOnSecondary">@color/white</item>
@@ -34,7 +35,7 @@
 
     <style name="Theme.AuraMart.Splash" parent="Theme.AuraMart">
         <item name="android:windowBackground">@drawable/bg_splash</item>
-        <item name="android:statusBarColor">@color/primary</item>
+        <item name="android:statusBarColor">@color/primary_deep</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
     </style>
 
@@ -42,6 +43,7 @@
 
     <style name="Widget.AuraMart.Button" parent="Widget.Material3.Button">
         <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/on_primary</item>
         <item name="android:textSize">@dimen/text_body</item>
         <item name="android:paddingTop">12dp</item>
         <item name="android:paddingBottom">12dp</item>

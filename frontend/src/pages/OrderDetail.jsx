@@ -172,7 +172,7 @@ export default function OrderDetail() {
             {order.pricing.discount > 0 ? (
               <div className="summary-row">
                 <span className="muted">{t('cart.discount')} {order.couponCode ? `(${order.couponCode})` : ''}</span>
-                <span style={{ color: 'var(--green-600)' }}>−{currency(order.pricing.discount)}</span>
+                <span style={{ color: 'var(--primary-ink)' }}>−{currency(order.pricing.discount)}</span>
               </div>
             ) : null}
             <div className="summary-row">

@@ -5,15 +5,25 @@
    =========================================================================== */
 
 :root {
-  --green-50: #f0fdf4;
-  --green-100: #dcfce7;
-  --green-200: #bbf7d0;
-  --green-300: #86efac;
-  --green-400: #4ade80;
-  --green-500: #22c55e;
-  --green-600: #16a34a;
-  --green-700: #15803d;
-  --green-800: #166534;
+  /* The brand ramp, built around #9dc209. It keeps the --green-* names
+     because a yellow-green is still a green and the names are referenced in
+     over a hundred places, but note the hue: these are lime steps, not the
+     emerald ones they replaced.
+
+     The important property of this hue is that it is LIGHT. White on #9dc209
+     is 2.07:1 - not merely sub-AA but below the 3:1 floor for graphics, so
+     white text and white glyphs cannot sit on the brand colour at all. The
+     system is therefore dark-on-light: see --on-primary below. */
+  --green-50: #f7fce9;
+  --green-100: #eef8cb;
+  --green-200: #ddf09b;
+  --green-300: #c6e45f;
+  --green-400: #b0d42c;
+  --green-500: #9dc209;
+  --green-600: #8aab08;
+  --green-700: #647d06;
+  --green-800: #4c5f06;
+  --green-900: #38470a;
 
   /* Kept as the accent scale: sale badges, destructive buttons, errors. */
   --red-50: #fef2f2;
@@ -67,21 +77,25 @@
 
      NOTE, deliberately chosen: --primary is green-600, where white sits at
      3.30:1. That clears the 3:1 WCAG asks of UI components, icons, borders and
-     large text, but it is under the 4.5:1 for labels below 18.66px - so a
-     button caption is legible without being AA-compliant. This was picked for
-     the brand over the stricter figure. #158741 is the lightest green that
-     makes white text AA (4.59:1); changing the one line below reverts it.
-     Everywhere a *paragraph* of white text sits on green - the auth panel -
-     the gradient starts at --primary-dark instead, which does clear 4.5:1. */
-  --primary: #16a34a;
-  --primary-dark: #15803d;
-  --primary-ink: #15803d;
+     large text, but it is under the 4.5:1 for labels below 18.66px.
+
+     With #9dc209 that trade is no longer available: white on it is 2.07:1,
+     which fails even the 3:1 for non-text. So the brand fill carries DARK
+     type, not white - --on-primary, at 7.81:1. Every rule that pairs
+     `background: var(--primary)` with a label uses it.
+
+     --primary-ink is still the brand AS text on white and on the pale tints,
+     where the fill itself is 2.07:1 and unusable. */
+  --primary: #9dc209;
+  --primary-dark: #8aab08;
+  --on-primary: #1a2408;
+  --primary-ink: #586d06;
   --primary-soft: var(--green-50);
   /* A deeper emerald, so an "ok" badge stays distinct from a primary button. */
   --success: #0d9488;
 
   --bg: #ffffff;
-  --bg-soft: #f2faf5;
+  --bg-soft: #f8fbef;
   --border: var(--ink-200);
   --text: var(--ink-900);
   --text-muted: var(--ink-500);
@@ -162,7 +176,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .btn:active { transform: translateY(1px); }
 .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
-.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary { background: var(--primary); color: var(--on-primary); }
 .btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
 
 .btn-success { background: var(--success); color: #fff; }
@@ -301,8 +315,8 @@ ul { margin: 0; padding: 0; list-style: none; }
 .brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .brand-mark {
   width: 40px; height: 40px; border-radius: 10px;
-  background: linear-gradient(135deg, var(--green-600), var(--primary-dark));
-  display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 1.15rem;
+  background: linear-gradient(135deg, var(--primary), var(--green-600));
+  display: grid; place-items: center; color: var(--on-primary); font-weight: 800; font-size: 1.15rem;
 }
 .brand-name { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.03em; }
 .brand-tag { font-size: 0.66rem; color: var(--text-muted); letter-spacing: 0.02em; }
@@ -310,7 +324,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .search { position: relative; flex: 1; max-width: 640px; }
 .search input { width: 100%; padding: 11px 44px 11px 16px; border: 1px solid var(--border); border-radius: var(--radius-full); font-size: 0.9rem; background: var(--ink-50); }
 .search input:focus { outline: none; border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px var(--green-100); }
-.search button { position: absolute; right: 5px; top: 5px; width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--primary); color: #fff; display: grid; place-items: center; }
+.search button { position: absolute; right: 5px; top: 5px; width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--primary); color: var(--on-primary); display: grid; place-items: center; }
 .search-suggest { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: #fff; border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-lg); overflow: hidden; z-index: 20; }
 .search-suggest a { display: flex; align-items: center; gap: 12px; padding: 10px 14px; }
 .search-suggest a:hover { background: var(--ink-50); }
@@ -324,7 +338,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .icon-btn:hover { background: var(--ink-100); color: var(--ink-900); }
 .icon-btn .count {
   position: absolute; top: 4px; right: 3px; min-width: 18px; height: 18px; padding: 0 5px;
-  border-radius: var(--radius-full); background: var(--primary); color: #fff;
+  border-radius: var(--radius-full); background: var(--primary); color: var(--on-primary);
   font-size: 0.66rem; font-weight: 700; display: grid; place-items: center;
 }
 
@@ -352,7 +366,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 
 /* A deep green rather than the near-black ink-900, so the page does not end
    on a slab that reads as a different palette. */
-.footer { background: #14532d; color: var(--ink-300); padding: 48px 0 24px; margin-top: auto; }
+.footer { background: var(--green-900); color: var(--ink-300); padding: 48px 0 24px; margin-top: auto; }
 .footer h4 { color: #fff; font-size: 0.92rem; margin-bottom: 14px; }
 /* ink-400 falls to 3.95:1 on the lighter ground; ink-300 holds 6.13:1. */
 .footer a { font-size: 0.86rem; color: var(--ink-300); }
@@ -402,7 +416,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .product-media img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.35s; }
 .product-card:hover .product-media img { transform: scale(1.05); }
 /* Sale flags stay red so a discount still pops against the green UI. */
-.product-flag { position: absolute; top: 10px; left: 10px; padding: 3px 9px; border-radius: var(--radius-full); background: var(--red-500); color: #fff; font-size: 0.7rem; font-weight: 700; }
+.product-flag { position: absolute; top: 10px; left: 10px; padding: 3px 9px; border-radius: var(--radius-full); background: var(--red-600); color: #fff; font-size: 0.7rem; font-weight: 700; }
 .product-flag.out { background: var(--ink-600); }
 .wish-btn { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; border: 0; border-radius: 50%; background: rgba(255,255,255,0.94); display: grid; place-items: center; color: var(--ink-500); box-shadow: var(--shadow-sm); }
 .wish-btn:hover { color: var(--primary-ink); }
@@ -480,7 +494,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .pagination { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 34px; }
 .pagination button { min-width: 38px; height: 38px; border: 1px solid var(--border); background: #fff; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600; color: var(--ink-700); }
 .pagination button:hover:not(:disabled) { border-color: var(--primary); color: var(--primary-ink); }
-.pagination button.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+.pagination button.active { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
 .pagination button:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* -------------------------------- cart ---------------------------------- */
@@ -502,7 +516,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .steps { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 28px 0 30px; }
 .step { display: flex; align-items: center; gap: 9px; }
 .step .num { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--ink-200); color: var(--ink-600); font-size: 0.8rem; font-weight: 700; }
-.step.active .num { background: var(--primary); color: #fff; }
+.step.active .num { background: var(--primary); color: var(--on-primary); }
 .step.done .num { background: var(--success); color: #fff; }
 .step span { font-size: 0.84rem; font-weight: 600; color: var(--text-muted); }
 .step.active span, .step.done span { color: var(--ink-900); }
@@ -620,7 +634,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   .mobile-nav a.active { color: var(--primary-ink); }
   .mobile-nav .count {
     position: absolute; top: 2px; right: 50%; margin-right: -22px; min-width: 16px; height: 16px;
-    border-radius: var(--radius-full); background: var(--primary); color: #fff;
+    border-radius: var(--radius-full); background: var(--primary); color: var(--on-primary);
     font-size: 0.6rem; font-weight: 700; display: grid; place-items: center; padding: 0 4px;
   }
 }
@@ -703,8 +717,8 @@ html[lang='zh'] .btn, html[lang='ja'] .btn { white-space: normal; }
 
   /* Tinted shadows: a green glow reads as lift on the tinted canvas in a way
      a neutral gray shadow does not. */
-  --glow: 0 14px 30px -14px rgba(21, 135, 65, 0.55);
-  --glow-strong: 0 20px 44px -14px rgba(21, 135, 65, 0.72);
+  --glow: 0 14px 30px -14px rgba(114, 143, 7, 0.55);
+  --glow-strong: 0 20px 44px -14px rgba(114, 143, 7, 0.72);
   --lift: 0 22px 44px -20px rgba(11, 31, 20, 0.38);
 }
 
@@ -715,8 +729,8 @@ html[lang='zh'] .btn, html[lang='ja'] .btn { white-space: normal; }
 @keyframes pan { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
 @keyframes sheen { from { transform: translateX(-130%) skewX(-18deg); } to { transform: translateX(230%) skewX(-18deg); } }
 @keyframes halo {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(21, 135, 65, 0.45); }
-  70% { box-shadow: 0 0 0 10px rgba(21, 135, 65, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(114, 143, 7, 0.45); }
+  70% { box-shadow: 0 0 0 10px rgba(114, 143, 7, 0); }
 }
 @keyframes flare {
   0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
@@ -871,7 +885,7 @@ body[data-scrolled="1"] .header-main {
   height: 320px;
   top: -110px;
   right: -60px;
-  background: rgba(74, 222, 128, 0.42);
+  background: rgba(176, 212, 44, 0.42);
   animation: blob-a 16s ease-in-out infinite;
 }
 .hero::after {
@@ -879,7 +893,7 @@ body[data-scrolled="1"] .header-main {
   height: 260px;
   bottom: -120px;
   left: 18%;
-  background: rgba(13, 148, 136, 0.28);
+  background: rgba(101, 163, 13, 0.28);
   animation: blob-b 20s ease-in-out infinite;
 }
 .hero > * { position: relative; z-index: 1; }
@@ -1005,7 +1019,7 @@ body[data-scrolled="1"] .header-main {
 .auth-page {
   background:
     radial-gradient(900px 480px at 12% -10%, var(--green-200), transparent 62%),
-    radial-gradient(760px 420px at 96% 110%, rgba(13, 148, 136, 0.28), transparent 60%),
+    radial-gradient(760px 420px at 96% 110%, rgba(101, 163, 13, 0.28), transparent 60%),
     linear-gradient(140deg, var(--green-100), var(--green-50) 45%, #ffffff 78%);
   background-size: 160% 160%;
   animation: pan 26s ease-in-out infinite alternate;
@@ -1179,7 +1193,7 @@ body[data-scrolled="1"] .header-main {
   /* Starts one step darker than --primary: this panel carries a paragraph of
      white body copy, which needs the full 4.5:1 rather than the 3:1 a button
      caption gets away with. */
-  background: linear-gradient(150deg, var(--primary-dark), var(--green-800) 55%, #0f3d22);
+  background: linear-gradient(150deg, var(--green-800), var(--green-900) 55%, #26300a);
   color: #fff;
 }
 .auth-aside::before, .auth-aside::after {
@@ -1200,7 +1214,7 @@ body[data-scrolled="1"] .header-main {
   height: 170px;
   bottom: -60px;
   left: -40px;
-  background: rgba(74, 222, 128, 0.22);
+  background: rgba(176, 212, 44, 0.22);
 }
 .auth-aside > * { position: relative; z-index: 1; }
 .auth-aside .mark {
@@ -1323,14 +1337,14 @@ body[data-scrolled="1"] .header-main {
   padding: 10px 18px;
   border-radius: var(--radius-sm);
   background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  color: #fff;
+  color: var(--on-primary);
   font-size: 0.86rem;
   font-weight: 700;
   white-space: nowrap;
   box-shadow: var(--glow);
   transition: transform var(--t-fast) var(--ease-spring), box-shadow var(--t-base);
 }
-.cat-pill:hover { transform: translateY(-2px); box-shadow: var(--glow-strong); color: #fff; }
+.cat-pill:hover { transform: translateY(-2px); box-shadow: var(--glow-strong); color: var(--on-primary); }
 .header-nav .nav-link { margin-left: 4px; }
 
 /* --------------------------------- hero row ------------------------------- */
@@ -1517,7 +1531,7 @@ body[data-scrolled="1"] .header-main {
 /* The "New" marker keeps the flag's default top-left slot, opposite the
    wishlist heart. The reference swaps the two on its New Arrivals row, but
    the heart has to stay put across every grid on the site. */
-.product-flag.new { background: var(--primary); }
+.product-flag.new { background: var(--primary); color: var(--on-primary); }
 .product-meta { gap: 8px; }
 
 /* -------------------------------- responsive ------------------------------ */

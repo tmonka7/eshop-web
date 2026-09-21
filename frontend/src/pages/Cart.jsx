@@ -201,14 +201,14 @@ export default function CartPage() {
             {totals.discount > 0 ? (
               <div className="summary-row">
                 <span className="muted">{t('cart.discount')} {cart.coupon ? `(${cart.coupon.code})` : ''}</span>
-                <span className="bold" style={{ color: 'var(--green-600)' }}>
+                <span className="bold" style={{ color: 'var(--primary-ink)' }}>
                   −{currency(totals.discount)}
                 </span>
               </div>
             ) : null}
             <div className="summary-row">
               <span className="muted">{t('cart.shipping')}</span>
-              <span className="bold" style={{ color: totals.shipping === 0 ? 'var(--green-600)' : undefined }}>
+              <span className="bold" style={{ color: totals.shipping === 0 ? 'var(--primary-ink)' : undefined }}>
                 {totals.shipping === 0 ? t('common.free') : currency(totals.shipping)}
               </span>
             </div>
@@ -225,7 +225,7 @@ export default function CartPage() {
 
             {cart.coupon ? (
               <div className="row between" style={{ padding: '8px 12px', background: 'var(--green-50)', borderRadius: 8 }}>
-                <span className="row gap-8 small bold" style={{ color: 'var(--green-600)' }}>
+                <span className="row gap-8 small bold" style={{ color: 'var(--primary-ink)' }}>
                   <Tag size={14} /> {t('cart.couponApplied', { code: cart.coupon.code })}
                 </span>
                 <button type="button" className="btn btn-ghost btn-sm" onClick={() => cart.removeCoupon()}>

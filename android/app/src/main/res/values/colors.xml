@@ -3,17 +3,18 @@
      one brand: green primary, red kept back for sale flags and destructive
      actions, and neutrals carrying a trace of green. -->
 <resources>
-    <!-- Split the same way as the web design system. `primary` is green
-         UNDER white text or a white glyph, at 3.30:1 - which clears the 3:1
-         for icons, borders and large text but not the 4.5:1 for small labels.
-         A deliberate brand call; #158741 is the compliant alternative.
-         `primary_ink` is green AS text, which also sits on primary_light and on the tinted background,
-         where the fill step only reaches 4.18-4.32:1. -->
-    <color name="primary">#16A34A</color>
-    <color name="primary_dark">#15803D</color>
-    <color name="primary_ink">#15803D</color>
-    <color name="primary_light">#DCFCE7</color>
-    <color name="primary_surface">#F0FDF4</color>
+    <!-- Split the same way as the web design system, around #9DC209.
+         White cannot sit on the brand colour at all - 2.07:1, below even the
+         3:1 for graphics - so `on_primary`, a dark olive, is what labels and
+         glyphs use on top of it (7.81:1). `primary_ink` is the brand AS text
+         on white and on the pale tints, where the fill itself is 2.07:1. -->
+    <color name="primary">#9DC209</color>
+    <color name="primary_dark">#8AAB08</color>
+    <color name="on_primary">#1A2408</color>
+    <color name="primary_ink">#586D06</color>
+    <color name="primary_light">#EEF8CB</color>
+    <color name="primary_surface">#F7FCE9</color>
+    <color name="primary_deep">#4C5F06</color>
 
     <!-- A deeper teal, so an "ok" badge never looks like a primary button. -->
     <color name="success">#0D9488</color>
@@ -56,5 +57,5 @@
     <color name="text_secondary">#5A7566</color>
     <color name="divider">#E2ECE6</color>
     <color name="surface">#FFFFFF</color>
-    <color name="background">#F2FAF5</color>
+    <color name="background">#F8FBEF</color>
 </resources>

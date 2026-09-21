@@ -44,7 +44,7 @@ export default function OrderSuccess() {
             margin: '0 auto 20px',
             borderRadius: '50%',
             background: 'var(--green-50)',
-            color: 'var(--green-600)',
+            color: 'var(--primary-ink)',
             display: 'grid',
             placeItems: 'center',
           }}
