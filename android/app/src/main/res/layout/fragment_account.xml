@@ -27,7 +27,7 @@
                 android:layout_height="54dp"
                 android:gravity="center"
                 android:background="@drawable/bg_avatar_circle"
-                android:textColor="@color/primary"
+                android:textColor="@color/primary_ink"
                 android:textSize="@dimen/text_headline"
                 android:textStyle="bold" />
 
@@ -112,7 +112,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/space_lg"
             android:text="@string/sign_out"
-            android:textColor="@color/primary"
+            android:textColor="@color/primary_ink"
             app:icon="@drawable/ic_logout"
             app:iconTint="@color/primary" />
 

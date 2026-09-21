@@ -51,13 +51,22 @@
   --ink-100: #eff6f1;
   --ink-50: #f7fbf8;
 
-  /* green-700, not the brighter green-600: buttons and prices are 12-15px
-     text, which WCAG treats as normal size, so the pairing with white has to
-     clear 4.5:1. green-600 on white is 3.30:1; green-700 is 5.02:1 both ways.
-     green-500/600 stay available for large fills and chart marks, which only
-     need 3:1. */
-  --primary: var(--green-700);
-  --primary-dark: var(--green-800);
+  /* The brand green splits in two, because the two jobs have different floors.
+
+     --primary is the FILL: buttons, pills, active states - green underneath
+     white text or a white glyph. #158741 is the lightest green that still
+     clears 4.5:1 against white (4.59:1). Anything lighter fails: green-600 is
+     3.30:1, which is fine for a chart mark but not for a 14px button label.
+
+     --primary-ink is the same green as TYPE. Green text does not only sit on
+     white - it sits on the green-50 and green-100 tints too (chips, active nav,
+     the free-shipping bar), where the fill step drops to 4.18-4.39:1. This
+     darker step holds 4.57:1 on green-100 and 4.79:1 on green-50.
+
+     green-400/500 remain decoration only: rules, rings, blobs, chart marks. */
+  --primary: #158741;
+  --primary-dark: #15803d;
+  --primary-ink: #15803d;
   --primary-soft: var(--green-50);
   /* A deeper emerald, so an "ok" badge stays distinct from a primary button. */
   --success: #0d9488;
@@ -260,9 +269,9 @@ ul { margin: 0; padding: 0; list-style: none; }
 .section { padding: 40px 0; }
 .section-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 20px; gap: 16px; }
 .section-head h2 { font-size: 1.35rem; }
-.link { color: var(--primary); font-weight: 600; }
+.link { color: var(--primary-ink); font-weight: 600; }
 .link:hover { text-decoration: underline; }
-.price { font-weight: 800; color: var(--primary); }
+.price { font-weight: 800; color: var(--primary-ink); }
 .price-old { color: var(--ink-400); text-decoration: line-through; font-weight: 500; font-size: 0.85em; }
 .divider { height: 1px; background: var(--border); margin: 16px 0; border: 0; }
 .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -283,7 +292,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .brand-mark {
   width: 40px; height: 40px; border-radius: 10px;
-  background: linear-gradient(135deg, var(--green-500), var(--green-700));
+  background: linear-gradient(135deg, var(--green-600), var(--primary-dark));
   display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 1.15rem;
 }
 .brand-name { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.03em; }
@@ -315,7 +324,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .header-nav .container::-webkit-scrollbar { display: none; }
 .nav-link { padding: 7px 13px; border-radius: var(--radius-sm); font-size: 0.86rem; font-weight: 500; color: var(--ink-600); white-space: nowrap; }
 .nav-link:hover { background: var(--ink-100); color: var(--ink-900); }
-.nav-link.active { background: var(--green-50); color: var(--primary); font-weight: 600; }
+.nav-link.active { background: var(--green-50); color: var(--primary-ink); font-weight: 600; }
 
 .user-menu { position: relative; }
 .user-dropdown {
@@ -332,12 +341,15 @@ ul { margin: 0; padding: 0; list-style: none; }
 
 /* -------------------------------- footer -------------------------------- */
 
-.footer { background: var(--ink-900); color: var(--ink-300); padding: 48px 0 24px; margin-top: auto; }
+/* A deep green rather than the near-black ink-900, so the page does not end
+   on a slab that reads as a different palette. */
+.footer { background: #14532d; color: var(--ink-300); padding: 48px 0 24px; margin-top: auto; }
 .footer h4 { color: #fff; font-size: 0.92rem; margin-bottom: 14px; }
-.footer a { font-size: 0.86rem; color: var(--ink-400); }
+/* ink-400 falls to 3.95:1 on the lighter ground; ink-300 holds 6.13:1. */
+.footer a { font-size: 0.86rem; color: var(--ink-300); }
 .footer a:hover { color: var(--green-400); }
 .footer-grid { display: grid; grid-template-columns: 1.6fr repeat(3, 1fr); gap: 36px; }
-.footer-bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--ink-700); display: flex; justify-content: space-between; gap: 16px; font-size: 0.8rem; flex-wrap: wrap; }
+.footer-bottom { margin-top: 36px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.16); display: flex; justify-content: space-between; gap: 16px; font-size: 0.8rem; flex-wrap: wrap; }
 
 /* --------------------------------- hero --------------------------------- */
 
@@ -359,7 +371,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 
 .feature-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px; }
 .feature-item { display: flex; align-items: center; gap: 12px; padding: 16px; background: #fff; border: 1px solid var(--border); border-radius: var(--radius); }
-.feature-icon { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; background: var(--green-50); color: var(--primary); flex-shrink: 0; }
+.feature-icon { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; background: var(--green-50); color: var(--primary-ink); flex-shrink: 0; }
 .feature-item h4 { font-size: 0.86rem; margin: 0; }
 .feature-item p { font-size: 0.76rem; color: var(--text-muted); margin: 0; }
 
@@ -384,11 +396,11 @@ ul { margin: 0; padding: 0; list-style: none; }
 .product-flag { position: absolute; top: 10px; left: 10px; padding: 3px 9px; border-radius: var(--radius-full); background: var(--red-500); color: #fff; font-size: 0.7rem; font-weight: 700; }
 .product-flag.out { background: var(--ink-600); }
 .wish-btn { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; border: 0; border-radius: 50%; background: rgba(255,255,255,0.94); display: grid; place-items: center; color: var(--ink-500); box-shadow: var(--shadow-sm); }
-.wish-btn:hover { color: var(--primary); }
-.wish-btn.on { color: var(--primary); }
+.wish-btn:hover { color: var(--primary-ink); }
+.wish-btn.on { color: var(--primary-ink); }
 .product-body { padding: 13px 14px 15px; display: flex; flex-direction: column; gap: 7px; flex: 1; }
 .product-name { font-size: 0.88rem; font-weight: 600; line-height: 1.35; min-height: 2.4em; }
-.product-name:hover { color: var(--primary); }
+.product-name:hover { color: var(--primary-ink); }
 .product-meta { display: flex; align-items: center; gap: 6px; font-size: 0.74rem; color: var(--text-muted); }
 .product-price-row { display: flex; align-items: baseline; gap: 7px; margin-top: auto; }
 .product-price-row .price { font-size: 1.05rem; }
@@ -413,7 +425,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .swatch { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border); padding: 0; position: relative; }
 .swatch.active { border-color: var(--primary); box-shadow: 0 0 0 3px var(--green-100); }
 .size-chip { min-width: 46px; padding: 8px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: #fff; font-size: 0.85rem; font-weight: 600; }
-.size-chip.active { border-color: var(--primary); background: var(--green-50); color: var(--primary); }
+.size-chip.active { border-color: var(--primary); background: var(--green-50); color: var(--primary-ink); }
 .size-chip:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .qty { display: inline-flex; align-items: center; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
@@ -424,17 +436,17 @@ ul { margin: 0; padding: 0; list-style: none; }
 
 .trust-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 22px; }
 .trust-item { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); }
-.trust-item .ico { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; background: var(--green-50); color: var(--primary); flex-shrink: 0; }
+.trust-item .ico { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; background: var(--green-50); color: var(--primary-ink); flex-shrink: 0; }
 .trust-item strong { font-size: 0.8rem; display: block; }
 .trust-item span { font-size: 0.72rem; color: var(--text-muted); }
 
 .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-top: 44px; }
 .tab { padding: 12px 18px; border: 0; background: transparent; font-size: 0.9rem; font-weight: 600; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
-.tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+.tab.active { color: var(--primary-ink); border-bottom-color: var(--primary); }
 .tab-panel { padding: 24px 0; }
 
 .review-item { padding: 18px 0; border-bottom: 1px solid var(--border); }
-.review-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--green-50); color: var(--primary); display: grid; place-items: center; font-weight: 700; flex-shrink: 0; }
+.review-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--green-50); color: var(--primary-ink); display: grid; place-items: center; font-weight: 700; flex-shrink: 0; }
 .rating-bar { display: flex; align-items: center; gap: 10px; font-size: 0.8rem; }
 .rating-bar .track { flex: 1; height: 7px; border-radius: 4px; background: var(--ink-100); overflow: hidden; }
 .rating-bar .fill { height: 100%; background: var(--amber-500); }
@@ -453,12 +465,12 @@ ul { margin: 0; padding: 0; list-style: none; }
 
 .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
 .chips { display: flex; gap: 7px; flex-wrap: wrap; }
-.chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: var(--radius-full); background: var(--green-50); color: var(--primary); font-size: 0.76rem; font-weight: 600; border: 0; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: var(--radius-full); background: var(--green-50); color: var(--primary-ink); font-size: 0.76rem; font-weight: 600; border: 0; }
 .chip button { border: 0; background: transparent; color: inherit; padding: 0; line-height: 1; font-size: 0.95rem; }
 
 .pagination { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 34px; }
 .pagination button { min-width: 38px; height: 38px; border: 1px solid var(--border); background: #fff; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600; color: var(--ink-700); }
-.pagination button:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+.pagination button:hover:not(:disabled) { border-color: var(--primary); color: var(--primary-ink); }
 .pagination button.active { background: var(--primary); border-color: var(--primary); color: #fff; }
 .pagination button:disabled { opacity: 0.45; cursor: not-allowed; }
 
@@ -472,7 +484,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .summary-row { display: flex; justify-content: space-between; font-size: 0.88rem; padding: 6px 0; }
 .summary-row.total { font-size: 1.12rem; font-weight: 800; padding-top: 14px; border-top: 1px solid var(--border); margin-top: 8px; }
 
-.free-ship-bar { background: var(--green-50); border: 1px solid var(--green-100); border-radius: var(--radius-sm); padding: 11px 14px; font-size: 0.8rem; color: var(--primary); }
+.free-ship-bar { background: var(--green-50); border: 1px solid var(--green-100); border-radius: var(--radius-sm); padding: 11px 14px; font-size: 0.8rem; color: var(--primary-ink); }
 .free-ship-bar .track { height: 6px; border-radius: 3px; background: #fff; margin-top: 8px; overflow: hidden; }
 .free-ship-bar .fill { height: 100%; background: var(--success); transition: width 0.3s; }
 
@@ -515,7 +527,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .account-layout { display: grid; grid-template-columns: 230px 1fr; gap: 26px; align-items: start; margin-top: 24px; }
 .account-nav a { display: flex; align-items: center; gap: 10px; padding: 10px 13px; border-radius: var(--radius-sm); font-size: 0.87rem; color: var(--ink-600); font-weight: 500; }
 .account-nav a:hover { background: var(--ink-100); color: var(--ink-900); }
-.account-nav a.active { background: var(--green-50); color: var(--primary); font-weight: 600; }
+.account-nav a.active { background: var(--green-50); color: var(--primary-ink); font-weight: 600; }
 
 /* --------------------------------- auth --------------------------------- */
 
@@ -553,7 +565,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .alert-success { background: var(--green-50); color: var(--green-600); border: 1px solid var(--green-100); }
 
 .breadcrumb { display: flex; align-items: center; gap: 7px; font-size: 0.8rem; color: var(--text-muted); padding: 16px 0; flex-wrap: wrap; }
-.breadcrumb a:hover { color: var(--primary); }
+.breadcrumb a:hover { color: var(--primary-ink); }
 
 /* ------------------------------ mobile nav ------------------------------ */
 
@@ -596,7 +608,7 @@ ul { margin: 0; padding: 0; list-style: none; }
     flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
     padding: 6px 0; font-size: 0.66rem; color: var(--ink-500); position: relative;
   }
-  .mobile-nav a.active { color: var(--primary); }
+  .mobile-nav a.active { color: var(--primary-ink); }
   .mobile-nav .count {
     position: absolute; top: 2px; right: 50%; margin-right: -22px; min-width: 16px; height: 16px;
     border-radius: var(--radius-full); background: var(--primary); color: #fff;
@@ -645,7 +657,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 
 .lang-menu button:hover { background: var(--ink-50); color: var(--ink-900); }
-.lang-menu button.active { color: var(--primary); font-weight: 600; }
+.lang-menu button.active { color: var(--primary-ink); font-weight: 600; }
 
 /* The trigger keeps its label on desktop and drops to the flag on phones,
    where the header actions row is already tight. */
@@ -682,8 +694,8 @@ html[lang='zh'] .btn, html[lang='ja'] .btn { white-space: normal; }
 
   /* Tinted shadows: a green glow reads as lift on the tinted canvas in a way
      a neutral gray shadow does not. */
-  --glow: 0 14px 30px -14px rgba(21, 128, 61, 0.55);
-  --glow-strong: 0 20px 44px -14px rgba(21, 128, 61, 0.72);
+  --glow: 0 14px 30px -14px rgba(21, 135, 65, 0.55);
+  --glow-strong: 0 20px 44px -14px rgba(21, 135, 65, 0.72);
   --lift: 0 22px 44px -20px rgba(11, 31, 20, 0.38);
 }
 
@@ -694,8 +706,8 @@ html[lang='zh'] .btn, html[lang='ja'] .btn { white-space: normal; }
 @keyframes pan { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
 @keyframes sheen { from { transform: translateX(-130%) skewX(-18deg); } to { transform: translateX(230%) skewX(-18deg); } }
 @keyframes halo {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(21, 128, 61, 0.45); }
-  70% { box-shadow: 0 0 0 10px rgba(21, 128, 61, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(21, 135, 65, 0.45); }
+  70% { box-shadow: 0 0 0 10px rgba(21, 135, 65, 0); }
 }
 @keyframes flare {
   0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
@@ -748,7 +760,7 @@ body[data-scrolled="1"] .header-main {
 
 /* Slow drift across the announcement bar. Both stops clear 4.5:1 with white. */
 .header-top {
-  background: linear-gradient(90deg, var(--green-800), var(--green-700) 50%, var(--green-800));
+  background: linear-gradient(90deg, var(--primary-dark), var(--primary) 50%, var(--primary-dark));
   background-size: 200% 100%;
   animation: pan 14s linear infinite;
 }
@@ -814,20 +826,20 @@ body[data-scrolled="1"] .header-main {
 .btn:disabled::after { content: none; }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--green-700), var(--green-800));
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   box-shadow: var(--glow);
 }
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--green-800), var(--green-700));
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
   box-shadow: var(--glow-strong);
 }
 /* teal-600 is only 3.74:1 with white, which is under the floor for a 14px
    label, so the success button runs between the two darker teal steps. */
-.btn-success { background: linear-gradient(135deg, #0f766e, #115e59); }
-.btn-success:hover:not(:disabled) { background: linear-gradient(135deg, #115e59, #0f766e); }
+.btn-success { background: linear-gradient(135deg, #0e8379, #0f766e); }
+.btn-success:hover:not(:disabled) { background: linear-gradient(135deg, #0f766e, #0e8379); }
 .btn-dark { background: linear-gradient(135deg, var(--ink-900), var(--ink-700)); }
 .btn-dark:hover:not(:disabled) { background: linear-gradient(135deg, var(--ink-800), var(--ink-900)); }
-.btn-outline:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); box-shadow: var(--glow); }
+.btn-outline:hover:not(:disabled) { border-color: var(--primary); color: var(--primary-ink); box-shadow: var(--glow); }
 
 /* ---------------------------------- hero ---------------------------------- */
 
@@ -1096,7 +1108,7 @@ body[data-scrolled="1"] .header-main {
 
 /* Both scales run dark enough that the white copy clears 4.5:1 across the
    whole gradient, not just at one end. */
-.promo-tile-ship { background: linear-gradient(140deg, var(--green-700), var(--green-800)); }
+.promo-tile-ship { background: linear-gradient(140deg, var(--primary), var(--primary-dark)); }
 
 /* No opacity on either of these. CSS opacity composites against the tile, so
    white at 0.9 over red-600 is really #fce9e9 on #dc2626 - 4.13:1, under the
@@ -1155,7 +1167,7 @@ body[data-scrolled="1"] .header-main {
   justify-content: center;
   gap: 10px;
   padding: 36px;
-  background: linear-gradient(150deg, var(--green-700), var(--green-800) 55%, #0f3d22);
+  background: linear-gradient(150deg, var(--primary), var(--primary-dark) 55%, var(--green-800));
   color: #fff;
 }
 .auth-aside::before, .auth-aside::after {
@@ -1230,11 +1242,11 @@ body[data-scrolled="1"] .header-main {
 }
 .header-top .container { height: 38px; }
 .header-top a { color: var(--ink-700); }
-.header-top a:hover { color: var(--primary); }
+.header-top a:hover { color: var(--primary-ink); }
 
 .promise-bar { display: flex; align-items: center; gap: 28px; min-width: 0; }
 .promise-bar span { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
-.promise-bar svg { color: var(--primary); flex-shrink: 0; }
+.promise-bar svg { color: var(--primary-ink); flex-shrink: 0; }
 .currency-tag { color: var(--ink-700); font-weight: 600; }
 
 /* Brand block: name over tagline, as in the reference. */
@@ -1262,11 +1274,11 @@ body[data-scrolled="1"] .header-main {
   color: var(--ink-700);
   transition: background var(--t-fast), color var(--t-fast), transform var(--t-fast) var(--ease-out);
 }
-.action-item:hover { background: var(--ink-50); color: var(--primary); transform: translateY(-1px); }
+.action-item:hover { background: var(--ink-50); color: var(--primary-ink); transform: translateY(-1px); }
 .action-icon { position: relative; display: grid; place-items: center; }
 .action-label { display: flex; flex-direction: column; font-size: 0.78rem; font-weight: 600; line-height: 1.25; }
 .action-auth .action-label a { color: var(--ink-700); }
-.action-auth .action-label a:hover { color: var(--primary); }
+.action-auth .action-label a:hover { color: var(--primary-ink); }
 .action-auth .action-label a:last-child { color: var(--text-muted); font-weight: 500; }
 
 /* The badge is red so a count reads as a notification rather than as another
@@ -1298,7 +1310,7 @@ body[data-scrolled="1"] .header-main {
   flex-shrink: 0;
   padding: 10px 18px;
   border-radius: var(--radius-sm);
-  background: linear-gradient(135deg, var(--green-700), var(--green-800));
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   color: #fff;
   font-size: 0.86rem;
   font-weight: 700;
@@ -1351,7 +1363,7 @@ body[data-scrolled="1"] .header-main {
 .promise-card strong { display: block; font-size: 0.92rem; }
 .promise-card .tiny { display: block; }
 .promise-card > svg { color: var(--ink-400); flex-shrink: 0; transition: transform var(--t-fast) var(--ease-out); }
-.promise-card:hover > svg { color: var(--primary); transform: translateX(3px); }
+.promise-card:hover > svg { color: var(--primary-ink); transform: translateX(3px); }
 
 .promise-icon {
   width: 44px;
@@ -1360,7 +1372,7 @@ body[data-scrolled="1"] .header-main {
   display: grid;
   place-items: center;
   background: var(--green-50);
-  color: var(--primary);
+  color: var(--primary-ink);
   flex-shrink: 0;
   transition: transform var(--t-base) var(--ease-spring), background var(--t-base);
 }
@@ -1388,7 +1400,7 @@ body[data-scrolled="1"] .header-main {
   display: grid;
   place-items: center;
   background: var(--green-50);
-  color: var(--primary);
+  color: var(--primary-ink);
   overflow: hidden;
   transition: background var(--t-base), box-shadow var(--t-base);
 }
@@ -1493,7 +1505,7 @@ body[data-scrolled="1"] .header-main {
 /* The "New" marker keeps the flag's default top-left slot, opposite the
    wishlist heart. The reference swaps the two on its New Arrivals row, but
    the heart has to stay put across every grid on the site. */
-.product-flag.new { background: var(--green-700); }
+.product-flag.new { background: var(--primary); }
 .product-meta { gap: 8px; }
 
 /* -------------------------------- responsive ------------------------------ */

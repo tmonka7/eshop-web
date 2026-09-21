@@ -13,7 +13,7 @@
         android:layout_height="38dp"
         android:gravity="center"
         android:background="@drawable/bg_avatar_circle"
-        android:textColor="@color/primary"
+        android:textColor="@color/primary_ink"
         android:textStyle="bold" />
 
     <LinearLayout

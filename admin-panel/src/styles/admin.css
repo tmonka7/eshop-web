@@ -51,10 +51,13 @@
   --ink-100: #eff6f1;
   --ink-50: #f7fbf8;
 
-  /* green-700 rather than green-600 so white button text clears 4.5:1 -
-     see the note in the storefront's global.css. */
-  --primary: var(--green-700);
-  --primary-dark: #166534;
+  /* Split the same way as the storefront - see the long note in global.css.
+     --primary is green under white text (#158741 is the lightest step that
+     clears 4.5:1 with white); --primary-ink is green AS text, which also has
+     to hold up on the green-50 and green-100 tints. */
+  --primary: #158741;
+  --primary-dark: #15803d;
+  --primary-ink: #15803d;
   --success: #0d9488;
   --border: var(--ink-200);
   --text: var(--ink-900);
@@ -114,7 +117,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   z-index: 60;
 }
 .sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 18px 18px; border-bottom: 1px solid var(--ink-800); }
-.sidebar-brand .mark { width: 34px; height: 34px; border-radius: 9px; background: linear-gradient(135deg, var(--green-500), var(--green-700)); display: grid; place-items: center; color: #fff; font-weight: 800; }
+.sidebar-brand .mark { width: 34px; height: 34px; border-radius: 9px; background: linear-gradient(135deg, var(--green-600), var(--primary-dark)); display: grid; place-items: center; color: #fff; font-weight: 800; }
 .sidebar-brand .name { color: #fff; font-weight: 800; font-size: 1.05rem; letter-spacing: -0.02em; }
 .sidebar-brand .sub { font-size: 0.66rem; color: var(--ink-500); }
 
@@ -314,12 +317,12 @@ table.data .actions { display: flex; gap: 4px; justify-content: flex-end; }
 .search-box input { padding-left: 34px; }
 .search-box svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--ink-400); }
 
-.avatar-circle { width: 34px; height: 34px; border-radius: 50%; background: var(--green-50); color: var(--primary); display: grid; place-items: center; font-weight: 700; font-size: 0.82rem; flex-shrink: 0; }
+.avatar-circle { width: 34px; height: 34px; border-radius: 50%; background: var(--green-50); color: var(--primary-ink); display: grid; place-items: center; font-weight: 700; font-size: 0.82rem; flex-shrink: 0; }
 
 .pagination { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 18px; border-top: 1px solid var(--border); flex-wrap: wrap; }
 .pagination .pages { display: flex; gap: 5px; }
 .pagination button { min-width: 32px; height: 32px; border: 1px solid var(--border); background: #fff; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600; color: var(--ink-700); }
-.pagination button:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+.pagination button:hover:not(:disabled) { border-color: var(--primary); color: var(--primary-ink); }
 .pagination button.active { background: var(--primary); border-color: var(--primary); color: #fff; }
 .pagination button:disabled { opacity: 0.45; cursor: not-allowed; }
 
@@ -394,7 +397,7 @@ table.data .actions { display: flex; gap: 4px; justify-content: flex-end; }
 }
 
 .lang-menu button:hover { background: var(--ink-50); color: var(--ink-900); }
-.lang-menu button.active { color: var(--primary); font-weight: 600; }
+.lang-menu button.active { color: var(--primary-ink); font-weight: 600; }
 
 /* The per-language editor inside product, category and banner forms. */
 .translation-block {
@@ -408,7 +411,7 @@ table.data .actions { display: flex; gap: 4px; justify-content: flex-end; }
 }
 
 .translation-tab.active {
-  border-color: var(--primary); color: var(--primary); background: var(--green-50);
+  border-color: var(--primary); color: var(--primary-ink); background: var(--green-50);
 }
 
 /* Filled dot = this language has copy; hollow = it will fall back to English. */
@@ -446,7 +449,7 @@ table.data .actions { display: flex; gap: 4px; justify-content: flex-end; }
   --t-base: 240ms;
   --t-slow: 480ms;
 
-  --glow: 0 12px 26px -14px rgba(21, 128, 61, 0.55);
+  --glow: 0 12px 26px -14px rgba(21, 135, 65, 0.55);
   --lift: 0 18px 38px -22px rgba(11, 31, 20, 0.4);
 }
 
@@ -456,8 +459,8 @@ table.data .actions { display: flex; gap: 4px; justify-content: flex-end; }
 @keyframes pan { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
 @keyframes sheen { from { transform: translateX(-130%) skewX(-18deg); } to { transform: translateX(230%) skewX(-18deg); } }
 @keyframes halo {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(21, 128, 61, 0.4); }
-  70% { box-shadow: 0 0 0 9px rgba(21, 128, 61, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(21, 135, 65, 0.4); }
+  70% { box-shadow: 0 0 0 9px rgba(21, 135, 65, 0); }
 }
 @keyframes modal-pop {
   from { opacity: 0; transform: translateY(-14px) scale(0.96); }
@@ -556,19 +559,19 @@ body[data-scrolled="1"] .topbar {
 .btn:disabled::after { content: none; }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--green-700), var(--green-800));
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   box-shadow: var(--glow);
 }
-.btn-primary:hover:not(:disabled) { background: linear-gradient(135deg, var(--green-800), var(--green-700)); }
+.btn-primary:hover:not(:disabled) { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); }
 /* green-500 and red-500 are 2.4:1 and 3.8:1 against white - both under the
    4.5:1 a 13px button label needs - so the filled buttons run between darker
    steps of their own scale instead. */
-.btn-success { background: linear-gradient(135deg, var(--green-700), var(--green-800)); }
-.btn-success:hover:not(:disabled) { background: linear-gradient(135deg, var(--green-800), var(--green-700)); }
+.btn-success { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); }
+.btn-success:hover:not(:disabled) { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); }
 .btn-danger { background: linear-gradient(135deg, var(--red-600), var(--red-700)); }
 .btn-danger:hover:not(:disabled) { background: linear-gradient(135deg, var(--red-700), var(--red-600)); }
 .btn-dark { background: linear-gradient(135deg, var(--ink-900), var(--ink-700)); }
-.btn-outline:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); box-shadow: var(--glow); }
+.btn-outline:hover:not(:disabled) { border-color: var(--primary); color: var(--primary-ink); box-shadow: var(--glow); }
 .btn-icon:hover:not(:disabled) { transform: translateY(-2px) scale(1.06); }
 
 /* --------------------------------- surfaces -------------------------------- */

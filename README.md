@@ -158,7 +158,8 @@ Restyling means editing those three blocks, not hunting hex values.
 
 | Role | Value | Why |
 |---|---|---|
-| `--primary` | `#15803d` (green-700) | 5.0:1 against white **both ways**, so it works as a button fill *and* as price/link text. The brighter `#16a34a` is only 3.3:1 — fine for a chart mark, too weak for 12–15px text. |
+| `--primary` | `#158741` | Green **under** white text: buttons, pills, active states. The lightest green that still clears 4.5:1 on white (4.59:1). `#16a34a` is only 3.3:1 — fine for a chart mark, too weak for a 14px button label. |
+| `--primary-ink` | `#15803d` | Green **as** text. Green type also sits on the green-50/green-100 tints (chips, active nav, the free-shipping bar), where the fill step drops to 4.18–4.39:1. This step holds 4.57:1 on green-100. |
 | `--bg-soft` | `#f2faf5` | The tinted page canvas white cards sit on. |
 | red scale | `#ef4444`–`#b91c1c` | **Not** a brand colour. Reserved for sale flags, destructive buttons and errors, so it still reads as an accent against all the green. |
 | `--success` | `#0d9488` teal | Deliberately not green, so an "ok" badge never looks like a primary button. |
@@ -167,6 +168,13 @@ Restyling means editing those three blocks, not hunting hex values.
 WCAG AA (4.5:1 for body and badge text, 3:1 for marks). That pass also caught
 three badge styles — warn, purple and danger — that had been sitting at
 3.0–4.0:1 since before the restyle; they now use `-700` text steps.
+
+The `--primary` / `--primary-ink` split above is the reason the green can be
+light without regressing: a single token cannot be both, because green under
+white text and green as text on a green tint have different floors, and they
+pull in opposite directions. The same two names exist in the panel's
+stylesheet and as `primary` / `primary_ink` in the Android `colors.xml`, so a
+change made in one place means the same thing in the other two.
 
 **Chart colour** follows the data-viz rules: a fixed categorical order that
 leads with brand green and excludes red (a reserved status colour must never

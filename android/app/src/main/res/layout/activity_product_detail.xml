@@ -141,7 +141,7 @@
                         android:layout_height="wrap_content"
                         android:textSize="@dimen/text_display"
                         android:textStyle="bold"
-                        android:textColor="@color/primary" />
+                        android:textColor="@color/primary_ink" />
 
                     <TextView
                         android:id="@+id/comparePriceText"

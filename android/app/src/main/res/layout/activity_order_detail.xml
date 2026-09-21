@@ -352,7 +352,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/space_md"
         android:text="@string/cancel_order"
-        android:textColor="@color/primary"
+        android:textColor="@color/primary_ink"
         android:visibility="gone" />
 
     <ProgressBar

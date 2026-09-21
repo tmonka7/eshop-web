@@ -3,8 +3,14 @@
      one brand: green primary, red kept back for sale flags and destructive
      actions, and neutrals carrying a trace of green. -->
 <resources>
-    <color name="primary">#15803D</color>
-    <color name="primary_dark">#166534</color>
+    <!-- Split the same way as the web design system. `primary` is green
+         UNDER white text or a white glyph: #158741 is the lightest step that
+         still clears 4.5:1 with white (4.59:1). `primary_ink` is green AS
+         text, which also sits on primary_light and on the tinted background,
+         where the fill step only reaches 4.18-4.32:1. -->
+    <color name="primary">#158741</color>
+    <color name="primary_dark">#15803D</color>
+    <color name="primary_ink">#15803D</color>
     <color name="primary_light">#DCFCE7</color>
     <color name="primary_surface">#F0FDF4</color>
     <!-- Only for large fills such as the splash gradient: white sits at

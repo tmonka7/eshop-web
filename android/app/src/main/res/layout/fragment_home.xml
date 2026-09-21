@@ -96,7 +96,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/see_all"
-                    android:textColor="@color/primary"
+                    android:textColor="@color/primary_ink"
                     android:textStyle="bold"
                     android:textSize="@dimen/text_small" />
             </LinearLayout>
@@ -135,7 +135,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/see_all"
-                    android:textColor="@color/primary"
+                    android:textColor="@color/primary_ink"
                     android:textStyle="bold"
                     android:textSize="@dimen/text_small" />
             </LinearLayout>
@@ -174,7 +174,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/see_all"
-                    android:textColor="@color/primary"
+                    android:textColor="@color/primary_ink"
                     android:textStyle="bold"
                     android:textSize="@dimen/text_small" />
             </LinearLayout>
