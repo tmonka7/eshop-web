@@ -52,10 +52,12 @@
   --ink-50: #f7fbf8;
 
   /* Split the same way as the storefront - see the long note in global.css.
-     --primary is green under white text (#158741 is the lightest step that
-     clears 4.5:1 with white); --primary-ink is green AS text, which also has
-     to hold up on the green-50 and green-100 tints. */
-  --primary: #158741;
+     --primary is green UNDER white text: green-600, where white is 3.30:1. It
+     clears the 3:1 that UI components, icons and large text need, but not the
+     4.5:1 for small labels - a deliberate brand call, documented in full in
+     the storefront's stylesheet. --primary-ink is green AS text, which also
+     has to hold up on the green-50 and green-100 tints. */
+  --primary: #16a34a;
   --primary-dark: #15803d;
   --primary-ink: #15803d;
   --success: #0d9488;

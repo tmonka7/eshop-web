@@ -158,7 +158,7 @@ Restyling means editing those three blocks, not hunting hex values.
 
 | Role | Value | Why |
 |---|---|---|
-| `--primary` | `#158741` | Green **under** white text: buttons, pills, active states. The lightest green that still clears 4.5:1 on white (4.59:1). `#16a34a` is only 3.3:1 — fine for a chart mark, too weak for a 14px button label. |
+| `--primary` | `#16a34a` (green-600) | Green **under** white text: buttons, pills, active states. White on it is **3.30:1** — see the note below. |
 | `--primary-ink` | `#15803d` | Green **as** text. Green type also sits on the green-50/green-100 tints (chips, active nav, the free-shipping bar), where the fill step drops to 4.18–4.39:1. This step holds 4.57:1 on green-100. |
 | `--bg-soft` | `#f2faf5` | The tinted page canvas white cards sit on. |
 | red scale | `#ef4444`–`#b91c1c` | **Not** a brand colour. Reserved for sale flags, destructive buttons and errors, so it still reads as an accent against all the green. |
@@ -169,12 +169,27 @@ WCAG AA (4.5:1 for body and badge text, 3:1 for marks). That pass also caught
 three badge styles — warn, purple and danger — that had been sitting at
 3.0–4.0:1 since before the restyle; they now use `-700` text steps.
 
-The `--primary` / `--primary-ink` split above is the reason the green can be
-light without regressing: a single token cannot be both, because green under
-white text and green as text on a green tint have different floors, and they
-pull in opposite directions. The same two names exist in the panel's
-stylesheet and as `primary` / `primary_ink` in the Android `colors.xml`, so a
-change made in one place means the same thing in the other two.
+The `--primary` / `--primary-ink` split above is what lets the green be light
+without regressing everything: a single token cannot do both jobs, because
+green *under* white text and green *as* text on a green tint have opposite
+requirements. The same two names exist in the panel's stylesheet and as
+`primary` / `primary_ink` in the Android `colors.xml`, so a change in one
+place means the same thing in the other two.
+
+**One deliberate exception to AA.** `--primary` is green-600, where white text
+lands at **3.30:1**. That clears the 3:1 WCAG asks of UI components, icons,
+borders and large text, but not the 4.5:1 for labels under 18.66px — so a
+button caption is comfortably legible without being AA-compliant. This was a
+brand decision, taken with the number known. Two things follow from it:
+
+- **`#158741` is the compliant alternative** — the lightest green that makes
+  white text AA (4.59:1). Changing the one `--primary` line in each of the
+  three stylesheets reverts it; nothing else depends on the value.
+- **Anywhere a *paragraph* of white text sits on green, the darker step is
+  used instead.** The sign-in panel's gradient starts at `--primary-dark`, and
+  the homepage promo card was rebuilt as pale green with dark type (13.1:1)
+  rather than white-on-green. Short captions take the 3:1; running text does
+  not.
 
 **Chart colour** follows the data-viz rules: a fixed categorical order that
 leads with brand green and excludes red (a reserved status colour must never

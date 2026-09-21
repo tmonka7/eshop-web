@@ -4,19 +4,16 @@
      actions, and neutrals carrying a trace of green. -->
 <resources>
     <!-- Split the same way as the web design system. `primary` is green
-         UNDER white text or a white glyph: #158741 is the lightest step that
-         still clears 4.5:1 with white (4.59:1). `primary_ink` is green AS
-         text, which also sits on primary_light and on the tinted background,
+         UNDER white text or a white glyph, at 3.30:1 - which clears the 3:1
+         for icons, borders and large text but not the 4.5:1 for small labels.
+         A deliberate brand call; #158741 is the compliant alternative.
+         `primary_ink` is green AS text, which also sits on primary_light and on the tinted background,
          where the fill step only reaches 4.18-4.32:1. -->
-    <color name="primary">#158741</color>
+    <color name="primary">#16A34A</color>
     <color name="primary_dark">#15803D</color>
     <color name="primary_ink">#15803D</color>
     <color name="primary_light">#DCFCE7</color>
     <color name="primary_surface">#F0FDF4</color>
-    <!-- Only for large fills such as the splash gradient: white sits at
-         3.30:1 on this step, which clears the 3:1 for a graphic but not the
-         4.5:1 that any label would need. -->
-    <color name="primary_bright">#16A34A</color>
 
     <!-- A deeper teal, so an "ok" badge never looks like a primary button. -->
     <color name="success">#0D9488</color>

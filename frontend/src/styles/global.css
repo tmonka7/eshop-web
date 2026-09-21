@@ -63,8 +63,17 @@
      the free-shipping bar), where the fill step drops to 4.18-4.39:1. This
      darker step holds 4.57:1 on green-100 and 4.79:1 on green-50.
 
-     green-400/500 remain decoration only: rules, rings, blobs, chart marks. */
-  --primary: #158741;
+     green-400/500 remain decoration only: rules, rings, blobs, chart marks.
+
+     NOTE, deliberately chosen: --primary is green-600, where white sits at
+     3.30:1. That clears the 3:1 WCAG asks of UI components, icons, borders and
+     large text, but it is under the 4.5:1 for labels below 18.66px - so a
+     button caption is legible without being AA-compliant. This was picked for
+     the brand over the stricter figure. #158741 is the lightest green that
+     makes white text AA (4.59:1); changing the one line below reverts it.
+     Everywhere a *paragraph* of white text sits on green - the auth panel -
+     the gradient starts at --primary-dark instead, which does clear 4.5:1. */
+  --primary: #16a34a;
   --primary-dark: #15803d;
   --primary-ink: #15803d;
   --primary-soft: var(--green-50);
@@ -1078,6 +1087,9 @@ body[data-scrolled="1"] .header-main {
    reflowing to whatever the auto-fill grid decides. */
 .deal-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
+/* Pale green with dark type, as the reference has it - and the lightest this
+   card can go while every label still clears 4.5:1 (ink-900 on green-200 is
+   13.1:1). A dark slab here would have fought the lighter chrome around it. */
 .promo-tile {
   position: relative;
   overflow: hidden;
@@ -1087,7 +1099,8 @@ body[data-scrolled="1"] .header-main {
   min-height: 168px;
   padding: 22px;
   border-radius: var(--radius-lg);
-  color: #fff;
+  background: linear-gradient(140deg, var(--green-200), var(--green-100) 55%, var(--green-50));
+  color: var(--ink-900);
   box-shadow: var(--shadow);
   transition: transform var(--t-base) var(--ease-out), box-shadow var(--t-base);
 }
@@ -1102,20 +1115,15 @@ body[data-scrolled="1"] .header-main {
   width: 168px;
   height: 168px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.45);
   pointer-events: none;
 }
 
-/* Both scales run dark enough that the white copy clears 4.5:1 across the
-   whole gradient, not just at one end. */
-.promo-tile-ship { background: linear-gradient(140deg, var(--primary), var(--primary-dark)); }
-
-/* No opacity on either of these. CSS opacity composites against the tile, so
-   white at 0.9 over red-600 is really #fce9e9 on #dc2626 - 4.13:1, under the
-   floor for a 0.72rem label. (Bold only counts as "large" from 18.66px, which
-   these are not.) The hierarchy comes from size and weight instead, and the
-   heading below, at 1.5rem, is the one element that could afford it. */
+/* The eyebrow is the one coloured label here: green-800 on the tile's palest
+   stop is 5.9:1. No opacity anywhere in this block - CSS opacity composites
+   against the tile, and a 0.72rem label has no contrast to spare. */
 .promo-eyebrow {
+  color: var(--green-800);
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1125,7 +1133,7 @@ body[data-scrolled="1"] .header-main {
   text-transform: uppercase;
 }
 .promo-tile strong { font-size: 1.5rem; line-height: 1.15; letter-spacing: -0.02em; }
-.promo-sub { font-size: 0.82rem; }
+.promo-sub { font-size: 0.82rem; color: var(--ink-700); }
 .promo-cta {
   display: inline-flex;
   align-items: center;
@@ -1133,6 +1141,7 @@ body[data-scrolled="1"] .header-main {
   margin-top: auto;
   font-size: 0.84rem;
   font-weight: 700;
+  color: var(--primary-ink);
 }
 .promo-cta svg { transition: transform var(--t-fast) var(--ease-out); }
 .promo-tile:hover .promo-cta svg { transform: translateX(4px); }
@@ -1167,7 +1176,10 @@ body[data-scrolled="1"] .header-main {
   justify-content: center;
   gap: 10px;
   padding: 36px;
-  background: linear-gradient(150deg, var(--primary), var(--primary-dark) 55%, var(--green-800));
+  /* Starts one step darker than --primary: this panel carries a paragraph of
+     white body copy, which needs the full 4.5:1 rather than the 3:1 a button
+     caption gets away with. */
+  background: linear-gradient(150deg, var(--primary-dark), var(--green-800) 55%, #0f3d22);
   color: #fff;
 }
 .auth-aside::before, .auth-aside::after {
