@@ -25,10 +25,16 @@ export default function VisualSearch() {
   const [error, setError] = useState(null);
   const [dragging, setDragging] = useState(false);
 
-  // The file came through history state; clear it so a reload or a back
-  // navigation does not silently run the same search again.
+  // A photo picked with the header's camera button arrives in history state.
+  // This runs on every such navigation, not only on mount: picking a second
+  // photo while already on this page re-uses the component, so reading the
+  // state only in useState() would ignore it. The state is then cleared so a
+  // reload or a back navigation does not silently run the same search again.
   useEffect(() => {
-    if (location.state?.file) navigate(location.pathname, { replace: true, state: null });
+    const incoming = location.state?.file;
+    if (!incoming) return;
+    setFile(incoming);
+    navigate(location.pathname, { replace: true, state: null });
   }, [location.state, location.pathname, navigate]);
 
   useEffect(() => {
