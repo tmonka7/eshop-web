@@ -24,6 +24,6 @@ public final class Validators {
 
     public static boolean isCardNumber(@Nullable String value) {
         if (value == null) return false;
-        return value.replaceAll("\D", "").length() >= 12;
+        return value.replaceAll("\\D", "").length() >= 12;
     }
 }

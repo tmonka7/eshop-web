@@ -8,6 +8,12 @@
  *   npm run model:fetch                                  # ViT-S/16, fp32 (default)
  *   npm run model:fetch -- --variant quantized           # int8, ~4x smaller
  *   npm run model:fetch -- --model vitb16                # ViT-B/16, 768-d, slower
+ *   npm run model:fetch -- --android                     # also copy into the Android app
+ *
+ * Files already present with the right checksum are not downloaded again, so
+ * `--android` also works offline once backend/ml is populated. The Android
+ * app embeds photos on the device and must use exactly the server's network,
+ * so it only supports the default ViT-S/16 fp32 model.
  *
  * Set HF_ENDPOINT to use a Hugging Face mirror.
  */
@@ -98,6 +104,7 @@ async function run() {
   const base = ENDPOINT + '/' + model.repo + '/resolve/main/';
 
   for (const file of CONFIG_FILES) {
+    if (fs.existsSync(path.join(dest, file))) continue;
     console.log('[model] ' + file);
     await download(base + file, path.join(dest, file));
   }
@@ -124,6 +131,23 @@ async function run() {
   if (model.dir !== 'dinov3-vits16') console.log('  VISUAL_SEARCH_MODEL_DIR=ml/' + model.dir);
   if (modelFile !== 'model.onnx') console.log('  VISUAL_SEARCH_MODEL_FILE=' + modelFile);
   console.log('  Use of these weights is governed by ' + path.join(dest, 'LICENSE.md'));
+  console.log('');
+
+  if (process.argv.includes('--android')) copyToAndroid(dest, modelKey, variantKey);
+}
+
+/** Bundles the verified model into the Android app (app/src/main/assets/model). */
+function copyToAndroid(src, modelKey, variantKey) {
+  if (modelKey !== 'vits16' || variantKey !== 'fp32') {
+    // Dinov3Encoder.MODEL_ID in the app names this exact network.
+    throw new Error('--android supports only the default model (vits16, fp32)');
+  }
+  const target = path.resolve(__dirname, '../../../android/app/src/main/assets/model');
+  fs.mkdirSync(target, { recursive: true });
+  for (const file of ['model.onnx', 'model.onnx_data', ...CONFIG_FILES]) {
+    fs.copyFileSync(path.join(src, file), path.join(target, file));
+  }
+  console.log('  Copied into ' + target);
   console.log('');
 }
 

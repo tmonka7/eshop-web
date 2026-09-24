@@ -63,6 +63,7 @@ the CPU from `ml/`, with no network access, so it works on an air-gapped host. S
 ```bash
 npm run model:fetch       # once, on a connected machine: downloads + verifies the model
 npm run visual:reindex    # (re)extract missing vectors; add -- --force to redo all
+npm run model:android     # (repo root) bundle the same model into the Android app
 ```
 
 ## Transactions
@@ -92,7 +93,9 @@ Base path: `/api/v1`
 `GET /products/:slug` · `GET /products/:slug/related` · `GET /products/:slug/reviews`
 `GET /products/:slug/reviews/summary` · `GET /banners` · `GET /promotions` · `GET /coupons/validate`
 `GET /products/visual-search/status` · `POST /products/visual-search` (multipart `image`;
-`limit`, `minScore`) returns products with a `similarity` score, best match first
+`limit`, `minScore`) returns products with a `similarity` score, best match first.
+`POST /products/visual-search/vector` (`{ model, vector, limit?, minScore? }`) does the same for a
+vector the client computed itself; it returns 409 when `model` is not the server's model
 
 `GET /products` accepts: `page`, `limit`, `search`, `category` (id or slug), `brand`, `color`,
 `tag`, `minPrice`, `maxPrice`, `minRating`, `featured`, `inStock`, and

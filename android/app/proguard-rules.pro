@@ -16,3 +16,10 @@
 # Glide
 -keep public class * implements com.bumptech.glide.module.GlideModule
 -keep class * extends com.bumptech.glide.module.AppGlideModule { <init>(...); }
+
+# onnxruntime: the native library calls back into these classes through JNI.
+-keep class ai.onnxruntime.** { *; }
+
+# Gson reads the bundled preprocessor_config.json into this class.
+-keep class com.auramart.app.data.local.Dinov3Encoder$PreprocessorConfig { *; }
+-keep class com.auramart.app.data.local.Dinov3Encoder$PreprocessorConfig$Size { *; }

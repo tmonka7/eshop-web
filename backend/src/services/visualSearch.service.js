@@ -295,10 +295,31 @@ async function reindexAll({ force = false, onlyPending = false } = {}) {
  * Ranks products by visual similarity to `buffer`.
  * @returns {Promise<Array<{ productId: string, score: number }>>} best first
  */
-async function search(buffer, { limit = 24, minScore = env.visualSearch.minScore } = {}) {
-  const query = await dinov3.embed(buffer);
+async function search(buffer, options) {
+  return searchVector(await dinov3.embed(buffer), options);
+}
+
+/**
+ * Ranks products against a feature vector computed elsewhere - the Android
+ * app runs the same DINOv3 model on the phone and sends only the vector.
+ * The vector is L2-normalised here, so callers may send it raw.
+ * @param {ArrayLike<number>} vector
+ */
+async function searchVector(vector, { limit = 24, minScore = env.visualSearch.minScore } = {}) {
+  const query = Float32Array.from(vector);
+  let norm = 0;
+  for (let i = 0; i < query.length; i += 1) norm += query[i] * query[i];
+  norm = Math.sqrt(norm);
+  if (!norm) return [];
+  for (let i = 0; i < query.length; i += 1) query[i] /= norm;
+
   const index = await getIndex();
-  if (!index.rowProduct.length || index.dim !== query.length) return [];
+  if (!index.rowProduct.length) return [];
+  if (index.dim !== query.length) {
+    const err = new Error('Expected a ' + index.dim + '-d vector, got ' + query.length);
+    err.code = 'DIMENSION_MISMATCH';
+    throw err;
+  }
 
   const { dim, matrix, rowProduct, productIds } = index;
   const best = new Float32Array(productIds.length).fill(-Infinity);
@@ -323,7 +344,8 @@ async function search(buffer, { limit = 24, minScore = env.visualSearch.minScore
 async function status({ detailed = false } = {}) {
   const model = dinov3.status();
   const base = { ...model, available: model.enabled && model.filesPresent && !model.error };
-  if (!detailed) return { enabled: base.enabled, available: base.available };
+  // `model` lets on-device clients check their bundled network matches ours.
+  if (!detailed) return { enabled: base.enabled, available: base.available, model: base.model };
 
   const [vectors, products, byStatus] = await Promise.all([
     ProductEmbedding.countDocuments({ model: model.model }),
@@ -364,6 +386,7 @@ module.exports = {
   removeProduct,
   reindexAll,
   search,
+  searchVector,
   status,
   warmUp,
   invalidate,

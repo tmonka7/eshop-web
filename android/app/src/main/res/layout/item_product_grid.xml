@@ -43,6 +43,24 @@
                 android:textStyle="bold"
                 android:visibility="gone" />
 
+            <!-- image-search results only: how closely the product matches the photo -->
+            <TextView
+                android:id="@+id/matchBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|start"
+                android:layout_margin="@dimen/space_sm"
+                android:background="@drawable/bg_badge_green"
+                android:backgroundTint="@color/primary"
+                android:paddingStart="@dimen/space_sm"
+                android:paddingEnd="@dimen/space_sm"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:textColor="@color/on_primary"
+                android:textSize="@dimen/text_tiny"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
             <ImageView
                 android:id="@+id/wishlistButton"
                 android:layout_width="30dp"

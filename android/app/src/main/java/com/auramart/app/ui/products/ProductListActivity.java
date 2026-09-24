@@ -23,6 +23,7 @@ import com.auramart.app.databinding.ActivityProductListBinding;
 import com.auramart.app.ui.adapter.ProductAdapter;
 import com.auramart.app.ui.auth.LoginActivity;
 import com.auramart.app.ui.product.ProductDetailActivity;
+import com.auramart.app.ui.visual.VisualSearchActivity;
 import com.auramart.app.util.Ui;
 
 import java.util.ArrayList;
@@ -104,6 +105,11 @@ public class ProductListActivity extends AppCompatActivity implements ProductAda
         });
 
         b.sortButton.setOnClickListener(v -> showSortDialog());
+        b.visualSearchButton.setOnClickListener(v ->
+                startActivity(VisualSearchActivity.intent(this, null)));
+        VisualSearchActivity.whenAvailable(this, () -> {
+            if (!isDestroyed()) b.visualSearchButton.setVisibility(View.VISIBLE);
+        });
         b.swipeRefresh.setOnRefreshListener(() -> reload(true));
 
         b.productList.addOnScrollListener(new androidx.recyclerview.widget.RecyclerView.OnScrollListener() {

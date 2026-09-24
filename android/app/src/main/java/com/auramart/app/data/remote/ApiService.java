@@ -27,17 +27,22 @@ import com.auramart.app.data.model.Models.UpdateCartItemRequest;
 import com.auramart.app.data.model.Models.UpdateLanguageRequest;
 import com.auramart.app.data.model.Models.UpdateProfileRequest;
 import com.auramart.app.data.model.Models.User;
+import com.auramart.app.data.model.Models.VectorSearchRequest;
+import com.auramart.app.data.model.Models.VisualSearchStatus;
 import com.auramart.app.data.model.Models.WishlistToggle;
 
 import java.util.List;
 import java.util.Map;
 
+import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import retrofit2.http.QueryMap;
@@ -81,6 +86,19 @@ public interface ApiService {
 
     @GET("products/best-sellers")
     Call<ApiResponse<List<Product>>> bestSellers(@Query("limit") int limit);
+
+    /** Whether the API has the DINOv3 model loaded; the camera buttons hide otherwise. */
+    @GET("products/visual-search/status")
+    Call<ApiResponse<VisualSearchStatus>> visualSearchStatus();
+
+    /** Products that look like the photo in `image`, best match first. */
+    @Multipart
+    @POST("products/visual-search")
+    Call<ApiResponse<List<Product>>> visualSearch(@Part MultipartBody.Part image, @Query("limit") int limit);
+
+    /** Same ranking for a DINOv3 vector the app computed on the device. */
+    @POST("products/visual-search/vector")
+    Call<ApiResponse<List<Product>>> visualSearchByVector(@Body VectorSearchRequest body);
 
     @GET("products/{slug}")
     Call<ApiResponse<Product>> product(@Path("slug") String slug);

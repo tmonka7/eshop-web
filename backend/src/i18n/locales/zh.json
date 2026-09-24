@@ -75,7 +75,9 @@
     "imageTypeNotAllowed": "仅支持 JPEG、PNG、WEBP、GIF 或 AVIF 格式的图片",
     "unsupportedLanguage": "不支持该语言。可选：{{locales}}",
     "visualSearchUnavailable": "图片搜索暂不可用",
-    "imageUnreadable": "无法读取该图片，请尝试 JPEG 或 PNG 照片"
+    "imageUnreadable": "无法读取该图片，请尝试 JPEG 或 PNG 照片",
+    "visualModelMismatch": "应用与服务器（{{model}}）使用的图片模型不同，请改为上传照片",
+    "visualVectorInvalid": "vector 必须是与模型维度一致的数字数组"
   },
   "validation": {
     "emailValid": "请输入有效的邮箱地址",

@@ -17,8 +17,9 @@ import com.auramart.app.util.Formats;
 import com.auramart.app.util.Images;
 
 import java.util.Locale;
+import java.util.Objects;
 
-/** Grid/carousel product tile used on Home, search results and the wishlist. */
+/** Grid/carousel product tile used on Home, search results, image search and the wishlist. */
 public class ProductAdapter extends ListAdapter<Product, ProductAdapter.VH> {
 
     public interface Listener {
@@ -54,7 +55,8 @@ public class ProductAdapter extends ListAdapter<Product, ProductAdapter.VH> {
             return a.price == b.price
                     && a.stock == b.stock
                     && a.rating == b.rating
-                    && a.name.equals(b.name);
+                    && a.name.equals(b.name)
+                    && Objects.equals(a.similarity, b.similarity);
         }
     };
 
@@ -114,6 +116,14 @@ public class ProductAdapter extends ListAdapter<Product, ProductAdapter.VH> {
                 b.discountBadge.setText(String.format(Locale.US, "%d%% OFF", off));
             } else {
                 b.discountBadge.setVisibility(View.GONE);
+            }
+
+            if (p.similarity != null) {
+                int percent = (int) Math.round(Math.max(0, p.similarity) * 100);
+                b.matchBadge.setVisibility(View.VISIBLE);
+                b.matchBadge.setText(b.getRoot().getContext().getString(R.string.visual_search_match, percent));
+            } else {
+                b.matchBadge.setVisibility(View.GONE);
             }
 
             boolean wished = SessionManager.get().isWishlisted(p.id);

@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.auramart.app.R;
 import com.auramart.app.data.model.Models.Category;
 import com.auramart.app.data.repository.Repo;
 import com.auramart.app.databinding.FragmentCategoriesBinding;

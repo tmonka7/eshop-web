@@ -75,7 +75,9 @@
     "imageTypeNotAllowed": "JPEG、PNG、WEBP、GIF、AVIF 形式の画像のみアップロードできます",
     "unsupportedLanguage": "対応していない言語です。利用可能: {{locales}}",
     "visualSearchUnavailable": "現在、画像検索はご利用いただけません",
-    "imageUnreadable": "画像を読み込めませんでした。JPEG または PNG の写真をお試しください"
+    "imageUnreadable": "画像を読み込めませんでした。JPEG または PNG の写真をお試しください",
+    "visualModelMismatch": "アプリとサーバー（{{model}}）で画像モデルが異なります。写真をアップロードしてください",
+    "visualVectorInvalid": "vector はモデルの次元数に合った数値の配列で指定してください"
   },
   "validation": {
     "emailValid": "有効なメールアドレスを入力してください",

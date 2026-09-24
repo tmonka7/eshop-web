@@ -75,7 +75,9 @@
     "imageTypeNotAllowed": "Only JPEG, PNG, WEBP, GIF or AVIF images are allowed",
     "unsupportedLanguage": "Unsupported language. Supported: {{locales}}",
     "visualSearchUnavailable": "Image search is not available right now",
-    "imageUnreadable": "That image could not be read. Try a JPEG or PNG photo"
+    "imageUnreadable": "That image could not be read. Try a JPEG or PNG photo",
+    "visualModelMismatch": "This app uses a different image model than the server ({{model}}). Upload the photo instead",
+    "visualVectorInvalid": "vector must be an array of numbers matching the model's dimensions"
   },
   "validation": {
     "emailValid": "A valid email is required",

@@ -47,11 +47,25 @@
                         android:contentDescription="@null" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:layout_marginStart="@dimen/space_sm"
                         android:text="@string/search_hint"
                         style="@style/Text.Secondary" />
+
+                    <!-- shown once the API confirms image search is available -->
+                    <ImageView
+                        android:id="@+id/visualSearchIcon"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_marginEnd="-8dp"
+                        android:padding="@dimen/space_sm"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_camera"
+                        app:tint="@color/ink_700"
+                        android:contentDescription="@string/visual_search_open"
+                        android:visibility="gone" />
                 </LinearLayout>
 
                 <ImageView

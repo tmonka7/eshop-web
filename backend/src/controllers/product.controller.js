@@ -9,7 +9,9 @@ const Product = require('../models/Product');
 const Category = require('../models/Category');
 const Review = require('../models/Review');
 const visualSearch = require('../services/visualSearch.service');
-const { ModelUnavailableError } = require('../services/dinov3.service');
+const dinov3 = require('../services/dinov3.service');
+
+const { ModelUnavailableError } = dinov3;
 
 const SORTS = {
   best_selling: { soldCount: -1, rating: -1 },
@@ -213,30 +215,15 @@ exports.visualSearchStatus = asyncHandler(async (req, res) => {
   return ok(res, await visualSearch.status(), 'success.visualSearchStatus');
 });
 
-/**
- * POST multipart `image`: returns active products that look like the photo,
- * best match first, each with a cosine `similarity` in [-1, 1].
- */
-exports.visualSearch = asyncHandler(async (req, res) => {
-  if (!req.file) throw ApiError.badRequest('error.noImageUploaded');
-  const limit = Math.min(Math.max(Number.parseInt(req.query.limit, 10) || 24, 1), 60);
-  const minScore = Number.parseFloat(req.query.minScore);
+/** `limit` / `minScore` from the query string or JSON body. */
+function searchOptions(source) {
+  const limit = Math.min(Math.max(Number.parseInt(source.limit, 10) || 24, 1), 60);
+  const minScore = Number.parseFloat(source.minScore);
+  return { limit, ...(Number.isFinite(minScore) ? { minScore } : {}) };
+}
 
-  let hits;
-  try {
-    hits = await visualSearch.search(req.file.buffer, {
-      limit,
-      ...(Number.isFinite(minScore) ? { minScore } : {}),
-    });
-  } catch (err) {
-    if (err instanceof ModelUnavailableError) throw new ApiError(503, 'error.visualSearchUnavailable');
-    // sharp rejects files that claim to be images but do not decode.
-    if (/unsupported image format|Input buffer|corrupt/i.test(err.message)) {
-      throw ApiError.badRequest('error.imageUnreadable');
-    }
-    throw err;
-  }
-
+/** Loads the ranked products and answers with them in ranking order. */
+async function sendHits(res, hits) {
   const ids = hits.map((h) => h.productId);
   const docs = await Product.find({ _id: { $in: ids }, isActive: true })
     .select(LIST_FIELDS)
@@ -248,6 +235,52 @@ exports.visualSearch = asyncHandler(async (req, res) => {
     .map((h) => ({ ...byId.get(h.productId).toJSON(), similarity: h.score }));
 
   return ok(res, items, 'success.visualSearchResults', 200, {}, { count: items.length });
+}
+
+/**
+ * POST multipart `image`: returns active products that look like the photo,
+ * best match first, each with a cosine `similarity` in [-1, 1].
+ */
+exports.visualSearch = asyncHandler(async (req, res) => {
+  if (!req.file) throw ApiError.badRequest('error.noImageUploaded');
+
+  let hits;
+  try {
+    hits = await visualSearch.search(req.file.buffer, searchOptions(req.query));
+  } catch (err) {
+    if (err instanceof ModelUnavailableError) throw new ApiError(503, 'error.visualSearchUnavailable');
+    // sharp rejects files that claim to be images but do not decode.
+    if (/unsupported image format|Input buffer|corrupt/i.test(err.message)) {
+      throw ApiError.badRequest('error.imageUnreadable');
+    }
+    throw err;
+  }
+  return sendHits(res, hits);
+});
+
+/**
+ * POST JSON `{ model, vector, limit?, minScore? }`: the same ranking for a
+ * feature vector the client computed itself (the Android app bundles
+ * DINOv3). `model` must name the network this server indexed with, or the
+ * two vector spaces would not be comparable.
+ */
+exports.visualSearchByVector = asyncHandler(async (req, res) => {
+  const { model, vector } = req.body || {};
+  if (model !== dinov3.modelId()) {
+    throw ApiError.conflict('error.visualModelMismatch', { model: dinov3.modelId() });
+  }
+  if (!Array.isArray(vector) || vector.length === 0 || vector.length > 4096
+      || !vector.every((v) => typeof v === 'number' && Number.isFinite(v))) {
+    throw ApiError.badRequest('error.visualVectorInvalid');
+  }
+  let hits;
+  try {
+    hits = await visualSearch.searchVector(vector, searchOptions(req.body));
+  } catch (err) {
+    if (err.code === 'DIMENSION_MISMATCH') throw ApiError.badRequest('error.visualVectorInvalid');
+    throw err;
+  }
+  return sendHits(res, hits);
 });
 
 /* -------------------------------- admin ------------------------------- */

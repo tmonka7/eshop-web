@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.auramart.app.R;
 import com.auramart.app.data.local.SessionManager;
 import com.auramart.app.data.model.Models.AddToCartRequest;
 import com.auramart.app.data.model.Models.Banner;
@@ -28,6 +29,7 @@ import com.auramart.app.ui.auth.LoginActivity;
 import com.auramart.app.ui.main.MainActivity;
 import com.auramart.app.ui.product.ProductDetailActivity;
 import com.auramart.app.ui.products.ProductListActivity;
+import com.auramart.app.ui.visual.VisualSearchActivity;
 import com.auramart.app.util.Ui;
 
 import java.util.HashMap;
@@ -90,6 +92,11 @@ public class HomeFragment extends Fragment implements ProductAdapter.Listener {
         b.bestSellerList.setAdapter(bestSellerAdapter);
 
         b.searchBar.setOnClickListener(v -> openList(null, null, true));
+        b.visualSearchIcon.setOnClickListener(v ->
+                startActivity(VisualSearchActivity.intent(requireContext(), null)));
+        VisualSearchActivity.whenAvailable(requireContext(), () -> {
+            if (b != null) b.visualSearchIcon.setVisibility(View.VISIBLE);
+        });
         b.seeAllCategories.setOnClickListener(v ->
                 requireMainActivity().selectTab(MainActivity.TAB_CATEGORIES));
         b.seeAllFeatured.setOnClickListener(v -> openList(null, getString(R.string.title_featured), false, true));

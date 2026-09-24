@@ -7,6 +7,7 @@ import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.auramart.app.R;
 import com.auramart.app.data.local.SessionManager;
 import com.auramart.app.data.model.Models.AuthData;
 import com.auramart.app.data.model.Models.RegisterRequest;

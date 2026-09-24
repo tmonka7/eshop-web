@@ -205,4 +205,27 @@
     <string name="sort_by">Sort by</string>
     <string name="product_image">Product image</string>
     <string name="back">Back</string>
+
+    <!-- image search (DINOv3) -->
+    <string name="visual_search_title">Search by image</string>
+    <string name="visual_search_open">Search by image</string>
+    <string name="visual_search_share_label">Search on ShopWorld</string>
+    <string name="visual_search_hint">Take or choose a photo of a product to find similar items.</string>
+    <string name="visual_search_camera">Camera</string>
+    <string name="visual_search_gallery">Gallery</string>
+    <string name="visual_search_your_photo">Your photo</string>
+    <string name="visual_search_searching">Looking for similar products…</string>
+    <string name="visual_search_intro_title">Find it with a photo</string>
+    <string name="visual_search_intro">We\'ll show products that look like your picture.</string>
+    <string name="visual_search_empty_title">Nothing similar found</string>
+    <string name="visual_search_empty">Try a clearer photo of a single product on a plain background.</string>
+    <string name="visual_search_unreadable_title">Couldn\'t read that photo</string>
+    <string name="visual_search_unreadable">Try another photo, such as a JPEG or PNG.</string>
+    <string name="visual_search_failed_title">Image search failed</string>
+    <string name="visual_search_no_camera">No camera app is available on this device.</string>
+    <string name="visual_search_match">%1$d%% match</string>
+    <plurals name="visual_search_found">
+        <item quantity="one">%1$d similar product</item>
+        <item quantity="other">%1$d similar products</item>
+    </plurals>
 </resources>

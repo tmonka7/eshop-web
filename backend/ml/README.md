@@ -35,6 +35,20 @@ When the model is missing, the rest of the shop still works. Image search report
 unavailable, the storefront hides the camera button, and products are marked `unavailable`. Once the
 files are in place, restart the API and it indexes those products in the background.
 
+## Android app
+
+The Android app bundles the same model in `android/app/src/main/assets/model/`. It computes the
+query vector on the phone and sends only the 384 numbers to `POST /products/visual-search/vector`.
+To refresh the bundled copy, run this from the repo root:
+
+```bash
+npm run model:android     # verifies backend/ml, downloads only what is missing, copies into the app
+```
+
+The app must use exactly the server's network (`dinov3-vits16/model.onnx`, fp32). If the server
+switches models, it answers the app's vector requests with HTTP 409, and the app falls back to
+uploading the photo.
+
 ## Other variants
 
 | Command                                          | Size   | Notes                                    |

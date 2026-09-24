@@ -205,4 +205,26 @@
     <string name="sort_by">並び替え</string>
     <string name="product_image">商品画像</string>
     <string name="back">戻る</string>
+
+    <!-- image search (DINOv3) -->
+    <string name="visual_search_title">画像で検索</string>
+    <string name="visual_search_open">画像で検索</string>
+    <string name="visual_search_share_label">ShopWorld で検索</string>
+    <string name="visual_search_hint">商品の写真を撮るか選ぶと、似ている商品を探します。</string>
+    <string name="visual_search_camera">カメラ</string>
+    <string name="visual_search_gallery">ギャラリー</string>
+    <string name="visual_search_your_photo">選んだ写真</string>
+    <string name="visual_search_searching">似ている商品を探しています…</string>
+    <string name="visual_search_intro_title">写真で商品を探す</string>
+    <string name="visual_search_intro">写真に似ている商品を表示します。</string>
+    <string name="visual_search_empty_title">似ている商品が見つかりませんでした</string>
+    <string name="visual_search_empty">無地の背景で商品を 1 つだけ写した、鮮明な写真をお試しください。</string>
+    <string name="visual_search_unreadable_title">写真を読み込めませんでした</string>
+    <string name="visual_search_unreadable">JPEG や PNG など、別の写真をお試しください。</string>
+    <string name="visual_search_failed_title">画像検索に失敗しました</string>
+    <string name="visual_search_no_camera">この端末にはカメラアプリがありません。</string>
+    <string name="visual_search_match">一致度 %1$d%%</string>
+    <plurals name="visual_search_found">
+        <item quantity="other">似ている商品 %1$d 件</item>
+    </plurals>
 </resources>

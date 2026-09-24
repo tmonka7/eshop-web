@@ -205,4 +205,26 @@
     <string name="sort_by">排序方式</string>
     <string name="product_image">商品图片</string>
     <string name="back">返回</string>
+
+    <!-- image search (DINOv3) -->
+    <string name="visual_search_title">以图搜索</string>
+    <string name="visual_search_open">以图搜索</string>
+    <string name="visual_search_share_label">在 ShopWorld 中搜索</string>
+    <string name="visual_search_hint">拍摄或选择一张商品照片，查找相似商品。</string>
+    <string name="visual_search_camera">拍照</string>
+    <string name="visual_search_gallery">相册</string>
+    <string name="visual_search_your_photo">你的照片</string>
+    <string name="visual_search_searching">正在查找相似商品…</string>
+    <string name="visual_search_intro_title">用照片找商品</string>
+    <string name="visual_search_intro">我们会展示与照片外观相似的商品。</string>
+    <string name="visual_search_empty_title">没有找到相似的商品</string>
+    <string name="visual_search_empty">请尝试在纯色背景下拍摄单个商品的清晰照片。</string>
+    <string name="visual_search_unreadable_title">无法读取该照片</string>
+    <string name="visual_search_unreadable">请换一张照片，例如 JPEG 或 PNG。</string>
+    <string name="visual_search_failed_title">图片搜索失败</string>
+    <string name="visual_search_no_camera">此设备上没有可用的相机应用。</string>
+    <string name="visual_search_match">相似度 %1$d%%</string>
+    <plurals name="visual_search_found">
+        <item quantity="other">%1$d 件相似商品</item>
+    </plurals>
 </resources>

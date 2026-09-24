@@ -217,6 +217,8 @@ public final class Models {
         public boolean freeShipping;
         public int warrantyMonths;
         public int returnDays;
+        /** Cosine similarity to the query photo; only set on image-search results. */
+        public Double similarity;
 
         public String firstImage() {
             return images == null || images.isEmpty() ? null : images.get(0);
@@ -229,6 +231,27 @@ public final class Models {
 
         public boolean inStock() {
             return stock > 0;
+        }
+    }
+
+    /** GET products/visual-search/status: whether the API has the DINOv3 model loaded. */
+    public static class VisualSearchStatus {
+        public boolean enabled;
+        public boolean available;
+        /** Network the server indexed with, e.g. "dinov3-vits16/model.onnx". */
+        public String model;
+    }
+
+    /** POST products/visual-search/vector: a feature vector computed on the phone. */
+    public static class VectorSearchRequest {
+        public final String model;
+        public final float[] vector;
+        public final int limit;
+
+        public VectorSearchRequest(String model, float[] vector, int limit) {
+            this.model = model;
+            this.vector = vector;
+            this.limit = limit;
         }
     }
 

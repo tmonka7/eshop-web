@@ -4,6 +4,11 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!-- Image search hands photos to the system camera app, so no CAMERA
+         permission is needed - and devices without a camera can still pick
+         from the gallery. -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
     <application
         android:name=".AuraMartApp"
         android:allowBackup="true"
@@ -37,6 +42,29 @@
         <activity android:name=".ui.orders.OrderDetailActivity" android:exported="false" />
         <activity android:name=".ui.account.AddressListActivity" android:exported="false" />
         <activity android:name=".ui.account.WishlistActivity" android:exported="false" />
+
+        <!-- Exported only so other apps can share a photo into image search. -->
+        <activity
+            android:name=".ui.visual.VisualSearchActivity"
+            android:exported="true"
+            android:label="@string/visual_search_share_label">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+        </activity>
+
+        <!-- Lets the camera app write the photo taken for image search. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
     </application>
 </manifest>

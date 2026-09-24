@@ -55,6 +55,7 @@ Sign in with `john@example.com` / `Password@123`, or tap **Browse as guest**.
 | Home                   | Hero banner carousel, category rail, featured row, best-seller grid      |
 | Categories             | Full category list with product counts                                   |
 | Product list           | Search, sort, endless scroll, pull to refresh                            |
+| Search by image        | Camera or gallery photo, or one shared from another app, returns products that look alike, each with a match % |
 | Product detail         | Image pager, variants, quantity, reviews, related products, write review |
 | Cart                   | Quantity stepper, remove, promo code, live totals, free-shipping nudge   |
 | Checkout               | Saved addresses, add address, payment method, mock card capture          |
@@ -97,3 +98,17 @@ app/src/main/java/com/auramart/app/
   (`res/xml/network_security_config.xml`). Production traffic must be HTTPS.
 - The **payment step is a mock**, matching the backend: any card number ending in `0000`
   is declined so the failure path is testable.
+- **Image search** (`ui/visual/VisualSearchActivity`) runs DINOv3 on the phone. The model is
+  bundled in `app/src/main/assets/model/`: `model.onnx` plus 86 MB of weights in
+  `model.onnx_data`, the same fp32 files the server uses. The build fails if they are
+  missing; `npm run model:android` in the repo root copies them in, and needs no network
+  once `backend/ml` is populated. `data/local/Dinov3Encoder` copies the files to internal
+  storage on first use and runs them with onnxruntime-android. `util/Dinov3Preprocessor`
+  reproduces the server's antialiased resize, so vectors match the server's (cosine ≈ 0.9995).
+  Only those 384 numbers are sent (`POST products/visual-search/vector`). If the model can't
+  run on the device, or the server reports a different model (HTTP 409), the app uploads a
+  640px JPEG instead. The camera buttons appear when the server has its model, or when the
+  server's model id matches the bundled one.
+  Do not swap in the quantized model: its vectors drift too far from the server's
+  (cosine 0.80–0.93). Photos are taken through the system camera app via a `FileProvider`, and
+  picked through the system photo picker, so the app needs no camera or storage permission.

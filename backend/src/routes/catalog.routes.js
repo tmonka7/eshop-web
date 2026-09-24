@@ -29,6 +29,7 @@ router.post(
   uploadSearchImage.single('image'),
   products.visualSearch,
 );
+router.post('/products/visual-search/vector', visualSearchLimiter, products.visualSearchByVector);
 router.get('/products/:slug', optionalAuth, products.getBySlug);
 router.get('/products/:slug/related', products.related);
 router.get('/products/:slug/reviews', reviews.listForProduct);
