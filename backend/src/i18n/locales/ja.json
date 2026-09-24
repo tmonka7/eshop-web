@@ -73,7 +73,9 @@
     "invalidFilename": "ファイル名が不正です",
     "unknownUploadFolder": "不明なアップロード先です",
     "imageTypeNotAllowed": "JPEG、PNG、WEBP、GIF、AVIF 形式の画像のみアップロードできます",
-    "unsupportedLanguage": "対応していない言語です。利用可能: {{locales}}"
+    "unsupportedLanguage": "対応していない言語です。利用可能: {{locales}}",
+    "visualSearchUnavailable": "現在、画像検索はご利用いただけません",
+    "imageUnreadable": "画像を読み込めませんでした。JPEG または PNG の写真をお試しください"
   },
   "validation": {
     "emailValid": "有効なメールアドレスを入力してください",
@@ -194,7 +196,12 @@
     "staffUpdated": "管理者を更新しました",
     "staffCreated": "管理者を作成しました",
     "staffFetched": "管理者の詳細",
-    "staffList": "管理者一覧"
+    "staffList": "管理者一覧",
+    "visualSearchStatus": "画像検索のステータス",
+    "visualSearchResults": "見た目が似ている商品が {{count}} 件見つかりました",
+    "visualReindexStarted": "画像インデックスの再構築を開始しました",
+    "visualReindexRunning": "画像インデックスの再構築はすでに実行中です",
+    "visualProductIndexed": "画像特徴量を更新しました"
   },
   "common": {
     "uncategorised": "未分類"

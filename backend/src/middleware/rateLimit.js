@@ -13,5 +13,7 @@ const common = {
 const apiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 1000, ...common });
 const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30, ...common });
 const writeLimiter = rateLimit({ windowMs: 60 * 1000, max: 60, ...common });
+// Each image search runs a neural network on the CPU.
+const visualSearchLimiter = rateLimit({ windowMs: 60 * 1000, max: 20, ...common });
 
-module.exports = { apiLimiter, authLimiter, writeLimiter };
+module.exports = { apiLimiter, authLimiter, writeLimiter, visualSearchLimiter };

@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 const {
-  LOW_STOCK_THRESHOLD, PRODUCT_STATUS, CURRENCIES, CURRENCY_VALUES,
+  LOW_STOCK_THRESHOLD, PRODUCT_STATUS, CURRENCIES, CURRENCY_VALUES, VISUAL_INDEX_STATUS,
 } = require('../config/constants');
 const { translationsField } = require('./translations');
 
@@ -49,6 +49,21 @@ const productSchema = new mongoose.Schema(
     freeShipping: { type: Boolean, default: false },
     warrantyMonths: { type: Number, default: 12 },
     returnDays: { type: Number, default: 30 },
+    // Bookkeeping for image search. The vectors themselves live in
+    // ProductEmbedding; this is only what the admin panel needs to show.
+    // Written by services/visualSearch.service.js, never from a request body.
+    visualIndex: {
+      status: {
+        type: String,
+        enum: Object.values(VISUAL_INDEX_STATUS),
+        default: VISUAL_INDEX_STATUS.PENDING,
+        index: true,
+      },
+      model: { type: String, default: '' },
+      vectors: { type: Number, default: 0 },
+      error: { type: String, default: '' },
+      indexedAt: { type: Date },
+    },
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Search, Cart, Heart, User, Package, LogOut, Settings, MapPin, ChevronDown,
-  Truck, Shield, Headset, Tag, Grid,
+  Truck, Shield, Headset, Tag, Grid, Camera,
 } from './Icons';
 import { useAuthStore } from '../store/authStore';
 import { useCartStore } from '../store/cartStore';
@@ -25,7 +25,9 @@ export default function Header() {
   const [term, setTerm] = useState(searchParams.get('search') || '');
   const [suggestions, setSuggestions] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [visualSearch, setVisualSearch] = useState(false);
   const menuRef = useRef(null);
+  const photoRef = useRef(null);
 
   const cartCount = items.reduce((n, i) => n + i.quantity, 0);
   const wishCount = user?.wishlist?.length || 0;
@@ -35,6 +37,14 @@ export default function Header() {
       .categories({ parent: 'root' })
       .then((res) => setCategories(res.data.slice(0, 9)))
       .catch(() => setCategories([]));
+  }, []);
+
+  // The camera button only appears when the API has the DINOv3 model loaded.
+  useEffect(() => {
+    catalogApi
+      .visualSearchStatus()
+      .then((res) => setVisualSearch(Boolean(res.data?.available)))
+      .catch(() => setVisualSearch(false));
   }, []);
 
   // Debounced type-ahead against the product list endpoint.
@@ -64,6 +74,14 @@ export default function Header() {
     e.preventDefault();
     setSuggestions([]);
     navigate(term.trim() ? `/products?search=${encodeURIComponent(term.trim())}` : '/products');
+  }
+
+  function searchByPhoto(e) {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // lets the same file be picked again
+    if (!file) return;
+    setSuggestions([]);
+    navigate('/visual-search', { state: { file } });
   }
 
   async function handleLogout() {
@@ -101,7 +119,11 @@ export default function Header() {
             </span>
           </Link>
 
-          <form className="search" onSubmit={submitSearch} role="search">
+          <form
+            className={`search ${visualSearch ? 'has-camera' : ''}`}
+            onSubmit={submitSearch}
+            role="search"
+          >
             <input
               type="search"
               value={term}
@@ -109,6 +131,20 @@ export default function Header() {
               placeholder={t('header.searchPlaceholder')}
               aria-label={t('header.searchAria')}
             />
+            {visualSearch ? (
+              <>
+                <button
+                  type="button"
+                  className="search-camera"
+                  onClick={() => photoRef.current?.click()}
+                  aria-label={t('header.searchByImage')}
+                  title={t('header.searchByImage')}
+                >
+                  <Camera size={17} />
+                </button>
+                <input ref={photoRef} type="file" accept="image/*" hidden onChange={searchByPhoto} />
+              </>
+            ) : null}
             <button type="submit" aria-label={t('common.search')}><Search size={16} /></button>
 
             {suggestions.length > 0 ? (

@@ -195,6 +195,30 @@ export default {
     deleteMessage: '确定要删除“{{name}}”吗？该商品的评价也会一并删除，此操作无法撤销。',
   },
 
+  visualIndex: {
+    title: '图片搜索（DINOv3）',
+    column: '图片搜索',
+    modelReady: '模型已就绪',
+    modelMissing: '模型不可用',
+    coverage: '已索引 {{indexed}} / {{total}} 件商品 · {{vectors}} 个向量',
+    progress: '正在建立索引… {{processed}} / {{total}}',
+    rebuild: '重建索引',
+    rebuildHint: '仅为尚未提取特征的图片提取特征',
+    force: '全部重新提取',
+    forceHint: '重新计算所有商品图片的特征',
+    reindexAria: '重新提取图片特征',
+    vectors: '{{count}} 张',
+    saveWarning: '已保存，但图片搜索索引结果为：{{status}}',
+    status: {
+      indexed: '已索引',
+      partial: '部分完成',
+      pending: '待处理',
+      no_images: '无图片',
+      failed: '失败',
+      unavailable: '缺少模型',
+    },
+  },
+
   translations: {
     heading: '多语言内容',
     hint: '上方字段为英文原文，也是未填写语言的回退内容。',

@@ -73,6 +73,16 @@ const PRODUCT_STATUS = { IN_STOCK: 'in_stock', LOW_STOCK: 'low_stock', OUT_OF_ST
 
 const LOW_STOCK_THRESHOLD = 10;
 
+/** Where a product stands in the DINOv3 image-search index. */
+const VISUAL_INDEX_STATUS = {
+  PENDING: 'pending', // never indexed, or its images changed since
+  INDEXED: 'indexed', // every image has a feature vector
+  PARTIAL: 'partial', // some images could not be read
+  FAILED: 'failed', // none of its images could be read
+  NO_IMAGES: 'no_images',
+  UNAVAILABLE: 'unavailable', // the model files are missing on this host
+};
+
 module.exports = {
   ROLES,
   STAFF_ROLES,
@@ -86,4 +96,5 @@ module.exports = {
   PAYMENT_METHODS,
   PRODUCT_STATUS,
   LOW_STOCK_THRESHOLD,
+  VISUAL_INDEX_STATUS,
 };

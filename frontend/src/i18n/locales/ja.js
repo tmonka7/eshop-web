@@ -53,6 +53,7 @@ export default {
     freeShippingOver: '{{amount}} 以上で送料無料',
     searchPlaceholder: '商品名やブランド名で検索…',
     searchAria: '商品を検索',
+    searchByImage: '画像で検索',
     seeAllResults: '「{{term}}」の検索結果をすべて見る',
     wishlist: 'ほしい物リスト',
     cart: 'カート',
@@ -156,6 +157,23 @@ export default {
     emptyMessage: '価格の範囲を広げるか、絞り込みを解除してみてください。',
     removeFilter: '{{label}} を解除',
     ratingAndUp: '★{{rating}} 以上',
+  },
+
+  visualSearch: {
+    title: '画像で検索',
+    subtitle: '写真をアップロードすると、見た目が似ている商品を探します。',
+    drop: 'ここに写真をドロップ、または',
+    pick: 'ファイルを選択',
+    formats: 'JPEG・PNG・WEBP・GIF・AVIF',
+    change: '別の写真で試す',
+    yourPhoto: 'アップロードした写真',
+    searching: '似ている商品を探しています…',
+    resultsTitle: '見た目が似ている商品',
+    found: '{{count}} 件',
+    match: '一致度 {{percent}}%',
+    emptyTitle: '似ている商品が見つかりませんでした',
+    emptyMessage: '無地の背景で商品を 1 つだけ写した、鮮明な写真をお試しください。',
+    unavailable: '現在、画像検索はご利用いただけません。',
   },
 
   sort: {

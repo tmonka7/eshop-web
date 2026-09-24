@@ -21,6 +21,7 @@ import Wishlist from './pages/Wishlist';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import NotFound from './pages/NotFound';
+import VisualSearch from './pages/VisualSearch';
 
 import { useAuthStore } from './store/authStore';
 import { useCartStore } from './store/cartStore';
@@ -82,6 +83,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />
           <Route path="/product/:slug" element={<ProductDetail />} />
+          <Route path="/visual-search" element={<VisualSearch />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

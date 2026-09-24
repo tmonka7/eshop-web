@@ -8,6 +8,8 @@ const { LOCALES } = require('../i18n');
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const Review = require('../models/Review');
+const visualSearch = require('../services/visualSearch.service');
+const { ModelUnavailableError } = require('../services/dinov3.service');
 
 const SORTS = {
   best_selling: { soldCount: -1, rating: -1 },
@@ -176,6 +178,7 @@ exports.getBySlug = asyncHandler(async (req, res) => {
   const query = /^[0-9a-fA-F]{24}$/.test(slug) ? { _id: slug } : { slug };
 
   const product = await Product.findOneAndUpdate(query, { $inc: { viewCount: 1 } }, { new: true })
+    .select('-visualIndex')
     .populate('category', CATEGORY_FIELDS);
 
   if (!product) throw ApiError.notFound('error.productNotFound');
@@ -203,6 +206,50 @@ exports.related = asyncHandler(async (req, res) => {
   return ok(res, items, 'success.relatedProducts');
 });
 
+/* ---------------------------- image search ---------------------------- */
+
+/** Lets clients decide whether to show the camera button at all. */
+exports.visualSearchStatus = asyncHandler(async (req, res) => {
+  return ok(res, await visualSearch.status(), 'success.visualSearchStatus');
+});
+
+/**
+ * POST multipart `image`: returns active products that look like the photo,
+ * best match first, each with a cosine `similarity` in [-1, 1].
+ */
+exports.visualSearch = asyncHandler(async (req, res) => {
+  if (!req.file) throw ApiError.badRequest('error.noImageUploaded');
+  const limit = Math.min(Math.max(Number.parseInt(req.query.limit, 10) || 24, 1), 60);
+  const minScore = Number.parseFloat(req.query.minScore);
+
+  let hits;
+  try {
+    hits = await visualSearch.search(req.file.buffer, {
+      limit,
+      ...(Number.isFinite(minScore) ? { minScore } : {}),
+    });
+  } catch (err) {
+    if (err instanceof ModelUnavailableError) throw new ApiError(503, 'error.visualSearchUnavailable');
+    // sharp rejects files that claim to be images but do not decode.
+    if (/unsupported image format|Input buffer|corrupt/i.test(err.message)) {
+      throw ApiError.badRequest('error.imageUnreadable');
+    }
+    throw err;
+  }
+
+  const ids = hits.map((h) => h.productId);
+  const docs = await Product.find({ _id: { $in: ids }, isActive: true })
+    .select(LIST_FIELDS)
+    .populate('category', CATEGORY_FIELDS);
+  const byId = new Map(docs.map((d) => [String(d._id), d]));
+
+  const items = hits
+    .filter((h) => byId.has(h.productId))
+    .map((h) => ({ ...byId.get(h.productId).toJSON(), similarity: h.score }));
+
+  return ok(res, items, 'success.visualSearchResults', 200, {}, { count: items.length });
+});
+
 /* -------------------------------- admin ------------------------------- */
 
 exports.adminList = asyncHandler(async (req, res) => {
@@ -224,10 +271,15 @@ exports.adminList = asyncHandler(async (req, res) => {
 exports.create = asyncHandler(async (req, res) => {
   const category = await Category.findById(req.body.category);
   if (!category) throw ApiError.badRequest('error.categoryNotExist');
+  // visualIndex is server-owned bookkeeping; a client cannot set it.
+  const { visualIndex, ...body } = req.body; // eslint-disable-line no-unused-vars
   const product = await Product.create({
-    ...req.body,
-    translations: buildTranslations(req.body.translations),
+    ...body,
+    translations: buildTranslations(body.translations),
   });
+  // Extract and store the DINOv3 features before answering, so the product is
+  // searchable by image as soon as the admin sees it saved.
+  await visualSearch.indexProductSafely(product);
   return created(res, product, 'success.productCreated');
 });
 
@@ -238,13 +290,20 @@ exports.update = asyncHandler(async (req, res) => {
     const category = await Category.findById(req.body.category);
     if (!category) throw ApiError.badRequest('error.categoryNotExist');
   }
-  const { translations, ...rest } = req.body;
+  const { translations, visualIndex, ...rest } = req.body; // eslint-disable-line no-unused-vars
+  const imagesBefore = JSON.stringify(product.images);
   Object.assign(product, rest);
   // Merge rather than assign: a PATCH carrying only `ja` must not wipe en/zh.
   if (translations) {
     product.translations = buildTranslations(translations, product.toObject().translations);
   }
   await product.save();
+  // Only new or removed images need work; unchanged ones keep their vectors.
+  if (JSON.stringify(product.images) !== imagesBefore) {
+    await visualSearch.indexProductSafely(product);
+  } else if (rest.isActive !== undefined) {
+    visualSearch.invalidate();
+  }
   return ok(res, product, 'success.productUpdated');
 });
 
@@ -254,6 +313,8 @@ exports.toggleActive = asyncHandler(async (req, res) => {
   product.isActive =
     req.body.isActive !== undefined ? Boolean(req.body.isActive) : !product.isActive;
   await product.save();
+  // The search index only holds active products.
+  visualSearch.invalidate();
   return ok(res, product, product.isActive ? 'success.productActivated' : 'success.productDeactivated');
 });
 
@@ -269,6 +330,7 @@ exports.remove = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
   if (!product) throw ApiError.notFound('error.productNotFound');
   await Review.deleteMany({ product: product._id });
+  await visualSearch.removeProduct(product._id);
   await product.deleteOne();
   return ok(res, null, 'success.productDeleted');
 });

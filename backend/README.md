@@ -45,6 +45,25 @@ Five more customers exist (`sarah@`, `mike@`, `emily@`, `david@`, `anna@` `examp
 | `FREE_SHIPPING_THRESHOLD` | `50`                                    |                                          |
 | `SHIPPING_FLAT_RATE`      | `9.99`                                  |                                          |
 | `TAX_RATE`                | `0.1`                                   | 10%                                      |
+| `VISUAL_SEARCH_ENABLED`   | `true`                                  | DINOv3 image search                      |
+| `VISUAL_SEARCH_MODEL_DIR` | `ml/dinov3-vits16`                      | relative to `backend/`                   |
+| `VISUAL_SEARCH_MODEL_FILE`| `model.onnx`                            | `model_quantized.onnx` for int8          |
+| `VISUAL_SEARCH_MIN_SCORE` | `0.25`                                  | cosine cut-off for results               |
+| `VISUAL_SEARCH_THREADS`   | `0`                                     | onnxruntime threads, 0 = auto            |
+| `VISUAL_SEARCH_INDEX_ON_BOOT` | `true`                              | index pending products after start-up    |
+| `VISUAL_SEARCH_FETCH_REMOTE`  | `false`                             | also embed images hosted on other sites  |
+
+## Image search (DINOv3)
+
+Registering or editing a product extracts DINOv3 features from each image and stores them in
+MongoDB (`productembeddings`). Shoppers can then search by photo. The model runs in-process on
+the CPU from `ml/`, with no network access, so it works on an air-gapped host. See
+[ml/README.md](ml/README.md) for how to get the model there.
+
+```bash
+npm run model:fetch       # once, on a connected machine: downloads + verifies the model
+npm run visual:reindex    # (re)extract missing vectors; add -- --force to redo all
+```
 
 ## Transactions
 
@@ -72,6 +91,8 @@ Base path: `/api/v1`
 `GET /products` · `GET /products/filters` · `GET /products/featured` · `GET /products/best-sellers`
 `GET /products/:slug` · `GET /products/:slug/related` · `GET /products/:slug/reviews`
 `GET /products/:slug/reviews/summary` · `GET /banners` · `GET /promotions` · `GET /coupons/validate`
+`GET /products/visual-search/status` · `POST /products/visual-search` (multipart `image`;
+`limit`, `minScore`) returns products with a `similarity` score, best match first
 
 `GET /products` accepts: `page`, `limit`, `search`, `category` (id or slug), `brand`, `color`,
 `tag`, `minPrice`, `maxPrice`, `minRating`, `featured`, `inStock`, and
@@ -95,6 +116,8 @@ Base path: `/api/v1`
 `/customers` (list, detail, `/status`, `/export` → CSV)
 `/inventory/alerts` · `/reviews` (+ `/moderate`) · `/coupons` (CRUD) · `/banners` (CRUD)
 `/uploads/products` · `/uploads/banners` · `DELETE /uploads/:folder/:filename`
+`GET /visual-search/status` · `POST /visual-search/reindex` (`{ force }`) ·
+`POST /products/:id/visual-index`
 
 ## Response shape
 

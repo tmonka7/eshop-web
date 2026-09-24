@@ -15,6 +15,7 @@ const coupons = require('../controllers/coupon.controller');
 const banners = require('../controllers/banner.controller');
 const uploads = require('../controllers/upload.controller');
 const staff = require('../controllers/staff.controller');
+const visual = require('../controllers/visualSearch.controller');
 
 const router = express.Router();
 router.use(protect, adminOnly, rawTranslations);
@@ -59,6 +60,11 @@ router.patch('/products/:id', products.update);
 router.patch('/products/:id/status', products.toggleActive);
 router.patch('/products/:id/stock', products.updateStock);
 router.delete('/products/:id', products.remove);
+router.post('/products/:id/visual-index', visual.reindexProduct);
+
+/* ------------------------- image search (DINOv3) ------------------------- */
+router.get('/visual-search/status', visual.status);
+router.post('/visual-search/reindex', visual.reindex);
 
 /* ------------------------------- categories ------------------------------ */
 router.post(

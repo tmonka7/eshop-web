@@ -324,6 +324,24 @@ ul { margin: 0; padding: 0; list-style: none; }
 .search-suggest a { display: flex; align-items: center; gap: 12px; padding: 10px 14px; }
 .search-suggest a:hover { background: var(--ink-50); }
 .search-suggest img { width: 38px; height: 38px; border-radius: 8px; object-fit: cover; background: var(--ink-100); }
+.search.has-camera input { padding-right: 84px; }
+.search .search-camera { right: 42px; background: transparent; color: var(--ink-500); }
+.search .search-camera:hover { background: var(--ink-100); color: var(--primary-ink); }
+
+/* Image search page */
+.visual-search { display: grid; grid-template-columns: 300px 1fr; gap: 28px; align-items: start; }
+.visual-drop { display: grid; place-items: center; gap: 10px; min-height: 260px; padding: 24px; text-align: center; border: 2px dashed var(--ink-200); border-radius: var(--radius-lg); background: var(--ink-50); color: var(--ink-600); cursor: pointer; transition: border-color var(--t-fast), background var(--t-fast); }
+.visual-drop:hover, .visual-drop.dragging { border-color: var(--primary-ink); background: var(--green-50); }
+.visual-drop .link { color: var(--primary-ink); font-weight: 600; text-decoration: underline; }
+.visual-query { position: sticky; top: 140px; display: grid; gap: 12px; }
+.visual-query img { width: 100%; aspect-ratio: 1; object-fit: contain; border-radius: var(--radius-lg); background: var(--ink-50); border: 1px solid var(--border); }
+.visual-hit { position: relative; }
+.visual-hit .match { position: absolute; top: 10px; right: 10px; z-index: 2; padding: 3px 8px; border-radius: var(--radius-full); background: var(--primary); color: var(--on-primary); font-size: 0.72rem; font-weight: 700; pointer-events: none; }
+@media (max-width: 860px) {
+  .visual-search { grid-template-columns: 1fr; }
+  .visual-query { position: static; grid-template-columns: 120px 1fr; align-items: center; }
+  .visual-drop { min-height: 180px; }
+}
 
 .header-actions { display: flex; align-items: center; gap: 6px; margin-left: auto; }
 .icon-btn {

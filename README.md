@@ -114,7 +114,8 @@ JWT auth with refresh-token rotation · catalogue with faceted filtering · serv
 that re-validates stock and price on every read · checkout that decrements stock atomically ·
 mock payment gateway · order lifecycle with a guarded status machine and stock restoration on
 cancel · reviews with verified-purchase detection · coupons · banners · image uploads ·
-dashboard aggregations. Full API map in [backend/README.md](backend/README.md).
+dashboard aggregations · offline image search with DINOv3. Full API map in
+[backend/README.md](backend/README.md).
 
 ---
 
@@ -319,6 +320,12 @@ in `android/app/src/main/res/xml/locales_config.xml`, and adding the copy to
 **Product images are generated, not downloaded.** `npm run seed` writes gradient PNGs into
 `backend/uploads/` with a small built-in PNG encoder, so the store looks complete with no
 internet access and no image licensing. Replace them through the admin panel's upload field.
+
+**Image search runs offline.** Product images are embedded with DINOv3 (ONNX, CPU) when a
+product is saved, and the vectors are stored in MongoDB. The storefront's camera button finds
+products that look like an uploaded photo. The model lives in `backend/ml/` and is never fetched
+at runtime. Run `npm run model:fetch` once on a connected machine if the folder is empty. See
+[backend/ml/README.md](backend/ml/README.md).
 
 **Payments are mocked.** `backend/src/services/payment.service.js` mimics a Stripe-shaped
 charge so checkout is runnable without credentials. Any card number ending in `0000` is

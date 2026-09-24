@@ -73,7 +73,9 @@
     "invalidFilename": "Invalid filename",
     "unknownUploadFolder": "Unknown upload folder",
     "imageTypeNotAllowed": "Only JPEG, PNG, WEBP, GIF or AVIF images are allowed",
-    "unsupportedLanguage": "Unsupported language. Supported: {{locales}}"
+    "unsupportedLanguage": "Unsupported language. Supported: {{locales}}",
+    "visualSearchUnavailable": "Image search is not available right now",
+    "imageUnreadable": "That image could not be read. Try a JPEG or PNG photo"
   },
   "validation": {
     "emailValid": "A valid email is required",
@@ -194,7 +196,12 @@
     "staffUpdated": "Administrator updated",
     "staffCreated": "Administrator created",
     "staffFetched": "Administrator detail",
-    "staffList": "Administrators"
+    "staffList": "Administrators",
+    "visualSearchStatus": "Image search status",
+    "visualSearchResults": "{{count}} visually similar product(s)",
+    "visualReindexStarted": "Image index rebuild started",
+    "visualReindexRunning": "An image index rebuild is already running",
+    "visualProductIndexed": "Image features updated"
   },
   "common": {
     "uncategorised": "Uncategorised"

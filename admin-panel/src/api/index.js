@@ -31,6 +31,13 @@ export const productApi = {
   remove: (id) => client.delete(`/admin/products/${id}`),
 };
 
+/** DINOv3 image search: index health and re-extraction of feature vectors. */
+export const visualSearchApi = {
+  status: () => client.get('/admin/visual-search/status'),
+  reindex: (force = false) => client.post('/admin/visual-search/reindex', { force }),
+  reindexProduct: (id) => client.post(`/admin/products/${id}/visual-index`, null, { timeout: 60000 }),
+};
+
 export const categoryApi = {
   list: (params) => client.get('/categories', { params: clean({ all: true, withCounts: true, ...params }) }),
   create: (payload) => client.post('/admin/categories', payload),

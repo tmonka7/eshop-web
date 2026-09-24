@@ -4,6 +4,7 @@ module.exports = {
   User: require('./User'),
   Category: require('./Category'),
   Product: require('./Product'),
+  ProductEmbedding: require('./ProductEmbedding'),
   Cart: require('./Cart'),
   Order: require('./Order'),
   Review: require('./Review'),

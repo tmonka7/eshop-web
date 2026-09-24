@@ -21,6 +21,8 @@
 
     "start": "npm run start --workspace=auramart-backend",
     "seed": "npm run seed --workspace=auramart-backend",
+    "model:fetch": "npm run model:fetch --workspace=auramart-backend",
+    "visual:reindex": "npm run visual:reindex --workspace=auramart-backend",
     "lint": "npm run lint --workspace=auramart-backend",
 
     "build": "npm run build --workspace=auramart-frontend && npm run build --workspace=auramart-admin",

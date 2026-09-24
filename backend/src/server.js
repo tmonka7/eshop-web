@@ -2,6 +2,7 @@
 const env = require('./config/env');
 const app = require('./app');
 const { connectDB, disconnectDB } = require('./config/db');
+const visualSearch = require('./services/visualSearch.service');
 
 let server;
 
@@ -21,6 +22,8 @@ async function start() {
     console.log('  listening: http://localhost:' + env.port);
     console.log('  health   : http://localhost:' + env.port + env.apiPrefix + '/health');
     console.log('');
+    // Loads DINOv3 and indexes any products still waiting, off the request path.
+    visualSearch.warmUp();
   });
 }
 

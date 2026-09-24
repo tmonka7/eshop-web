@@ -195,6 +195,30 @@ export default {
     deleteMessage: '「{{name}}」を削除しますか？レビューも一緒に削除され、元に戻せません。',
   },
 
+  visualIndex: {
+    title: '画像検索（DINOv3）',
+    column: '画像検索',
+    modelReady: 'モデル準備完了',
+    modelMissing: 'モデルを利用できません',
+    coverage: '{{total}} 件中 {{indexed}} 件をインデックス済み・ベクトル {{vectors}} 件',
+    progress: 'インデックス作成中… {{processed}} / {{total}}',
+    rebuild: 'インデックスを再構築',
+    rebuildHint: '特徴量がまだない画像だけを処理します',
+    force: 'すべて再抽出',
+    forceHint: 'すべての商品画像の特徴量を再計算します',
+    reindexAria: '画像特徴量を再抽出',
+    vectors: '{{count}} 枚',
+    saveWarning: '保存しましたが、画像検索のインデックス作成結果: {{status}}',
+    status: {
+      indexed: 'インデックス済み',
+      partial: '一部のみ',
+      pending: '未処理',
+      no_images: '画像なし',
+      failed: '失敗',
+      unavailable: 'モデルなし',
+    },
+  },
+
   translations: {
     heading: '多言語コンテンツ',
     hint: '上の項目は英語の原文で、未入力の言語ではこれが使われます。',

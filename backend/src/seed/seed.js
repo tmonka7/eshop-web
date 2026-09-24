@@ -19,7 +19,10 @@ const {
   ORDER_STATUS, PAYMENT_STATUS, ROLES, PERMISSIONS, CURRENCIES,
 } = require('../config/constants');
 
-const { User, Category, Product, Cart, Order, Review, Coupon, Banner } = require('../models');
+const {
+  User, Category, Product, ProductEmbedding, Cart, Order, Review, Coupon, Banner,
+} = require('../models');
+const visualSearch = require('../services/visualSearch.service');
 
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -29,6 +32,7 @@ async function wipe() {
   await Promise.all([
     Category.deleteMany({}),
     Product.deleteMany({}),
+    ProductEmbedding.deleteMany({}),
     Cart.deleteMany({}),
     Order.deleteMany({}),
     Review.deleteMany({}),
@@ -374,6 +378,21 @@ async function seedPromotions() {
   console.log('[seed] ' + data.coupons.length + ' coupons, ' + data.banners.length + ' banners');
 }
 
+/**
+ * Extracts DINOv3 features for every seeded product image. Without the model
+ * the seed still completes; the API indexes the products on its next boot
+ * once the files are in place.
+ */
+async function seedVisualIndex() {
+  try {
+    const { job, done } = await visualSearch.reindexAll();
+    console.log('[seed] extracting image features for ' + job.total + ' products (DINOv3)...');
+    await done;
+  } catch (err) {
+    console.warn('[seed] image search index skipped: ' + err.message);
+  }
+}
+
 async function run() {
   console.log('[seed] connecting to ' + env.mongoUri);
   await connectDB();
@@ -385,6 +404,7 @@ async function run() {
   const orders = await seedOrders(customers, products);
   await seedReviews(customers, products, orders);
   await seedPromotions();
+  await seedVisualIndex();
 
   console.log('');
   console.log('  Seed complete.');

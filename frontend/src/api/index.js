@@ -28,6 +28,20 @@ export const catalogApi = {
   reviews: (slug, params) => client.get(`/products/${slug}/reviews`, { params: clean(params) }),
   reviewSummary: (slug) => client.get(`/products/${slug}/reviews/summary`),
 
+  /** Status of the DINOv3 image search: `{ enabled, available }`. */
+  visualSearchStatus: () => client.get('/products/visual-search/status'),
+  /** Products that look like `file`, best match first, each with `similarity`. */
+  visualSearch: (file, params) => {
+    const body = new FormData();
+    body.append('image', file);
+    return client.post('/products/visual-search', body, {
+      params: clean(params),
+      headers: { 'Content-Type': 'multipart/form-data' },
+      // The first search after a restart also loads the model.
+      timeout: 60000,
+    });
+  },
+
   banners: (placement) => client.get('/banners', { params: clean({ placement }) }),
   promotions: () => client.get('/promotions'),
 };

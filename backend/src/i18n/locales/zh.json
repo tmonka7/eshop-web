@@ -73,7 +73,9 @@
     "invalidFilename": "文件名无效",
     "unknownUploadFolder": "未知的上传目录",
     "imageTypeNotAllowed": "仅支持 JPEG、PNG、WEBP、GIF 或 AVIF 格式的图片",
-    "unsupportedLanguage": "不支持该语言。可选：{{locales}}"
+    "unsupportedLanguage": "不支持该语言。可选：{{locales}}",
+    "visualSearchUnavailable": "图片搜索暂不可用",
+    "imageUnreadable": "无法读取该图片，请尝试 JPEG 或 PNG 照片"
   },
   "validation": {
     "emailValid": "请输入有效的邮箱地址",
@@ -194,7 +196,12 @@
     "staffUpdated": "管理员已更新",
     "staffCreated": "管理员已创建",
     "staffFetched": "管理员详情",
-    "staffList": "管理员列表"
+    "staffList": "管理员列表",
+    "visualSearchStatus": "图片搜索状态",
+    "visualSearchResults": "找到 {{count}} 件外观相似的商品",
+    "visualReindexStarted": "已开始重建图片索引",
+    "visualReindexRunning": "图片索引正在重建中",
+    "visualProductIndexed": "图片特征已更新"
   },
   "common": {
     "uncategorised": "未分类"

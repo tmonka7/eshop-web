@@ -53,6 +53,7 @@ export default {
     freeShippingOver: '满 {{amount}} 免运费',
     searchPlaceholder: '搜索商品、品牌等…',
     searchAria: '搜索商品',
+    searchByImage: '以图搜索',
     seeAllResults: '查看“{{term}}”的全部结果',
     wishlist: '心愿单',
     cart: '购物车',
@@ -155,6 +156,23 @@ export default {
     emptyMessage: '试试放宽价格区间，或取消一两个筛选条件。',
     removeFilter: '移除 {{label}}',
     ratingAndUp: '{{rating}} 星及以上',
+  },
+
+  visualSearch: {
+    title: '以图搜索',
+    subtitle: '上传一张照片，我们会为你找到外观相似的商品。',
+    drop: '将照片拖到这里，或',
+    pick: '选择文件',
+    formats: '支持 JPEG、PNG、WEBP、GIF、AVIF',
+    change: '换一张照片',
+    yourPhoto: '你的照片',
+    searching: '正在查找相似商品…',
+    resultsTitle: '外观相似的商品',
+    found: '{{count}} 件',
+    match: '相似度 {{percent}}%',
+    emptyTitle: '没有找到相似的商品',
+    emptyMessage: '请尝试在纯色背景下拍摄单个商品的清晰照片。',
+    unavailable: '图片搜索暂不可用。',
   },
 
   sort: {

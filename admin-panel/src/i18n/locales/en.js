@@ -195,6 +195,30 @@ export default {
     deleteMessage: 'Delete “{{name}}”? Its reviews are removed too. This cannot be undone.',
   },
 
+  visualIndex: {
+    title: 'Image search (DINOv3)',
+    column: 'Image search',
+    modelReady: 'Model ready',
+    modelMissing: 'Model not available',
+    coverage: '{{indexed}} of {{total}} products indexed · {{vectors}} vectors',
+    progress: 'Indexing… {{processed}} / {{total}}',
+    rebuild: 'Rebuild index',
+    rebuildHint: 'Extract features for images that do not have them yet',
+    force: 'Re-extract all',
+    forceHint: 'Recompute the features of every product image',
+    reindexAria: 'Re-extract image features',
+    vectors: '{{count}} img',
+    saveWarning: 'Saved, but image search indexing reported: {{status}}',
+    status: {
+      indexed: 'Indexed',
+      partial: 'Partial',
+      pending: 'Pending',
+      no_images: 'No images',
+      failed: 'Failed',
+      unavailable: 'Model missing',
+    },
+  },
+
   translations: {
     heading: 'Translations',
     hint: 'The fields above are the English original and the fallback for any language left blank.',

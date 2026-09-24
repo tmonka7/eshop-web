@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { productApi, categoryApi, uploadApi } from '../api';
+import { productApi, categoryApi, uploadApi, visualSearchApi } from '../api';
 import { Badge, ConfirmModal, Empty, Modal, Pagination, Spinner, Switch } from '../components/ui';
-import { Plus, Search, Edit, Trash, Boxes, X, Image as ImageIcon } from '../components/Icons';
+import {
+  Plus, Search, Edit, Trash, Boxes, X, Refresh, Image as ImageIcon,
+} from '../components/Icons';
 import TranslationFields from '../components/TranslationFields';
+import VisualIndexBar from '../components/VisualIndexBar';
 import { useToastStore } from '../store';
 import { currency } from '../utils/format';
 import { CURRENCIES } from '../utils/constants';
@@ -28,6 +31,16 @@ const emptyProduct = {
   isFeatured: false,
   freeShipping: false,
   translations: {},
+};
+
+/** Badge tone for each DINOv3 index state (see VISUAL_INDEX_STATUS on the API). */
+const VISUAL_TONES = {
+  indexed: 'ok',
+  partial: 'warn',
+  pending: 'info',
+  no_images: 'muted',
+  failed: 'danger',
+  unavailable: 'danger',
 };
 
 /** Which of the translatable fields a product actually carries. */
@@ -59,6 +72,7 @@ export default function ProductsPage() {
   const [errors, setErrors] = useState({});
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [reindexing, setReindexing] = useState(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -158,12 +172,19 @@ export default function ProductsPage() {
 
     setSaving(true);
     try {
+      let res;
       if (editing) {
-        await productApi.update(editing._id, payload);
+        res = await productApi.update(editing._id, payload);
         toast.success(t('products.updated'));
       } else {
-        await productApi.create(payload);
+        res = await productApi.create(payload);
         toast.success(t('products.created'));
+      }
+      // Saving never fails because of image search, so say when the product
+      // did not make it into the index.
+      const visual = res.data?.visualIndex?.status;
+      if (['failed', 'partial', 'unavailable'].includes(visual)) {
+        toast.error(t('visualIndex.saveWarning', { status: t(`visualIndex.status.${visual}`) }));
       }
       closeModal();
       setPage(1);
@@ -201,6 +222,21 @@ export default function ProductsPage() {
     }
   }
 
+  async function reindexProduct(p) {
+    setReindexing(p._id);
+    try {
+      const res = await visualSearchApi.reindexProduct(p._id);
+      const { visualIndex } = res.data;
+      setProducts((list) => list.map((x) => (x._id === p._id ? { ...x, visualIndex } : x)));
+      if (visualIndex.status === 'indexed') toast.success(res.message);
+      else toast.error(visualIndex.error || t(`visualIndex.status.${visualIndex.status}`));
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setReindexing(null);
+    }
+  }
+
   async function confirmDelete() {
     setDeleting(true);
     try {
@@ -226,6 +262,8 @@ export default function ProductsPage() {
           <Plus size={16} /> {t('products.add')}
         </button>
       </div>
+
+      <VisualIndexBar onFinished={load} />
 
       <div className="card">
         <div className="card-header">
@@ -314,6 +352,7 @@ export default function ProductsPage() {
                     <th className="right">{t('common.stock')}</th>
                     <th>{t('common.status')}</th>
                     <th>{t('common.active')}</th>
+                    <th>{t('visualIndex.column')}</th>
                     <th className="right">{t('common.actions')}</th>
                   </tr>
                 </thead>
@@ -348,7 +387,20 @@ export default function ProductsPage() {
                         <Switch checked={p.isActive} onChange={(v) => toggleStatus(p, v)} />
                       </td>
                       <td>
+                        <VisualIndexCell index={p.visualIndex} t={t} />
+                      </td>
+                      <td>
                         <div className="actions">
+                          <button
+                            type="button"
+                            className="btn btn-ghost btn-icon"
+                            onClick={() => reindexProduct(p)}
+                            disabled={reindexing === p._id}
+                            aria-label={t('visualIndex.reindexAria')}
+                            title={t('visualIndex.reindexAria')}
+                          >
+                            <Refresh size={15} />
+                          </button>
                           <button
                             type="button"
                             className="btn btn-ghost btn-icon"
@@ -647,5 +699,20 @@ export default function ProductsPage() {
         busy={deleting}
       />
     </>
+  );
+}
+
+/** Per-product DINOv3 index state; the tooltip carries any extraction error. */
+function VisualIndexCell({ index, t }) {
+  const vi = index || { status: 'pending', vectors: 0 };
+  return (
+    <span title={vi.error || ''}>
+      <Badge tone={VISUAL_TONES[vi.status] || 'muted'}>{t(`visualIndex.status.${vi.status}`)}</Badge>
+      {vi.vectors ? (
+        <span className="tiny muted" style={{ marginLeft: 6 }}>
+          {t('visualIndex.vectors', { count: vi.vectors })}
+        </span>
+      ) : null}
+    </span>
   );
 }

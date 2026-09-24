@@ -53,6 +53,7 @@ export default {
     freeShippingOver: 'Free shipping over {{amount}}',
     searchPlaceholder: 'Search for products, brands and more...',
     searchAria: 'Search products',
+    searchByImage: 'Search by image',
     seeAllResults: 'See all results for “{{term}}”',
     wishlist: 'Wishlist',
     cart: 'Cart',
@@ -156,6 +157,23 @@ export default {
     emptyMessage: 'Try widening your price range or clearing a filter or two.',
     removeFilter: 'Remove {{label}}',
     ratingAndUp: '{{rating}}★ & up',
+  },
+
+  visualSearch: {
+    title: 'Search by image',
+    subtitle: 'Upload a photo and we will find products that look like it.',
+    drop: 'Drop a photo here, or',
+    pick: 'choose a file',
+    formats: 'JPEG, PNG, WEBP, GIF or AVIF',
+    change: 'Try another photo',
+    yourPhoto: 'Your photo',
+    searching: 'Looking for similar products…',
+    resultsTitle: 'Visually similar products',
+    found: '{{count}} match(es)',
+    match: '{{percent}}% match',
+    emptyTitle: 'Nothing similar found',
+    emptyMessage: 'Try a clearer photo of a single product on a plain background.',
+    unavailable: 'Image search is not available right now.',
   },
 
   sort: {

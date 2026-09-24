@@ -28,14 +28,26 @@ function makeUploader(folder) {
   return multer({
     storage,
     limits: { fileSize: env.uploadMaxBytes, files: 8 },
-    fileFilter: (_req, file, cb) => {
-      if (!ALLOWED.includes(file.mimetype)) {
-        return cb(ApiError.badRequest('error.imageTypeNotAllowed'));
-      }
-      return cb(null, true);
-    },
+    fileFilter: imagesOnly,
   });
 }
+
+function imagesOnly(_req, file, cb) {
+  if (!ALLOWED.includes(file.mimetype)) {
+    return cb(ApiError.badRequest('error.imageTypeNotAllowed'));
+  }
+  return cb(null, true);
+}
+
+/**
+ * Query photos for image search are only needed for the length of the
+ * request, so they stay in memory and never touch uploads/.
+ */
+const uploadSearchImage = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: env.uploadMaxBytes, files: 1 },
+  fileFilter: imagesOnly,
+});
 
 /** Turns a stored file into a browser-reachable absolute URL. */
 const publicUrl = (folder, filename) => env.publicUrl + '/uploads/' + folder + '/' + filename;
@@ -44,6 +56,7 @@ module.exports = {
   uploadProduct: makeUploader('products'),
   uploadAvatar: makeUploader('avatars'),
   uploadBanner: makeUploader('banners'),
+  uploadSearchImage,
   publicUrl,
   UPLOAD_ROOT: ROOT,
 };
