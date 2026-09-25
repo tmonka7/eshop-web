@@ -223,6 +223,13 @@
     <string name="visual_search_unreadable">JPEG や PNG など、別の写真をお試しください。</string>
     <string name="visual_search_failed_title">画像検索に失敗しました</string>
     <string name="visual_search_no_camera">この端末にはカメラアプリがありません。</string>
+    <string name="visual_search_region_description">あなたの写真。緑の枠が検索範囲です。ドラッグで移動、角をドラッグでサイズ変更、写真上をドラッグして囲み直せます。</string>
+    <string name="visual_search_region_pending">写真の中の商品を探しています…</string>
+    <string name="visual_search_region_auto">緑の枠内の商品を検索しています。ずれている場合は枠や角をドラッグしてください。</string>
+    <string name="visual_search_region_manual">選択した範囲を検索しています。</string>
+    <string name="visual_search_region_none">商品を特定できなかったため、写真全体を検索しています。写真上をドラッグして商品を囲んでください。</string>
+    <string name="visual_search_region_reset">自動検出に戻す</string>
+    <string name="visual_search_region_whole">写真全体</string>
     <string name="visual_search_match">一致度 %1$d%%</string>
     <plurals name="visual_search_found">
         <item quantity="other">似ている商品 %1$d 件</item>

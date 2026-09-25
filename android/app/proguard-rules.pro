@@ -23,3 +23,4 @@
 # Gson reads the bundled preprocessor_config.json into this class.
 -keep class com.auramart.app.data.local.Dinov3Encoder$PreprocessorConfig { *; }
 -keep class com.auramart.app.data.local.Dinov3Encoder$PreprocessorConfig$Size { *; }
+-keep class com.auramart.app.data.local.Dinov3Encoder$ModelConfig { *; }

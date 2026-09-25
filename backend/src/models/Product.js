@@ -17,6 +17,24 @@ const variantSchema = new mongoose.Schema(
   { _id: true },
 );
 
+/**
+ * The part of one product image that shows the product, as fractions (0..1)
+ * of the upright image. `auto` regions come from the detector and are
+ * refreshed when it changes; an admin's adjusted region (auto: false) is kept
+ * and used as-is for the image-search vector.
+ */
+const imageRegionSchema = new mongoose.Schema(
+  {
+    image: { type: String, required: true },
+    x: { type: Number, required: true, min: 0, max: 1 },
+    y: { type: Number, required: true, min: 0, max: 1 },
+    w: { type: Number, required: true, min: 0, max: 1 },
+    h: { type: Number, required: true, min: 0, max: 1 },
+    auto: { type: Boolean, default: true },
+  },
+  { _id: false },
+);
+
 const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true, maxlength: 160, index: 'text' },
@@ -29,6 +47,7 @@ const productSchema = new mongoose.Schema(
     brand: { type: String, default: 'Generic', trim: true, index: true },
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true, index: true },
     images: { type: [String], default: [] },
+    imageRegions: { type: [imageRegionSchema], default: [] },
     price: { type: Number, required: true, min: 0, index: true },
     // The currency this product is LISTED in. There is no rate between USD
     // and REM, so a price is only meaningful alongside this field - never
@@ -62,6 +81,8 @@ const productSchema = new mongoose.Schema(
       model: { type: String, default: '' },
       vectors: { type: Number, default: 0 },
       error: { type: String, default: '' },
+      // Region detector the vectors were cropped with ('none' when off).
+      detector: { type: String, default: '' },
       indexedAt: { type: Date },
     },
   },

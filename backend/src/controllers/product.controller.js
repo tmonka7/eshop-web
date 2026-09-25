@@ -10,6 +10,7 @@ const Category = require('../models/Category');
 const Review = require('../models/Review');
 const visualSearch = require('../services/visualSearch.service');
 const dinov3 = require('../services/dinov3.service');
+const { sanitizeBox } = require('../services/regionDetect');
 
 const { ModelUnavailableError } = dinov3;
 
@@ -215,6 +216,26 @@ exports.visualSearchStatus = asyncHandler(async (req, res) => {
   return ok(res, await visualSearch.status(), 'success.visualSearchStatus');
 });
 
+/**
+ * Keeps only well-formed regions for images the product actually has. A
+ * region an admin saved is manual (auto: false) unless it says otherwise.
+ */
+function sanitizeRegions(regions, images) {
+  if (!Array.isArray(regions)) return undefined;
+  const allowed = new Set(images || []);
+  const seen = new Set();
+  const out = [];
+  for (const r of regions) {
+    const box = r && allowed.has(r.image) && !seen.has(r.image) ? sanitizeBox(r) : null;
+    if (!box) continue;
+    seen.add(r.image);
+    out.push({ image: r.image, ...box, auto: r.auto === true });
+  }
+  return out;
+}
+
+const truthy = (v) => v === true || v === 'true' || v === '1';
+
 /** `limit` / `minScore` from the query string or JSON body. */
 function searchOptions(source) {
   const limit = Math.min(Math.max(Number.parseInt(source.limit, 10) || 24, 1), 60);
@@ -223,7 +244,7 @@ function searchOptions(source) {
 }
 
 /** Loads the ranked products and answers with them in ranking order. */
-async function sendHits(res, hits) {
+async function sendHits(res, hits, extra = {}) {
   const ids = hits.map((h) => h.productId);
   const docs = await Product.find({ _id: { $in: ids }, isActive: true })
     .select(LIST_FIELDS)
@@ -234,7 +255,7 @@ async function sendHits(res, hits) {
     .filter((h) => byId.has(h.productId))
     .map((h) => ({ ...byId.get(h.productId).toJSON(), similarity: h.score }));
 
-  return ok(res, items, 'success.visualSearchResults', 200, {}, { count: items.length });
+  return ok(res, items, 'success.visualSearchResults', 200, extra, { count: items.length });
 }
 
 /**
@@ -244,9 +265,21 @@ async function sendHits(res, hits) {
 exports.visualSearch = asyncHandler(async (req, res) => {
   if (!req.file) throw ApiError.badRequest('error.noImageUploaded');
 
-  let hits;
+  // `box` (JSON {x,y,w,h}, fractions of the upright photo) is the area the
+  // shopper adjusted; without it the product area is detected automatically.
+  const params = { ...req.query, ...req.body };
+  let box;
+  if (params.box !== undefined && params.box !== '') {
+    box = sanitizeBox(params.box);
+    if (!box) throw ApiError.badRequest('error.visualBoxInvalid');
+  }
+  let result;
   try {
-    hits = await visualSearch.search(req.file.buffer, searchOptions(req.query));
+    result = await visualSearch.search(req.file.buffer, {
+      ...searchOptions(params),
+      box,
+      detect: params.detect === undefined ? true : truthy(params.detect),
+    });
   } catch (err) {
     if (err instanceof ModelUnavailableError) throw new ApiError(503, 'error.visualSearchUnavailable');
     // sharp rejects files that claim to be images but do not decode.
@@ -255,7 +288,7 @@ exports.visualSearch = asyncHandler(async (req, res) => {
     }
     throw err;
   }
-  return sendHits(res, hits);
+  return sendHits(res, result.hits, { region: result.region });
 });
 
 /**
@@ -305,9 +338,10 @@ exports.create = asyncHandler(async (req, res) => {
   const category = await Category.findById(req.body.category);
   if (!category) throw ApiError.badRequest('error.categoryNotExist');
   // visualIndex is server-owned bookkeeping; a client cannot set it.
-  const { visualIndex, ...body } = req.body; // eslint-disable-line no-unused-vars
+  const { visualIndex, imageRegions, ...body } = req.body; // eslint-disable-line no-unused-vars
   const product = await Product.create({
     ...body,
+    imageRegions: sanitizeRegions(imageRegions, body.images) || [],
     translations: buildTranslations(body.translations),
   });
   // Extract and store the DINOv3 features before answering, so the product is
@@ -323,22 +357,39 @@ exports.update = asyncHandler(async (req, res) => {
     const category = await Category.findById(req.body.category);
     if (!category) throw ApiError.badRequest('error.categoryNotExist');
   }
-  const { translations, visualIndex, ...rest } = req.body; // eslint-disable-line no-unused-vars
+  const {
+    translations, visualIndex, imageRegions, ...rest // eslint-disable-line no-unused-vars
+  } = req.body;
   const imagesBefore = JSON.stringify(product.images);
+  const regionsBefore = JSON.stringify(manualRegions(product.imageRegions));
   Object.assign(product, rest);
+  if (imageRegions !== undefined) {
+    product.imageRegions = sanitizeRegions(imageRegions, product.images) || [];
+  } else if (rest.images) {
+    product.imageRegions = (product.imageRegions || []).filter((r) => product.images.includes(r.image));
+  }
   // Merge rather than assign: a PATCH carrying only `ja` must not wipe en/zh.
   if (translations) {
     product.translations = buildTranslations(translations, product.toObject().translations);
   }
   await product.save();
-  // Only new or removed images need work; unchanged ones keep their vectors.
-  if (JSON.stringify(product.images) !== imagesBefore) {
+  // Only new or removed images, or re-drawn regions, need work; unchanged
+  // images keep their vectors.
+  if (JSON.stringify(product.images) !== imagesBefore
+      || JSON.stringify(manualRegions(product.imageRegions)) !== regionsBefore) {
     await visualSearch.indexProductSafely(product);
   } else if (rest.isActive !== undefined) {
     visualSearch.invalidate();
   }
   return ok(res, product, 'success.productUpdated');
 });
+
+/** The admin-drawn regions only, in a comparable form. */
+function manualRegions(regions) {
+  return (regions || [])
+    .filter((r) => r.auto === false)
+    .map((r) => [r.image, r.x, r.y, r.w, r.h]);
+}
 
 exports.toggleActive = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);

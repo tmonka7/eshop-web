@@ -76,6 +76,7 @@
     "unsupportedLanguage": "Unsupported language. Supported: {{locales}}",
     "visualSearchUnavailable": "Image search is not available right now",
     "imageUnreadable": "That image could not be read. Try a JPEG or PNG photo",
+    "visualBoxInvalid": "The search area must be {x, y, w, h} fractions of the photo",
     "visualModelMismatch": "This app uses a different image model than the server ({{model}}). Upload the photo instead",
     "visualVectorInvalid": "vector must be an array of numbers matching the model's dimensions"
   },
@@ -203,6 +204,7 @@
     "visualSearchResults": "{{count}} visually similar product(s)",
     "visualReindexStarted": "Image index rebuild started",
     "visualReindexRunning": "An image index rebuild is already running",
+    "visualRegionDetected": "Product area detected",
     "visualProductIndexed": "Image features updated"
   },
   "common": {

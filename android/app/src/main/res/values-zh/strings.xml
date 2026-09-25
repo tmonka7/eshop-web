@@ -223,6 +223,13 @@
     <string name="visual_search_unreadable">请换一张照片，例如 JPEG 或 PNG。</string>
     <string name="visual_search_failed_title">图片搜索失败</string>
     <string name="visual_search_no_camera">此设备上没有可用的相机应用。</string>
+    <string name="visual_search_region_description">您的照片。绿色框为搜索区域：拖动可移动，拖动四角可调整大小，也可在照片上拖动重新框选。</string>
+    <string name="visual_search_region_pending">正在识别照片中的商品…</string>
+    <string name="visual_search_region_auto">正在搜索绿色框中的商品。如位置不对，请拖动框或四角。</string>
+    <string name="visual_search_region_manual">正在搜索您选择的区域。</string>
+    <string name="visual_search_region_none">未识别出单个商品，将搜索整张照片。在照片上拖动即可框选商品。</string>
+    <string name="visual_search_region_reset">使用自动识别</string>
+    <string name="visual_search_region_whole">整张照片</string>
     <string name="visual_search_match">相似度 %1$d%%</string>
     <plurals name="visual_search_found">
         <item quantity="other">%1$d 件相似商品</item>

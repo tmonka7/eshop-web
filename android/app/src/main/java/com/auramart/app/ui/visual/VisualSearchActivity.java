@@ -19,7 +19,6 @@ import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.core.content.IntentCompat;
-import androidx.core.widget.ImageViewCompat;
 
 import com.auramart.app.R;
 import com.auramart.app.data.local.Dinov3Encoder;
@@ -28,6 +27,7 @@ import com.auramart.app.data.model.Models.AddToCartRequest;
 import com.auramart.app.data.model.Models.ApiResponse;
 import com.auramart.app.data.model.Models.Cart;
 import com.auramart.app.data.model.Models.Product;
+import com.auramart.app.data.model.Models.SearchRegion;
 import com.auramart.app.data.model.Models.VectorSearchRequest;
 import com.auramart.app.data.model.Models.VisualSearchStatus;
 import com.auramart.app.data.model.Models.WishlistToggle;
@@ -36,10 +36,10 @@ import com.auramart.app.databinding.ActivityVisualSearchBinding;
 import com.auramart.app.ui.adapter.ProductAdapter;
 import com.auramart.app.ui.auth.LoginActivity;
 import com.auramart.app.ui.product.ProductDetailActivity;
+import com.auramart.app.util.RegionDetector;
+import com.auramart.app.util.RegionDetector.Box;
 import com.auramart.app.util.SearchPhotos;
 import com.auramart.app.util.Ui;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.signature.ObjectKey;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -66,6 +67,12 @@ import retrofit2.Call;
  * feature vector is normally computed on the phone and only those 384 numbers
  * are sent. If the model cannot run here, or the server indexed with a
  * different one, the shrunken photo is uploaded instead and the server embeds it.
+ *
+ * Only the product area is searched: RegionDetector finds it from the same
+ * model's patch tokens and the photo is shown with a glowing green box around
+ * it. If the box is wrong the user moves or resizes it (RegionSelectorView)
+ * and the search runs again on the new area. On the upload path the server
+ * detects the area instead and returns it, or searches the box the user drew.
  */
 public class VisualSearchActivity extends AppCompatActivity implements ProductAdapter.Listener {
 
@@ -74,6 +81,9 @@ public class VisualSearchActivity extends AppCompatActivity implements ProductAd
 
     private static final String EXTRA_SOURCE = "source";
     private static final String STATE_HAS_QUERY = "hasQuery";
+    private static final String STATE_MANUAL_REGION = "manualRegion";
+    /** Longest side the photo is scaled to for region detection on the phone. */
+    private static final int DETECT_LONG_SIDE = 320;
     private static final int RESULT_LIMIT = 24;
     private static final String CACHE_DIR = "visual-search";
     private static final String TAG = "VisualSearch";
@@ -125,6 +135,15 @@ public class VisualSearchActivity extends AppCompatActivity implements ProductAd
     private Call<ApiResponse<List<Product>>> inFlight;
     /** True once a photo has been prepared, so a rotation can repeat the search. */
     private boolean hasQuery;
+    /** The prepared photo (<= 640 px), kept to re-crop when the box moves. Read on the worker. */
+    @Nullable
+    private volatile Bitmap queryBitmap;
+    /** Where the product was found (on the phone or by the server); null until known. */
+    @Nullable
+    private Box detected;
+    /** The box the user set, or null while the detected area is used. */
+    @Nullable
+    private Box manualRegion;
 
     private final ActivityResultLauncher<PickVisualMediaRequest> pickPhoto =
             registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
@@ -148,12 +167,28 @@ public class VisualSearchActivity extends AppCompatActivity implements ProductAd
 
         b.cameraButton.setOnClickListener(v -> openCamera());
         b.galleryButton.setOnClickListener(v -> openGallery());
+        b.regionView.setOnRegionChangedListener(box -> {
+            manualRegion = box;
+            searchRegion();
+        });
+        b.resetRegionButton.setOnClickListener(v -> {
+            manualRegion = null;
+            searchRegion();
+        });
+        b.wholePhotoButton.setOnClickListener(v -> {
+            manualRegion = Box.whole();
+            searchRegion();
+        });
         b.empty.emptyIcon.setImageResource(R.drawable.ic_camera);
         showMessage(R.string.visual_search_intro_title, getString(R.string.visual_search_intro));
         // Load the bundled model while the shopper is still picking a photo.
         worker.execute(() -> Dinov3Encoder.get(getApplicationContext()));
 
         if (savedInstanceState != null) {
+            float[] saved = savedInstanceState.getFloatArray(STATE_MANUAL_REGION);
+            if (saved != null && saved.length == 4) {
+                manualRegion = new Box(saved[0], saved[1], saved[2], saved[3], true);
+            }
             // Rotation or process restore: search again with the photo prepared last time.
             if (savedInstanceState.getBoolean(STATE_HAS_QUERY) && queryFile().exists()) search(null);
             return;
@@ -174,6 +209,10 @@ public class VisualSearchActivity extends AppCompatActivity implements ProductAd
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(STATE_HAS_QUERY, hasQuery);
+        if (manualRegion != null) {
+            outState.putFloatArray(STATE_MANUAL_REGION,
+                    new float[]{manualRegion.x, manualRegion.y, manualRegion.w, manualRegion.h});
+        }
     }
 
     @Override
@@ -232,20 +271,23 @@ public class VisualSearchActivity extends AppCompatActivity implements ProductAd
     /* ------------------------------ searching ----------------------------- */
 
     /**
-     * Prepares the photo and computes its DINOv3 vector off the main thread,
-     * then asks the API for matches.
+     * Prepares the photo, finds the product in it and computes the DINOv3
+     * vector of that area off the main thread, then asks the API for matches.
      * @param source the picked photo, or null to reuse the last prepared one.
      */
     private void search(@Nullable Uri source) {
         int ticket = ++generation;
         if (inFlight != null) inFlight.cancel();
+        if (source != null) manualRegion = null; // a new photo starts from detection
+        Box manual = manualRegion;
         showLoading();
 
         worker.execute(() -> {
             byte[] jpeg;
+            Bitmap photo;
+            Box found = null;
             float[] vector = null;
             try {
-                Bitmap photo;
                 if (source != null) {
                     photo = SearchPhotos.load(getContentResolver(), source);
                     jpeg = SearchPhotos.toJpeg(photo);
@@ -255,8 +297,11 @@ public class VisualSearchActivity extends AppCompatActivity implements ProductAd
                     photo = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length);
                     if (photo == null) throw new IOException("Unreadable " + queryFile());
                 }
-                vector = embedOnDevice(photo);
-                photo.recycle();
+                Dinov3Encoder encoder = Dinov3Encoder.get(this);
+                if (encoder != null) {
+                    found = detectOnDevice(encoder, photo);
+                    vector = embedOnDevice(encoder, photo, manual != null ? manual : usable(found));
+                }
             } catch (IOException | RuntimeException | OutOfMemoryError e) {
                 runOnUiThread(() -> {
                     if (ticket != generation) return;
@@ -265,10 +310,15 @@ public class VisualSearchActivity extends AppCompatActivity implements ProductAd
                 });
                 return;
             }
+            Bitmap prepared = photo;
+            Box region = found;
             float[] features = vector;
             runOnUiThread(() -> {
                 if (ticket != generation) return;
                 hasQuery = true;
+                queryBitmap = prepared;
+                // On-device detection failed but the vector was computed: the whole photo was searched.
+                detected = region != null ? region : (features != null ? Box.whole() : null);
                 showQueryPhoto();
                 if (features != null) {
                     searchByVector(features, jpeg, ticket);
@@ -279,20 +329,87 @@ public class VisualSearchActivity extends AppCompatActivity implements ProductAd
         });
     }
 
-    /** The photo's vector from the bundled model, or null to let the server compute it. */
+    /**
+     * Searches again for the current photo after the box changed: the new area
+     * (or, after "reset", the detected one) is cropped and embedded again.
+     */
+    private void searchRegion() {
+        Bitmap photo = queryBitmap;
+        if (photo == null) return;
+        int ticket = ++generation;
+        if (inFlight != null) inFlight.cancel();
+        Box target = manualRegion != null ? manualRegion : usable(detected);
+        showLoading();
+        showRegion();
+
+        worker.execute(() -> {
+            Dinov3Encoder encoder = Dinov3Encoder.get(this);
+            float[] vector = encoder == null ? null : embedOnDevice(encoder, photo, target);
+            byte[] jpeg;
+            try {
+                jpeg = vector == null ? read(queryFile()) : null;
+            } catch (IOException e) {
+                jpeg = null;
+            }
+            float[] features = vector;
+            byte[] upload = jpeg;
+            runOnUiThread(() -> {
+                if (ticket != generation) return;
+                if (features != null) {
+                    searchByVector(features, upload, ticket);
+                } else if (upload != null) {
+                    upload(upload, ticket);
+                } else {
+                    showMessage(R.string.visual_search_unreadable_title,
+                            getString(R.string.visual_search_unreadable));
+                }
+            });
+        });
+    }
+
+    /** The detection as a crop box, or null (whole photo) when nothing stood out. */
     @Nullable
-    private float[] embedOnDevice(Bitmap photo) {
-        Dinov3Encoder encoder = Dinov3Encoder.get(this);
-        if (encoder == null) return null;
+    private static Box usable(@Nullable Box found) {
+        return found != null && found.found ? found : null;
+    }
+
+    /** Where the product is in `photo`, or null if the model cannot run here. */
+    @Nullable
+    private Box detectOnDevice(Dinov3Encoder encoder, Bitmap photo) {
         try {
-            return encoder.embed(photo);
+            return RegionDetector.detect(encoder.patchGrid(photo, DETECT_LONG_SIDE));
         } catch (Exception | OutOfMemoryError e) {
-            Log.w(TAG, "On-device embedding failed; uploading the photo instead", e);
+            Log.w(TAG, "On-device region detection failed; searching the whole photo", e);
             return null;
         }
     }
 
-    private void searchByVector(float[] vector, byte[] jpeg, int ticket) {
+    /** The vector of `box` in `photo` (null box = whole photo), or null to let the server compute it. */
+    @Nullable
+    private float[] embedOnDevice(Dinov3Encoder encoder, Bitmap photo, @Nullable Box box) {
+        Bitmap area = crop(photo, box);
+        try {
+            return encoder.embed(area);
+        } catch (Exception | OutOfMemoryError e) {
+            Log.w(TAG, "On-device embedding failed; uploading the photo instead", e);
+            return null;
+        } finally {
+            if (area != photo) area.recycle();
+        }
+    }
+
+    private static Bitmap crop(Bitmap photo, @Nullable Box box) {
+        if (box == null || box.isWhole()) return photo;
+        int w = photo.getWidth();
+        int h = photo.getHeight();
+        int left = Math.min(w - 1, Math.max(0, Math.round(box.x * w)));
+        int top = Math.min(h - 1, Math.max(0, Math.round(box.y * h)));
+        int cw = Math.max(1, Math.min(w - left, Math.round(box.w * w)));
+        int ch = Math.max(1, Math.min(h - top, Math.round(box.h * h)));
+        return Bitmap.createBitmap(photo, left, top, cw, ch);
+    }
+
+    private void searchByVector(float[] vector, @Nullable byte[] jpeg, int ticket) {
         inFlight = Repo.api().visualSearchByVector(
                 new VectorSearchRequest(Dinov3Encoder.MODEL_ID, vector, RESULT_LIMIT));
 
@@ -309,21 +426,43 @@ public class VisualSearchActivity extends AppCompatActivity implements ProductAd
                 // e.g. the server now indexes with another model (HTTP 409):
                 // let it embed the photo itself.
                 Log.w(TAG, "Vector search failed (" + message + "); uploading the photo instead");
-                upload(jpeg, ticket);
+                byte[] photo = jpeg;
+                if (photo == null) {
+                    try {
+                        photo = read(queryFile());
+                    } catch (IOException e) {
+                        showMessage(R.string.visual_search_failed_title, message);
+                        return;
+                    }
+                }
+                upload(photo, ticket);
             }
         });
     }
 
+    /**
+     * Uploads the photo. With a user box the server searches that area;
+     * otherwise it detects the product itself and returns the area as `region`.
+     */
     private void upload(byte[] jpeg, int ticket) {
         RequestBody body = RequestBody.create(jpeg, MediaType.get("image/jpeg"));
         MultipartBody.Part part = MultipartBody.Part.createFormData("image", "photo.jpg", body);
-        inFlight = Repo.api().visualSearch(part, RESULT_LIMIT);
+        Box manual = manualRegion;
+        RequestBody box = manual == null ? null : RequestBody.create(String.format(Locale.ROOT,
+                "{\"x\":%.4f,\"y\":%.4f,\"w\":%.4f,\"h\":%.4f}", manual.x, manual.y, manual.w, manual.h),
+                MediaType.get("application/json"));
+        inFlight = Repo.api().visualSearch(part, box, RESULT_LIMIT);
 
-        Repo.call(inFlight, new Repo.OnResult<List<Product>>() {
+        Repo.callEnvelope(inFlight, new Repo.OnEnvelope<List<Product>>() {
             @Override
-            public void onSuccess(List<Product> data, String message) {
+            public void onSuccess(ApiResponse<List<Product>> res) {
                 if (ticket != generation) return;
-                showResults(data);
+                SearchRegion r = res.region;
+                if (r != null && r.auto && manualRegion == null) {
+                    detected = new Box(r.x, r.y, r.w, r.h, r.found);
+                    showRegion();
+                }
+                showResults(res.data);
             }
 
             @Override
@@ -336,17 +475,31 @@ public class VisualSearchActivity extends AppCompatActivity implements ProductAd
 
     /* -------------------------------- views ------------------------------- */
 
+    /** Swaps the camera placeholder for the photo with its green box. */
     private void showQueryPhoto() {
-        File file = queryFile();
-        ImageViewCompat.setImageTintList(b.queryImage, null);
-        b.queryImage.setPadding(0, 0, 0, 0);
-        b.queryImage.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);
-        // The file is overwritten for every search, so key the cache on its timestamp.
-        Glide.with(this)
-                .load(file)
-                .signature(new ObjectKey(file.lastModified()))
-                .centerCrop()
-                .into(b.queryImage);
+        Ui.show(b.queryImage, false);
+        Ui.show(b.regionPanel, true);
+        b.regionView.setImage(queryBitmap);
+        showRegion();
+    }
+
+    /** Draws the searched area and says whether it was detected or chosen. */
+    private void showRegion() {
+        Box shown = manualRegion != null ? manualRegion : detected;
+        b.regionView.setRegion(shown);
+        int status;
+        if (manualRegion != null) {
+            status = R.string.visual_search_region_manual;
+        } else if (detected == null) {
+            status = R.string.visual_search_region_pending;
+        } else if (detected.found) {
+            status = R.string.visual_search_region_auto;
+        } else {
+            status = R.string.visual_search_region_none;
+        }
+        b.regionStatus.setText(status);
+        b.resetRegionButton.setEnabled(manualRegion != null);
+        b.wholePhotoButton.setEnabled(shown == null || !shown.isWhole());
     }
 
     private void showLoading() {

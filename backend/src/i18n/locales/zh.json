@@ -76,6 +76,7 @@
     "unsupportedLanguage": "不支持该语言。可选：{{locales}}",
     "visualSearchUnavailable": "图片搜索暂不可用",
     "imageUnreadable": "无法读取该图片，请尝试 JPEG 或 PNG 照片",
+    "visualBoxInvalid": "搜索区域必须是照片比例坐标 {x, y, w, h}",
     "visualModelMismatch": "应用与服务器（{{model}}）使用的图片模型不同，请改为上传照片",
     "visualVectorInvalid": "vector 必须是与模型维度一致的数字数组"
   },
@@ -203,6 +204,7 @@
     "visualSearchResults": "找到 {{count}} 件外观相似的商品",
     "visualReindexStarted": "已开始重建图片索引",
     "visualReindexRunning": "图片索引正在重建中",
+    "visualRegionDetected": "已识别商品区域",
     "visualProductIndexed": "图片特征已更新"
   },
   "common": {

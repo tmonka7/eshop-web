@@ -13,7 +13,8 @@
     "seed": "node src/seed/seed.js",
     "model:fetch": "node src/scripts/fetch-model.js",
     "visual:reindex": "node src/scripts/reindex-visual.js",
-    "lint": "eslint src --ext .js"
+    "lint": "eslint src --ext .js",
+    "test": "node --test test/"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

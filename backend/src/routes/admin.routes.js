@@ -65,6 +65,7 @@ router.post('/products/:id/visual-index', visual.reindexProduct);
 /* ------------------------- image search (DINOv3) ------------------------- */
 router.get('/visual-search/status', visual.status);
 router.post('/visual-search/reindex', visual.reindex);
+router.post('/visual-search/detect', visual.detect);
 
 /* ------------------------------- categories ------------------------------ */
 router.post(

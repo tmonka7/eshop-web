@@ -52,6 +52,8 @@ Five more customers exist (`sarah@`, `mike@`, `emily@`, `david@`, `anna@` `examp
 | `VISUAL_SEARCH_THREADS`   | `0`                                     | onnxruntime threads, 0 = auto            |
 | `VISUAL_SEARCH_INDEX_ON_BOOT` | `true`                              | index pending products after start-up    |
 | `VISUAL_SEARCH_FETCH_REMOTE`  | `false`                             | also embed images hosted on other sites  |
+| `VISUAL_SEARCH_DETECT`    | `true`                                  | find the product area (green box) first  |
+| `VISUAL_SEARCH_DETECT_SIDE` | `448`                                 | longest side used for area detection     |
 
 ## Image search (DINOv3)
 
@@ -59,6 +61,17 @@ Registering or editing a product extracts DINOv3 features from each image and st
 MongoDB (`productembeddings`). Shoppers can then search by photo. The model runs in-process on
 the CPU from `ml/`, with no network access, so it works on an air-gapped host. See
 [ml/README.md](ml/README.md) for how to get the model there.
+
+### Product area (green box)
+
+Before embedding, the API finds the product inside the photo and embeds only that area, for
+shoppers' photos and catalogue images alike. It needs no extra model: `src/services/regionDetect.js`
+scores DINOv3's own patch tokens by how unlike the image border they are, sharpened by colour
+distance from the border, and takes the bounding box of the strongest connected blob. The clients
+draw it as a glowing green box that the user can move or resize; the search then runs on that box
+(`box` field). Admins can adjust the box per catalogue image (`imageRegions`, saved as manual and
+kept on re-indexing). The Android app runs the same algorithm on the phone
+(`util/RegionDetector.java`).
 
 ```bash
 npm run model:fetch       # once, on a connected machine: downloads + verifies the model
@@ -93,7 +106,8 @@ Base path: `/api/v1`
 `GET /products/:slug` · `GET /products/:slug/related` · `GET /products/:slug/reviews`
 `GET /products/:slug/reviews/summary` · `GET /banners` · `GET /promotions` · `GET /coupons/validate`
 `GET /products/visual-search/status` · `POST /products/visual-search` (multipart `image`;
-`limit`, `minScore`) returns products with a `similarity` score, best match first.
+`limit`, `minScore`, optional `box` = JSON `{x,y,w,h}` fractions, `detect=false` for the whole
+photo) returns products with a `similarity` score, best match first, plus `region`: the area searched.
 `POST /products/visual-search/vector` (`{ model, vector, limit?, minScore? }`) does the same for a
 vector the client computed itself; it returns 409 when `model` is not the server's model
 
@@ -120,6 +134,7 @@ vector the client computed itself; it returns 409 when `model` is not the server
 `/inventory/alerts` · `/reviews` (+ `/moderate`) · `/coupons` (CRUD) · `/banners` (CRUD)
 `/uploads/products` · `/uploads/banners` · `DELETE /uploads/:folder/:filename`
 `GET /visual-search/status` · `POST /visual-search/reindex` (`{ force }`) ·
+`POST /visual-search/detect` (`{ image }` → product area of a stored image) ·
 `POST /products/:id/visual-index`
 
 ## Response shape

@@ -36,6 +36,11 @@ public final class Dinov3Preprocessor {
         return height;
     }
 
+    /** Same normalisation, another output size (region detection runs at ~320 px). */
+    public Dinov3Preprocessor resized(int newWidth, int newHeight) {
+        return new Dinov3Preprocessor(newWidth, newHeight, mean, std);
+    }
+
     /**
      * @param argb source pixels, row-major, as from Bitmap.getPixels(); must be opaque
      * @return 3 * height * width floats, channel-planar (R plane, then G, then B)

@@ -51,6 +51,13 @@ public final class Repo {
         void onError(String message);
     }
 
+    /** Like OnResult, but hands over the whole envelope (image search reads `region`). */
+    public interface OnEnvelope<T> {
+        void onSuccess(ApiResponse<T> body);
+
+        void onError(String message);
+    }
+
     public interface OnPaged<T> {
         void onSuccess(List<T> items, com.auramart.app.data.model.Models.Pagination pagination);
 
@@ -71,6 +78,25 @@ public final class Repo {
             public void onResponse(@NonNull Call<ApiResponse<T>> c, @NonNull Response<ApiResponse<T>> res) {
                 if (res.isSuccessful() && res.body() != null && res.body().success) {
                     cb.onSuccess(res.body().data, res.body().message);
+                } else {
+                    cb.onError(errorMessage(res));
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<T>> c, @NonNull Throwable t) {
+                cb.onError(networkMessage(t));
+            }
+        });
+    }
+
+    /** Enqueues a call and passes the complete envelope on success. */
+    public static <T> void callEnvelope(@NonNull Call<ApiResponse<T>> call, @NonNull OnEnvelope<T> cb) {
+        call.enqueue(new Callback<ApiResponse<T>>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<T>> c, @NonNull Response<ApiResponse<T>> res) {
+                if (res.isSuccessful() && res.body() != null && res.body().success) {
+                    cb.onSuccess(res.body());
                 } else {
                     cb.onError(errorMessage(res));
                 }

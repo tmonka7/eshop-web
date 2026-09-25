@@ -223,6 +223,13 @@
     <string name="visual_search_unreadable">Try another photo, such as a JPEG or PNG.</string>
     <string name="visual_search_failed_title">Image search failed</string>
     <string name="visual_search_no_camera">No camera app is available on this device.</string>
+    <string name="visual_search_region_description">Your photo. The green box marks the area being searched; drag it to move, drag a corner to resize, or drag on the photo to draw a new box.</string>
+    <string name="visual_search_region_pending">Finding the product in your photo…</string>
+    <string name="visual_search_region_auto">Searching the product in the green box. Drag the box or its corners if it is not right.</string>
+    <string name="visual_search_region_manual">Searching the area you selected.</string>
+    <string name="visual_search_region_none">No single product stood out, so the whole photo is searched. Drag on the photo to draw a box around the product.</string>
+    <string name="visual_search_region_reset">Use detected area</string>
+    <string name="visual_search_region_whole">Whole photo</string>
     <string name="visual_search_match">%1$d%% match</string>
     <plurals name="visual_search_found">
         <item quantity="one">%1$d similar product</item>

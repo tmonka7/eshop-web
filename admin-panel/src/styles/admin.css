@@ -844,3 +844,42 @@ table.data thead th:last-child { border-top-right-radius: var(--radius); }
 .tracking-form { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .tracking-form > svg { color: var(--ink-400); flex-shrink: 0; }
 .tracking-form .input { width: auto; flex: 1 1 150px; min-width: 120px; padding: 6px 10px; font-size: 0.8rem; }
+
+/* Product area (image search): glowing green box on catalogue images */
+.region-thumb-wrap { position: relative; }
+.region-thumb { position: relative; display: grid; place-items: center; width: 72px; height: 72px; padding: 0; border: 2px solid transparent; border-radius: 10px; overflow: hidden; background: var(--ink-100); cursor: pointer; }
+.region-thumb.is-open { border-color: #22c55e; }
+.region-thumb-inner { position: relative; display: inline-block; line-height: 0; }
+.region-thumb-inner img { display: block; max-width: 68px; max-height: 68px; }
+.region-spinner { width: 20px; height: 20px; border-radius: 50%; border: 2px solid rgba(22, 163, 74, 0.25); border-top-color: #16a34a; animation: region-spin 0.8s linear infinite; }
+@keyframes region-spin { to { transform: rotate(360deg); } }
+.region-thumb-box { position: absolute; box-sizing: border-box; border: 2px solid #22c55e; border-radius: 2px; box-shadow: 0 0 6px 1px rgba(34, 197, 94, 0.9); pointer-events: none; }
+.region-thumb-box.is-manual { border-style: dashed; }
+.region-thumb-busy { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(255, 255, 255, 0.6); }
+.region-panel { margin-top: 12px; padding: 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--ink-50, #f7fbf8); display: grid; gap: 10px; }
+.region-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.region-panel .region-frame { max-width: 460px; }
+.region-frame { position: relative; display: block; width: fit-content; max-width: 100%; margin: 0 auto; overflow: hidden; border-radius: 12px; border: 1px solid var(--border); background: var(--ink-100); touch-action: none; user-select: none; cursor: crosshair; line-height: 0; }
+/* The frame shrinks to the rendered photo, so box percentages are fractions of the photo itself. */
+.region-frame img, .visual-query .region-frame img { display: block; width: auto; height: auto; max-width: 100%; max-height: 420px; aspect-ratio: auto; object-fit: fill; border: 0; border-radius: 0; pointer-events: none; }
+.region-frame.is-disabled { cursor: progress; }
+.region-box { position: absolute; box-sizing: border-box; border: 2px solid #22c55e; border-radius: 4px; cursor: move; outline: none;
+  box-shadow: 0 0 0 9999px rgba(11, 31, 20, 0.38), 0 0 10px 2px rgba(34, 197, 94, 0.85), inset 0 0 8px rgba(34, 197, 94, 0.55);
+  animation: region-glow 1.8s ease-in-out infinite; }
+.region-box:focus-visible { border-color: #86efac; box-shadow: 0 0 0 9999px rgba(11, 31, 20, 0.38), 0 0 0 3px #fff, 0 0 14px 4px rgba(34, 197, 94, 0.95); }
+.region-box.is-dragging { animation: none; }
+.region-handle { position: absolute; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #fff; border: 2px solid #16a34a; box-shadow: 0 0 6px rgba(34, 197, 94, 0.9); }
+.region-handle-nw { left: 0; top: 0; cursor: nwse-resize; }
+.region-handle-n { left: 50%; top: 0; cursor: ns-resize; }
+.region-handle-ne { left: 100%; top: 0; cursor: nesw-resize; }
+.region-handle-e { left: 100%; top: 50%; cursor: ew-resize; }
+.region-handle-se { left: 100%; top: 100%; cursor: nwse-resize; }
+.region-handle-s { left: 50%; top: 100%; cursor: ns-resize; }
+.region-handle-sw { left: 0; top: 100%; cursor: nesw-resize; }
+.region-handle-w { left: 0; top: 50%; cursor: ew-resize; }
+.region-frame.is-disabled .region-handle { display: none; }
+@keyframes region-glow {
+  0%, 100% { box-shadow: 0 0 0 9999px rgba(11, 31, 20, 0.38), 0 0 8px 1px rgba(34, 197, 94, 0.7), inset 0 0 6px rgba(34, 197, 94, 0.45); }
+  50% { box-shadow: 0 0 0 9999px rgba(11, 31, 20, 0.38), 0 0 18px 5px rgba(34, 197, 94, 0.95), inset 0 0 12px rgba(34, 197, 94, 0.7); }
+}
+@media (prefers-reduced-motion: reduce) { .region-box { animation: none; } }

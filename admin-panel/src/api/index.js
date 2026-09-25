@@ -36,6 +36,8 @@ export const visualSearchApi = {
   status: () => client.get('/admin/visual-search/status'),
   reindex: (force = false) => client.post('/admin/visual-search/reindex', { force }),
   reindexProduct: (id) => client.post(`/admin/products/${id}/visual-index`, null, { timeout: 60000 }),
+  /** Product area of an uploaded image: `{ x, y, w, h, found, auto }` fractions. */
+  detect: (image) => client.post('/admin/visual-search/detect', { image }, { timeout: 60000 }),
 };
 
 export const categoryApi = {

@@ -174,6 +174,13 @@ export default {
     emptyTitle: '似ている商品が見つかりませんでした',
     emptyMessage: '無地の背景で商品を 1 つだけ写した、鮮明な写真をお試しください。',
     unavailable: '現在、画像検索はご利用いただけません。',
+    regionLabel: '検索範囲。矢印キーで移動、Shift + 矢印キーでサイズ変更。',
+    regionAuto: '緑の枠内の商品を検索しています。',
+    regionAdjusted: '選択した範囲を検索しています。',
+    regionNone: '商品を特定できなかったため、写真全体を検索しています。写真上をドラッグして商品を囲んでください。',
+    regionHint: '枠がずれている場合は、ドラッグで移動、角をドラッグでサイズ変更、または新しく囲み直せます。',
+    resetRegion: '自動検出の範囲に戻す',
+    wholePhoto: '写真全体を検索',
   },
 
   sort: {

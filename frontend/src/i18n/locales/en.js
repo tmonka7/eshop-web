@@ -174,6 +174,13 @@ export default {
     emptyTitle: 'Nothing similar found',
     emptyMessage: 'Try a clearer photo of a single product on a plain background.',
     unavailable: 'Image search is not available right now.',
+    regionLabel: 'Search area. Arrow keys move it; Shift + arrow keys resize it.',
+    regionAuto: 'Searching the product in the green box.',
+    regionAdjusted: 'Searching the area you selected.',
+    regionNone: 'No single product stood out, so the whole photo is searched. Drag on the photo to draw a box around the product.',
+    regionHint: 'Box in the wrong place? Drag it to move it, pull a corner to resize it, or draw a new one.',
+    resetRegion: 'Use detected area',
+    wholePhoto: 'Search whole photo',
   },
 
   sort: {

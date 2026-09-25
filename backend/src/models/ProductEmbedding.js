@@ -9,6 +9,11 @@ const mongoose = require('mongoose');
  * product. `model` records which network produced it: vectors from two
  * different models are not comparable, and search only reads rows whose
  * model matches the one currently loaded.
+ *
+ * `region` is the part of the image that was embedded (0..1 fractions);
+ * `regionAuto` tells whether the detector chose it or an admin did, and
+ * `detector` which detector version, so a detector upgrade re-crops only the
+ * automatic regions.
  */
 const productEmbeddingSchema = new mongoose.Schema(
   {
@@ -17,6 +22,14 @@ const productEmbeddingSchema = new mongoose.Schema(
     model: { type: String, required: true, index: true },
     dim: { type: Number, required: true, min: 1 },
     vector: { type: Buffer, required: true },
+    region: {
+      x: { type: Number, default: 0 },
+      y: { type: Number, default: 0 },
+      w: { type: Number, default: 1 },
+      h: { type: Number, default: 1 },
+    },
+    regionAuto: { type: Boolean, default: true },
+    detector: { type: String, default: '' },
   },
   { timestamps: true },
 );

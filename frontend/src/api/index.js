@@ -30,10 +30,15 @@ export const catalogApi = {
 
   /** Status of the DINOv3 image search: `{ enabled, available }`. */
   visualSearchStatus: () => client.get('/products/visual-search/status'),
-  /** Products that look like `file`, best match first, each with `similarity`. */
-  visualSearch: (file, params) => {
+  /**
+   * Products that look like the product in `file`, best match first, each
+   * with `similarity`. The response's `region` is the area that was searched:
+   * the detected product, or `box` ({x, y, w, h} fractions) when given.
+   */
+  visualSearch: (file, params, box) => {
     const body = new FormData();
     body.append('image', file);
+    if (box) body.append('box', JSON.stringify(box));
     return client.post('/products/visual-search', body, {
       params: clean(params),
       headers: { 'Content-Type': 'multipart/form-data' },

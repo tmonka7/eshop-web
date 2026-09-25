@@ -80,6 +80,55 @@
         </LinearLayout>
     </LinearLayout>
 
+    <!-- the photo with the product area as a glowing green box; shown once a photo is picked -->
+    <LinearLayout
+        android:id="@+id/regionPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/surface"
+        android:paddingStart="@dimen/space_lg"
+        android:paddingEnd="@dimen/space_lg"
+        android:paddingBottom="@dimen/space_md"
+        android:visibility="gone">
+
+        <com.auramart.app.ui.visual.RegionSelectorView
+            android:id="@+id/regionView"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:background="@drawable/bg_image_placeholder"
+            android:contentDescription="@string/visual_search_region_description" />
+
+        <TextView
+            android:id="@+id/regionStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_sm"
+            android:text="@string/visual_search_region_pending"
+            style="@style/Text.Secondary" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/resetRegionButton"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/visual_search_region_reset" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/wholePhotoButton"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_sm"
+                android:text="@string/visual_search_region_whole" />
+        </LinearLayout>
+    </LinearLayout>
+
     <TextView
         android:id="@+id/resultCount"
         android:layout_width="match_parent"

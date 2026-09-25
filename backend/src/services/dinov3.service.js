@@ -20,7 +20,16 @@ const DEFAULT_PREPROCESS = {
   mean: [0.485, 0.456, 0.406],
   std: [0.229, 0.224, 0.225],
   rescale: 1 / 255,
+  patchSize: 16,
+  prefixTokens: 5, // CLS + 4 register tokens
 };
+
+/**
+ * Photos are decoded once, upright, and capped at this longest side. Both the
+ * embedding (224x224) and region detection (<= 448) work from that copy, so a
+ * 12-megapixel upload is never held at full size twice.
+ */
+const DECODE_MAX_SIDE = 1600;
 
 let sessionPromise = null;
 let session = null;
@@ -49,14 +58,25 @@ function modelId() {
   return path.basename(env.visualSearch.modelDir) + '/' + env.visualSearch.modelFile;
 }
 
-/** Reads resize/normalisation settings from the model's own preprocessor_config.json. */
+/**
+ * Reads resize/normalisation settings from the model's own
+ * preprocessor_config.json, and the patch size / register count from
+ * config.json (region detection needs to know where the patch tokens start).
+ */
 function readPreprocessConfig() {
   const file = path.join(env.visualSearch.modelDir, 'preprocessor_config.json');
-  if (!fs.existsSync(file)) return DEFAULT_PREPROCESS;
+  const modelCfgFile = path.join(env.visualSearch.modelDir, 'config.json');
+  const modelCfg = fs.existsSync(modelCfgFile) ? JSON.parse(fs.readFileSync(modelCfgFile, 'utf8')) : {};
+  const layout = {
+    patchSize: modelCfg.patch_size || DEFAULT_PREPROCESS.patchSize,
+    prefixTokens: 1 + (modelCfg.num_register_tokens ?? DEFAULT_PREPROCESS.prefixTokens - 1),
+  };
+  if (!fs.existsSync(file)) return { ...DEFAULT_PREPROCESS, ...layout };
   const cfg = JSON.parse(fs.readFileSync(file, 'utf8'));
   const size = cfg.size || {};
   const edge = size.shortest_edge || cfg.image_size;
   return {
+    ...layout,
     width: size.width || edge || DEFAULT_PREPROCESS.width,
     height: size.height || edge || DEFAULT_PREPROCESS.height,
     mean: cfg.image_mean || DEFAULT_PREPROCESS.mean,
@@ -116,37 +136,64 @@ function load() {
   return sessionPromise;
 }
 
-/** Decodes any supported image into a normalised CHW Float32Array. */
-async function toTensorData(buffer) {
-  let sharp;
+function requireSharp() {
   try {
     // eslint-disable-next-line global-require
-    sharp = require('sharp');
+    return require('sharp');
   } catch (err) {
     throw new ModelUnavailableError('sharp is not installed: ' + err.message);
   }
+}
 
-  const { width, height, mean, std, rescale } = preprocess;
-  // Matches DINOv3ViTImageProcessor: plain (non aspect-preserving) resize to
-  // 224x224 with bilinear filtering, rescale to [0,1], ImageNet normalise.
-  // Transparent PNGs are flattened onto white, which is how shoppers see them.
+/**
+ * Decodes any supported image once: EXIF-rotated upright, transparency
+ * flattened onto white (how shoppers see it), sRGB, at most DECODE_MAX_SIDE.
+ * Region boxes are fractions of THIS upright image, which is also what
+ * browsers and the Android app display.
+ * @returns {Promise<{ data: Buffer, width: number, height: number }>} raw RGB
+ */
+async function decode(buffer) {
+  const sharp = requireSharp();
   const { data, info } = await sharp(buffer, { failOn: 'none', animated: false })
     .rotate()
     .flatten({ background: '#ffffff' })
-    .resize(width, height, { fit: 'fill', kernel: sharp.kernel.linear || sharp.kernel.cubic })
+    .resize(DECODE_MAX_SIDE, DECODE_MAX_SIDE, { fit: 'inside', withoutEnlargement: true })
     .toColourspace('srgb')
     .removeAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
+  return { data, width: info.width, height: info.height };
+}
 
-  const channels = info.channels;
+/** Pixel rectangle of a 0..1 region inside a decoded image. */
+function pixelRect(image, box) {
+  const left = Math.min(image.width - 1, Math.max(0, Math.round(box.x * image.width)));
+  const top = Math.min(image.height - 1, Math.max(0, Math.round(box.y * image.height)));
+  const width = Math.max(1, Math.min(image.width - left, Math.round(box.w * image.width)));
+  const height = Math.max(1, Math.min(image.height - top, Math.round(box.h * image.height)));
+  return { left, top, width, height };
+}
+
+/** Resizes a decoded image (optionally cut to `box`) to width x height raw RGB. */
+async function resizeRaw(image, box, width, height) {
+  const sharp = requireSharp();
+  let pipeline = sharp(image.data, { raw: { width: image.width, height: image.height, channels: 3 } });
+  if (box) pipeline = pipeline.extract(pixelRect(image, box));
+  const { data } = await pipeline
+    .resize(width, height, { fit: 'fill', kernel: sharp.kernel.linear || sharp.kernel.cubic })
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  return data;
+}
+
+/** Raw RGB -> normalised CHW Float32Array. */
+function toTensorData(rgb, width, height) {
+  const { mean, std, rescale } = preprocess;
   const plane = width * height;
   const out = new Float32Array(3 * plane);
   for (let i = 0; i < plane; i += 1) {
     for (let c = 0; c < 3; c += 1) {
-      // A greyscale source has one channel; reuse it for R, G and B.
-      const value = data[i * channels + (channels >= 3 ? c : 0)];
-      out[c * plane + i] = (value * rescale - mean[c]) / std[c];
+      out[c * plane + i] = (rgb[i * 3 + c] * rescale - mean[c]) / std[c];
     }
   }
   return out;
@@ -170,20 +217,28 @@ function serial(task) {
 }
 
 /**
- * Returns the L2-normalised global image descriptor for one image.
+ * Returns the L2-normalised global image descriptor.
  *
  * The descriptor is DINOv3's `pooler_output` (the final-layer-normed CLS
  * token). If a different export only offers `last_hidden_state`, the CLS token
  * is taken from it instead.
+ *
+ * Matches DINOv3ViTImageProcessor: plain (non aspect-preserving) resize to
+ * 224x224 with bilinear filtering, rescale to [0,1], ImageNet normalise.
+ *
+ * @param {Buffer|{data: Buffer, width: number, height: number}} input
+ *   an encoded image, or the result of decode()
+ * @param {{x:number,y:number,w:number,h:number}|null} [box] embed only this region
  */
-async function embed(buffer) {
+async function embed(input, box = null) {
   const { ort, handle } = await load();
-  const pixels = await toTensorData(buffer);
+  const image = Buffer.isBuffer(input) ? await decode(input) : input;
   const { width, height } = preprocess;
+  const pixels = toTensorData(await resizeRaw(image, box, width, height), width, height);
 
   return serial(async () => {
-    const input = new ort.Tensor('float32', pixels, [1, 3, height, width]);
-    const outputs = await handle.run({ [handle.inputNames[0]]: input });
+    const tensor = new ort.Tensor('float32', pixels, [1, 3, height, width]);
+    const outputs = await handle.run({ [handle.inputNames[0]]: tensor });
 
     let vector;
     if (outputs.pooler_output) {
@@ -195,6 +250,36 @@ async function embed(buffer) {
     }
     dim = vector.length;
     return l2normalize(vector);
+  });
+}
+
+/**
+ * Runs the model on the whole image at an aspect-preserving size whose
+ * longest side is about `longSide`, and returns the patch-token grid used by
+ * region detection plus a (gw*ppp)x(gh*ppp) RGB thumbnail for its colour cue.
+ * DINOv3 uses rotary position embeddings, so any multiple of 16 is valid.
+ */
+async function patchGrid(image, longSide, pixelsPerPatch) {
+  const { ort, handle } = await load();
+  const { patchSize, prefixTokens } = preprocess;
+  const scale = longSide / Math.max(image.width, image.height);
+  const gw = Math.max(2, Math.round((image.width * scale) / patchSize));
+  const gh = Math.max(2, Math.round((image.height * scale) / patchSize));
+  const w = gw * patchSize;
+  const h = gh * patchSize;
+  const pixels = toTensorData(await resizeRaw(image, null, w, h), w, h);
+  const rgb = await resizeRaw(image, null, gw * pixelsPerPatch, gh * pixelsPerPatch);
+
+  return serial(async () => {
+    const tensor = new ort.Tensor('float32', pixels, [1, 3, h, w]);
+    const outputs = await handle.run({ [handle.inputNames[0]]: tensor });
+    const hidden = outputs.last_hidden_state || outputs[handle.outputNames[0]];
+    const tokenDim = hidden.dims[hidden.dims.length - 1];
+    const patches = Float32Array.from(hidden.data.subarray(prefixTokens * tokenDim));
+    if (patches.length !== gw * gh * tokenDim) {
+      throw new Error('Unexpected token layout ' + hidden.dims.join('x') + ' for a ' + gw + 'x' + gh + ' grid');
+    }
+    return { patches, gw, gh, dim: tokenDim, rgb };
   });
 }
 
@@ -210,4 +295,6 @@ function status() {
   };
 }
 
-module.exports = { load, embed, modelId, status, ModelUnavailableError };
+module.exports = {
+  load, decode, embed, patchGrid, modelId, status, ModelUnavailableError,
+};

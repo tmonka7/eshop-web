@@ -329,17 +329,48 @@ ul { margin: 0; padding: 0; list-style: none; }
 .search .search-camera:hover { background: var(--ink-100); color: var(--primary-ink); }
 
 /* Image search page */
-.visual-search { display: grid; grid-template-columns: 300px 1fr; gap: 28px; align-items: start; }
+.visual-search { display: grid; grid-template-columns: 340px 1fr; gap: 28px; align-items: start; }
 .visual-drop { display: grid; place-items: center; gap: 10px; min-height: 260px; padding: 24px; text-align: center; border: 2px dashed var(--ink-200); border-radius: var(--radius-lg); background: var(--ink-50); color: var(--ink-600); cursor: pointer; transition: border-color var(--t-fast), background var(--t-fast); }
 .visual-drop:hover, .visual-drop.dragging { border-color: var(--primary-ink); background: var(--green-50); }
 .visual-drop .link { color: var(--primary-ink); font-weight: 600; text-decoration: underline; }
 .visual-query { position: sticky; top: 140px; display: grid; gap: 12px; }
 .visual-query img { width: 100%; aspect-ratio: 1; object-fit: contain; border-radius: var(--radius-lg); background: var(--ink-50); border: 1px solid var(--border); }
+/* Search area: the product found in the photo, drawn as a glowing green box */
+.region-frame { position: relative; display: block; width: fit-content; max-width: 100%; margin: 0 auto; overflow: hidden; border-radius: 12px; border: 1px solid var(--border); background: var(--ink-100); touch-action: none; user-select: none; cursor: crosshair; line-height: 0; }
+/* The frame shrinks to the rendered photo, so box percentages are fractions of the photo itself. */
+.region-frame img, .visual-query .region-frame img { display: block; width: auto; height: auto; max-width: 100%; max-height: 520px; aspect-ratio: auto; object-fit: fill; border: 0; border-radius: 0; pointer-events: none; }
+.region-frame.is-disabled { cursor: progress; }
+.region-box { position: absolute; box-sizing: border-box; border: 2px solid #22c55e; border-radius: 4px; cursor: move; outline: none;
+  box-shadow: 0 0 0 9999px rgba(11, 31, 20, 0.38), 0 0 10px 2px rgba(34, 197, 94, 0.85), inset 0 0 8px rgba(34, 197, 94, 0.55);
+  animation: region-glow 1.8s ease-in-out infinite; }
+.region-box:focus-visible { border-color: #86efac; box-shadow: 0 0 0 9999px rgba(11, 31, 20, 0.38), 0 0 0 3px #fff, 0 0 14px 4px rgba(34, 197, 94, 0.95); }
+.region-box.is-dragging { animation: none; }
+.region-handle { position: absolute; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #fff; border: 2px solid #16a34a; box-shadow: 0 0 6px rgba(34, 197, 94, 0.9); }
+.region-handle-nw { left: 0; top: 0; cursor: nwse-resize; }
+.region-handle-n { left: 50%; top: 0; cursor: ns-resize; }
+.region-handle-ne { left: 100%; top: 0; cursor: nesw-resize; }
+.region-handle-e { left: 100%; top: 50%; cursor: ew-resize; }
+.region-handle-se { left: 100%; top: 100%; cursor: nwse-resize; }
+.region-handle-s { left: 50%; top: 100%; cursor: ns-resize; }
+.region-handle-sw { left: 0; top: 100%; cursor: nesw-resize; }
+.region-handle-w { left: 0; top: 50%; cursor: ew-resize; }
+.region-frame.is-disabled .region-handle { display: none; }
+@media (hover: none) { .region-handle { width: 22px; height: 22px; margin: -11px 0 0 -11px; } }
+@keyframes region-glow {
+  0%, 100% { box-shadow: 0 0 0 9999px rgba(11, 31, 20, 0.38), 0 0 8px 1px rgba(34, 197, 94, 0.7), inset 0 0 6px rgba(34, 197, 94, 0.45); }
+  50% { box-shadow: 0 0 0 9999px rgba(11, 31, 20, 0.38), 0 0 18px 5px rgba(34, 197, 94, 0.95), inset 0 0 12px rgba(34, 197, 94, 0.7); }
+}
+@media (prefers-reduced-motion: reduce) { .region-box { animation: none; } }
+@media (forced-colors: active) { .region-box { border-color: Highlight; } .region-handle { background: Canvas; border-color: Highlight; } }
+.region-note { margin: 0; font-size: 0.85rem; color: var(--primary-ink); font-weight: 600; }
+.region-note.is-warn { color: var(--ink-600); font-weight: 500; }
+.region-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.region-hint { margin: 0; }
 .visual-hit { position: relative; }
 .visual-hit .match { position: absolute; top: 10px; right: 10px; z-index: 2; padding: 3px 8px; border-radius: var(--radius-full); background: var(--primary); color: var(--on-primary); font-size: 0.72rem; font-weight: 700; pointer-events: none; }
 @media (max-width: 860px) {
   .visual-search { grid-template-columns: 1fr; }
-  .visual-query { position: static; grid-template-columns: 120px 1fr; align-items: center; }
+  .visual-query { position: static; }
   .visual-drop { min-height: 180px; }
 }
 

@@ -6,6 +6,7 @@ import {
 } from '../components/Icons';
 import TranslationFields from '../components/TranslationFields';
 import VisualIndexBar from '../components/VisualIndexBar';
+import RegionSelector from '../components/RegionSelector';
 import { useToastStore } from '../store';
 import { currency } from '../utils/format';
 import { CURRENCIES } from '../utils/constants';
@@ -25,6 +26,8 @@ const emptyProduct = {
   shortDescription: '',
   description: '',
   images: [],
+  // Product area per image ({ image, x, y, w, h, auto }); see RegionPanel.
+  imageRegions: [],
   tags: '',
   colors: '',
   isActive: true,
@@ -69,6 +72,9 @@ export default function ProductsPage() {
   const [form, setForm] = useState(emptyProduct);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  // Image whose product area is open for adjusting, and detections in flight.
+  const [regionImage, setRegionImage] = useState(null);
+  const [detecting, setDetecting] = useState({});
   const [errors, setErrors] = useState({});
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -106,6 +112,7 @@ export default function ProductsPage() {
 
   function closeModal() {
     setModalOpen(false);
+    setRegionImage(null);
     setEditing(null);
     setForm(emptyProduct);
   }
@@ -124,6 +131,7 @@ export default function ProductsPage() {
       shortDescription: p.shortDescription || '',
       description: p.description || '',
       images: p.images || [],
+      imageRegions: p.imageRegions || [],
       tags: (p.tags || []).join(', '),
       colors: (p.colors || []).join(', '),
       isActive: p.isActive,
@@ -163,6 +171,8 @@ export default function ProductsPage() {
       shortDescription: form.shortDescription,
       description: form.description,
       images: form.images,
+      // Only regions of images still attached; the server re-detects the automatic ones.
+      imageRegions: form.imageRegions.filter((r) => form.images.includes(r.image)),
       tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
       colors: form.colors.split(',').map((c) => c.trim()).filter(Boolean),
       isActive: form.isActive,
@@ -202,12 +212,39 @@ export default function ProductsPage() {
     setUploading(true);
     try {
       const res = await uploadApi.products(files);
-      setForm((f) => ({ ...f, images: [...f.images, ...res.data.map((x) => x.url)] }));
+      const urls = res.data.map((x) => x.url);
+      setForm((f) => ({ ...f, images: [...f.images, ...urls] }));
       toast.success(res.message);
+      // Show where the product was found in each new image straight away.
+      urls.forEach((url) => detectRegion(url));
     } catch (err) {
       toast.error(err.message);
     } finally {
       setUploading(false);
+    }
+  }
+
+  /** Replaces (or adds) the region of one image in the form. */
+  function setRegion(image, box, auto) {
+    setForm((f) => ({
+      ...f,
+      imageRegions: [
+        ...f.imageRegions.filter((r) => r.image !== image),
+        { image, x: box.x, y: box.y, w: box.w, h: box.h, auto },
+      ],
+    }));
+  }
+
+  /** Asks the API where the product is in `image`; failures just leave no box. */
+  async function detectRegion(image) {
+    setDetecting((d) => ({ ...d, [image]: true }));
+    try {
+      const res = await visualSearchApi.detect(image);
+      setRegion(image, res.data, true);
+    } catch (err) {
+      if (err.status !== 503) toast.error(err.message);
+    } finally {
+      setDetecting((d) => ({ ...d, [image]: false }));
     }
   }
 
@@ -624,24 +661,53 @@ export default function ProductsPage() {
           <div className="field">
             <span className="field-label">{t('common.images')}</span>
             <div className="row gap-8 wrap mb-8">
-              {form.images.map((src) => (
-                <div key={src} style={{ position: 'relative' }}>
-                  <img
-                    src={src}
-                    alt=""
-                    style={{ width: 72, height: 72, objectFit: 'cover', borderRadius: 8, background: 'var(--ink-100)' }}
-                  />
-                  <button
-                    type="button"
-                    className="btn btn-danger btn-icon"
-                    style={{ position: 'absolute', top: -7, right: -7, width: 22, height: 22 }}
-                    onClick={() => setForm((f) => ({ ...f, images: f.images.filter((i) => i !== src) }))}
-                    aria-label={t('products.removeImage')}
-                  >
-                    <X size={12} />
-                  </button>
-                </div>
-              ))}
+              {form.images.map((src) => {
+                const region = form.imageRegions.find((r) => r.image === src);
+                return (
+                  <div key={src} className="region-thumb-wrap">
+                    <button
+                      type="button"
+                      className={`region-thumb ${regionImage === src ? 'is-open' : ''}`}
+                      onClick={() => setRegionImage(regionImage === src ? null : src)}
+                      aria-label={t('products.region.adjustAria')}
+                      title={t('products.region.adjust')}
+                    >
+                      {/* The box is positioned against the image itself, not the square button. */}
+                      <span className="region-thumb-inner">
+                        <img src={src} alt="" />
+                        {region ? (
+                          <span
+                            className={`region-thumb-box ${region.auto ? '' : 'is-manual'}`}
+                            style={{
+                              left: `${region.x * 100}%`,
+                              top: `${region.y * 100}%`,
+                              width: `${region.w * 100}%`,
+                              height: `${region.h * 100}%`,
+                            }}
+                          />
+                        ) : null}
+                      </span>
+                      {detecting[src] ? <span className="region-thumb-busy"><span className="region-spinner" /></span> : null}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-danger btn-icon"
+                      style={{ position: 'absolute', top: -7, right: -7, width: 22, height: 22 }}
+                      onClick={() => {
+                        if (regionImage === src) setRegionImage(null);
+                        setForm((f) => ({
+                          ...f,
+                          images: f.images.filter((i) => i !== src),
+                          imageRegions: f.imageRegions.filter((r) => r.image !== src),
+                        }));
+                      }}
+                      aria-label={t('products.removeImage')}
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                );
+              })}
               {form.images.length === 0 ? (
                 <div
                   className="row center muted"
@@ -665,6 +731,19 @@ export default function ProductsPage() {
               disabled={uploading}
             />
             {uploading ? <span className="field-hint">{t('products.uploading')}</span> : null}
+            {form.images.length ? <span className="field-hint">{t('products.region.thumbHint')}</span> : null}
+            {regionImage && form.images.includes(regionImage) ? (
+              <RegionPanel
+                image={regionImage}
+                region={form.imageRegions.find((r) => r.image === regionImage)}
+                busy={Boolean(detecting[regionImage])}
+                onChange={(box) => setRegion(regionImage, box, false)}
+                onDetect={() => detectRegion(regionImage)}
+                onWhole={() => setRegion(regionImage, { x: 0, y: 0, w: 1, h: 1 }, false)}
+                onClose={() => setRegionImage(null)}
+                t={t}
+              />
+            ) : null}
           </div>
 
           <div className="row gap-20 wrap">
@@ -714,5 +793,44 @@ function VisualIndexCell({ index, t }) {
         </span>
       ) : null}
     </span>
+  );
+}
+
+/**
+ * Inline editor for the product area of one catalogue image: the green box is
+ * what image search embeds for this image. Detected automatically on upload;
+ * an adjusted box is saved as manual and survives re-indexing.
+ */
+function RegionPanel({ image, region, busy, onChange, onDetect, onWhole, onClose, t }) {
+  let status = t('products.region.none');
+  if (region) status = region.auto ? t('products.region.auto') : t('products.region.manual');
+  if (region && region.auto && region.found === false) status = t('products.region.notFound');
+  return (
+    <div className="region-panel">
+      <div className="region-panel-head">
+        <strong>{t('products.region.title')}</strong>
+        <span className={`badge ${region && !region.auto ? 'badge-info' : 'badge-ok'}`}>{status}</span>
+      </div>
+      <RegionSelector
+        src={image}
+        alt=""
+        region={region ? { x: region.x, y: region.y, w: region.w, h: region.h } : null}
+        onChange={onChange}
+        disabled={busy}
+        label={t('products.region.label')}
+      />
+      <p className="field-hint">{t('products.region.hint')}</p>
+      <div className="row gap-8 wrap">
+        <button type="button" className="btn btn-outline btn-sm" onClick={onDetect} disabled={busy}>
+          {busy ? t('products.region.detecting') : t('products.region.redetect')}
+        </button>
+        <button type="button" className="btn btn-outline btn-sm" onClick={onWhole} disabled={busy}>
+          {t('products.region.whole')}
+        </button>
+        <button type="button" className="btn btn-primary btn-sm" onClick={onClose}>
+          {t('products.region.done')}
+        </button>
+      </div>
+    </div>
   );
 }

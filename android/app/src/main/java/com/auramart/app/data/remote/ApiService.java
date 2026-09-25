@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -91,10 +92,16 @@ public interface ApiService {
     @GET("products/visual-search/status")
     Call<ApiResponse<VisualSearchStatus>> visualSearchStatus();
 
-    /** Products that look like the photo in `image`, best match first. */
+    /**
+     * Products that look like the product in `image`, best match first. `box`
+     * (JSON {x,y,w,h} fractions, may be null) is the area the user chose;
+     * without it the server detects the product and returns it as `region`.
+     */
     @Multipart
     @POST("products/visual-search")
-    Call<ApiResponse<List<Product>>> visualSearch(@Part MultipartBody.Part image, @Query("limit") int limit);
+    Call<ApiResponse<List<Product>>> visualSearch(@Part MultipartBody.Part image,
+                                                  @Part("box") RequestBody box,
+                                                  @Query("limit") int limit);
 
     /** Same ranking for a DINOv3 vector the app computed on the device. */
     @POST("products/visual-search/vector")

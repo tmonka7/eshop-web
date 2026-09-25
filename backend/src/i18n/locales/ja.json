@@ -76,6 +76,7 @@
     "unsupportedLanguage": "対応していない言語です。利用可能: {{locales}}",
     "visualSearchUnavailable": "現在、画像検索はご利用いただけません",
     "imageUnreadable": "画像を読み込めませんでした。JPEG または PNG の写真をお試しください",
+    "visualBoxInvalid": "検索範囲は写真に対する比率 {x, y, w, h} で指定してください",
     "visualModelMismatch": "アプリとサーバー（{{model}}）で画像モデルが異なります。写真をアップロードしてください",
     "visualVectorInvalid": "vector はモデルの次元数に合った数値の配列で指定してください"
   },
@@ -203,6 +204,7 @@
     "visualSearchResults": "見た目が似ている商品が {{count}} 件見つかりました",
     "visualReindexStarted": "画像インデックスの再構築を開始しました",
     "visualReindexRunning": "画像インデックスの再構築はすでに実行中です",
+    "visualRegionDetected": "商品の範囲を検出しました",
     "visualProductIndexed": "画像特徴量を更新しました"
   },
   "common": {

@@ -44,6 +44,11 @@ const env = {
     // Product images hosted elsewhere are only downloaded when this is on;
     // files under /uploads are always read straight from disk.
     fetchRemote: bool(process.env.VISUAL_SEARCH_FETCH_REMOTE, false),
+    // Find the product inside a photo (green box) and embed only that area,
+    // for both shopper photos and catalogue images. See regionDetect.js.
+    detect: bool(process.env.VISUAL_SEARCH_DETECT, true),
+    // Longest side, in pixels, the photo is scaled to for detection.
+    detectSide: int(process.env.VISUAL_SEARCH_DETECT_SIDE, 448),
   },
   seed: {
     adminEmail: process.env.SEED_ADMIN_EMAIL || 'admin@auramart.com',

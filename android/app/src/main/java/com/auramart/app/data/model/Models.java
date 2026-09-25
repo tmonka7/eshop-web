@@ -23,6 +23,20 @@ public final class Models {
         public String message;
         public T data;
         public List<FieldError> errors;
+        /** Image search only: the area of the photo that was searched. */
+        public SearchRegion region;
+    }
+
+    /** Part of a photo, as fractions (0..1) of the upright image. */
+    public static class SearchRegion {
+        public float x;
+        public float y;
+        public float w = 1f;
+        public float h = 1f;
+        /** True when the server's detector chose it, false when the user did. */
+        public boolean auto = true;
+        /** False when no single product stood out and the whole photo was used. */
+        public boolean found = true;
     }
 
     public static class PagedResponse<T> {

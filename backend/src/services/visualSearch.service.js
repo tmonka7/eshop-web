@@ -8,6 +8,10 @@
  *  - search() embeds the shopper's photo and ranks products by cosine
  *    similarity, scoring each product by its best-matching image.
  *
+ * Both sides embed only the product area of a photo, not the whole frame:
+ * regionDetect.js finds it (the green box the clients draw) and a user can
+ * override it - shoppers per search, admins per catalogue image.
+ *
  * MongoDB 6 Community has no vector index, so search runs over an in-memory
  * matrix built from the collection. It is rebuilt lazily after any write,
  * which is cheap at catalogue scale: 10k products x 3 images x 384 dims is
@@ -21,6 +25,9 @@ const Product = require('../models/Product');
 const ProductEmbedding = require('../models/ProductEmbedding');
 const { UPLOAD_ROOT } = require('../middleware/upload');
 const dinov3 = require('./dinov3.service');
+const {
+  detectRegion, sanitizeBox, sameBox, DETECTOR_ID, PIXELS_PER_PATCH,
+} = require('./regionDetect');
 
 const REMOTE_TIMEOUT_MS = 10000;
 
@@ -53,6 +60,40 @@ async function loadImage(src) {
   const res = await fetch(src, { signal: AbortSignal.timeout(REMOTE_TIMEOUT_MS) });
   if (!res.ok) throw new Error('HTTP ' + res.status);
   return Buffer.from(await res.arrayBuffer());
+}
+
+/* ------------------------------ region detection -------------------------- */
+
+const FULL_IMAGE = Object.freeze({ x: 0, y: 0, w: 1, h: 1 });
+
+/** Identifies how automatic regions are made right now ('none' when detection is off). */
+function detectorId() {
+  return env.visualSearch.detect ? DETECTOR_ID : 'none';
+}
+
+/**
+ * Finds the product in a decoded image.
+ * @returns {Promise<{x,y,w,h,coverage,found}|null>} null when detection is off
+ */
+async function locate(image) {
+  if (!env.visualSearch.detect) return null;
+  return detectRegion(await dinov3.patchGrid(image, env.visualSearch.detectSide, PIXELS_PER_PATCH));
+}
+
+/** The box to embed for an automatic region: the detection, or the whole image if nothing stood out. */
+const autoBox = (found) => (found && found.found ? found : null);
+
+/** Detects the product area of a stored catalogue image (admin "adjust area" dialog). */
+async function detectForImage(src) {
+  const image = await dinov3.decode(await loadImage(src));
+  const found = await locate(image);
+  return {
+    ...(found || { ...FULL_IMAGE, coverage: 1, found: false }),
+    auto: true,
+    detector: detectorId(),
+    width: image.width,
+    height: image.height,
+  };
 }
 
 /* ------------------------------ in-memory index --------------------------- */
@@ -121,11 +162,25 @@ async function getIndex() {
 
 /* -------------------------------- indexing -------------------------------- */
 
-async function writeStatus(product, visualIndex) {
+async function writeStatus(product, visualIndex, imageRegions) {
+  const fields = { visualIndex: { detector: detectorId(), ...visualIndex } };
+  if (imageRegions) fields.imageRegions = imageRegions;
   // updateOne rather than save(): no validation hooks, no updatedAt bump.
-  await Product.updateOne({ _id: product._id }, { $set: { visualIndex } }, { timestamps: false });
-  product.visualIndex = visualIndex; // eslint-disable-line no-param-reassign
-  return visualIndex;
+  await Product.updateOne({ _id: product._id }, { $set: fields }, { timestamps: false });
+  Object.assign(product, fields);
+  return fields.visualIndex;
+}
+
+/** The admin-set region for `src`, or null when the detector should choose. */
+function manualRegion(product, src) {
+  const r = (product.imageRegions || []).find((x) => x.image === src && x.auto === false);
+  return r ? sanitizeBox(r) : null;
+}
+
+/** Whether a stored vector still matches how `src` should be cropped now. */
+function isCurrent(embedding, manual) {
+  if (manual) return embedding.regionAuto === false && sameBox(embedding.region, manual);
+  return embedding.regionAuto !== false && embedding.detector === detectorId();
 }
 
 /**
@@ -155,18 +210,37 @@ async function indexProduct(productOrId, { force = false } = {}) {
   if (!images.length) {
     return writeStatus(product, {
       status: VISUAL_INDEX_STATUS.NO_IMAGES, model, vectors: 0, error: '', indexedAt: new Date(),
-    });
+    }, []);
   }
 
-  const existing = await ProductEmbedding.find({ product: product._id, model }).select('image').lean();
-  const done = new Set(existing.map((e) => e.image));
-  const todo = images.filter((src) => !done.has(src));
+  const existing = await ProductEmbedding.find({ product: product._id, model })
+    .select('image region regionAuto detector')
+    .lean();
+  const byImage = new Map(existing.map((e) => [e.image, e]));
+  // Regions shown in the admin panel: one per current image.
+  const regions = new Map();
+  const done = new Set();
+  const todo = [];
+  for (const src of images) {
+    const manual = manualRegion(product, src);
+    const stored = byImage.get(src);
+    if (stored && isCurrent(stored, manual)) {
+      done.add(src);
+      regions.set(src, { image: src, ...(manual || stored.region || FULL_IMAGE), auto: !manual });
+    } else {
+      todo.push({ src, manual });
+    }
+  }
   const errors = [];
 
-  for (const src of todo) {
+  for (const { src, manual } of todo) {
     let vector;
+    let region;
     try {
-      vector = await dinov3.embed(await loadImage(src));
+      const image = await dinov3.decode(await loadImage(src));
+      const box = manual || autoBox(await locate(image));
+      region = sanitizeBox(box || FULL_IMAGE);
+      vector = await dinov3.embed(image, box);
     } catch (err) {
       if (err instanceof dinov3.ModelUnavailableError) {
         return writeStatus(product, {
@@ -179,12 +253,27 @@ async function indexProduct(productOrId, { force = false } = {}) {
     }
     await ProductEmbedding.updateOne(
       { product: product._id, image: src, model },
-      { $set: { dim: vector.length, vector: ProductEmbedding.pack(vector) } },
+      {
+        $set: {
+          dim: vector.length,
+          vector: ProductEmbedding.pack(vector),
+          region,
+          regionAuto: !manual,
+          detector: detectorId(),
+        },
+      },
       { upsert: true },
     );
+    regions.set(src, { image: src, ...region, auto: !manual });
     done.add(src);
     invalidate();
   }
+  // Keep regions in image order, and keep an admin's region even if its
+  // image failed to load this time.
+  const imageRegions = images
+    .map((src) => regions.get(src) || (product.imageRegions || []).find((r) => r.image === src))
+    .filter(Boolean)
+    .map((r) => ({ image: r.image, x: r.x, y: r.y, w: r.w, h: r.h, auto: r.auto !== false }));
 
   let status = VISUAL_INDEX_STATUS.INDEXED;
   if (errors.length) status = done.size ? VISUAL_INDEX_STATUS.PARTIAL : VISUAL_INDEX_STATUS.FAILED;
@@ -196,7 +285,7 @@ async function indexProduct(productOrId, { force = false } = {}) {
     vectors: done.size,
     error: errors.join('; ').slice(0, 500),
     indexedAt: new Date(),
-  });
+  }, imageRegions);
 }
 
 /**
@@ -232,7 +321,8 @@ const job = {
 
 /**
  * Products that still need a pass: never indexed, indexed while the model was
- * missing, or indexed by a different model before a swap.
+ * missing, indexed by a different model before a swap, or cropped by another
+ * region detector (automatic regions are then re-detected).
  */
 function needsIndexFilter(model) {
   return {
@@ -240,6 +330,7 @@ function needsIndexFilter(model) {
       { 'visualIndex.status': { $in: [VISUAL_INDEX_STATUS.PENDING, VISUAL_INDEX_STATUS.UNAVAILABLE] } },
       { 'visualIndex.status': { $exists: false } },
       { 'visualIndex.model': { $nin: [model, '', null] } },
+      { 'visualIndex.detector': { $ne: detectorId() } },
     ],
   };
 }
@@ -292,11 +383,34 @@ async function reindexAll({ force = false, onlyPending = false } = {}) {
 /* --------------------------------- search --------------------------------- */
 
 /**
- * Ranks products by visual similarity to `buffer`.
- * @returns {Promise<Array<{ productId: string, score: number }>>} best first
+ * Ranks products by visual similarity to the product in a shopper's photo.
+ *
+ * @param {Buffer} buffer the encoded photo
+ * @param {object} [options]
+ * @param {object|string} [options.box] region chosen by the shopper (0..1);
+ *   when absent the product area is detected automatically
+ * @param {boolean} [options.detect=true] false embeds the whole photo
+ * @returns {Promise<{ hits: Array<{ productId: string, score: number }>, region: object }>}
+ *   hits best first; region is the box that was searched, for the client to draw
  */
-async function search(buffer, options) {
-  return searchVector(await dinov3.embed(buffer), options);
+async function search(buffer, { box, detect = true, ...options } = {}) {
+  const image = await dinov3.decode(buffer);
+  const chosen = box ? sanitizeBox(box) : null;
+  let region;
+  if (chosen) {
+    region = { ...chosen, auto: false, found: true };
+  } else {
+    const found = detect ? await locate(image) : null;
+    region = found ? { ...found, auto: true } : { ...FULL_IMAGE, coverage: 1, found: false, auto: true };
+  }
+  const embedBox = region.auto ? autoBox(region) : chosen;
+  const hits = await searchVector(await dinov3.embed(image, embedBox), options);
+  return {
+    hits,
+    region: {
+      x: region.x, y: region.y, w: region.w, h: region.h, auto: region.auto, found: region.found,
+    },
+  };
 }
 
 /**
@@ -343,7 +457,11 @@ async function searchVector(vector, { limit = 24, minScore = env.visualSearch.mi
 
 async function status({ detailed = false } = {}) {
   const model = dinov3.status();
-  const base = { ...model, available: model.enabled && model.filesPresent && !model.error };
+  const base = {
+    ...model,
+    available: model.enabled && model.filesPresent && !model.error,
+    detector: detectorId(),
+  };
   // `model` lets on-device clients check their bundled network matches ours.
   if (!detailed) return { enabled: base.enabled, available: base.available, model: base.model };
 
@@ -381,6 +499,8 @@ async function warmUp() {
 }
 
 module.exports = {
+  detectForImage,
+  detectorId,
   indexProduct,
   indexProductSafely,
   removeProduct,

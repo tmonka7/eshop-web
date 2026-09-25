@@ -27,6 +27,24 @@ exports.reindex = asyncHandler(async (req, res) => {
   return ok(res, result.job, message, result.started ? 202 : 200);
 });
 
+/**
+ * Detects the product area of a catalogue image (body `{ image: url }`) so the
+ * admin can check or adjust the green box before saving.
+ */
+exports.detect = asyncHandler(async (req, res) => {
+  const image = req.body && req.body.image;
+  if (typeof image !== 'string' || !image) throw ApiError.badRequest('error.noImageUploaded');
+  try {
+    return ok(res, await visualSearch.detectForImage(image), 'success.visualRegionDetected');
+  } catch (err) {
+    if (err instanceof ModelUnavailableError) throw new ApiError(503, 'error.visualSearchUnavailable');
+    if (err.code === 'ENOENT' || /unsupported|remote image|HTTP \d+/i.test(err.message)) {
+      throw ApiError.badRequest('error.imageUnreadable');
+    }
+    throw err;
+  }
+});
+
 /** Re-extracts one product's features synchronously and returns its new status. */
 exports.reindexProduct = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);

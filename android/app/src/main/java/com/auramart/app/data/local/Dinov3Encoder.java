@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
 import com.auramart.app.util.Dinov3Preprocessor;
+import com.auramart.app.util.RegionDetector;
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -52,6 +53,7 @@ public final class Dinov3Encoder {
     private static final String ASSET_DIR = "model";
     private static final String[] MODEL_FILES = {"model.onnx", "model.onnx_data"};
     private static final String PREPROCESSOR = "preprocessor_config.json";
+    private static final String MODEL_CONFIG = "config.json";
 
     @Nullable
     private static volatile Dinov3Encoder instance;
@@ -62,12 +64,18 @@ public final class Dinov3Encoder {
     private final OrtSession session;
     private final Dinov3Preprocessor preprocessor;
     private final String inputName;
+    /** Pixels per patch side, and tokens before the patch grid (CLS + registers). */
+    private final int patchSize;
+    private final int prefixTokens;
 
-    private Dinov3Encoder(OrtEnvironment env, OrtSession session, Dinov3Preprocessor preprocessor) {
+    private Dinov3Encoder(OrtEnvironment env, OrtSession session, Dinov3Preprocessor preprocessor,
+                          ModelConfig modelConfig) {
         this.env = env;
         this.session = session;
         this.preprocessor = preprocessor;
         this.inputName = session.getInputNames().iterator().next();
+        this.patchSize = modelConfig.patch_size != null ? modelConfig.patch_size : 16;
+        this.prefixTokens = 1 + (modelConfig.num_register_tokens != null ? modelConfig.num_register_tokens : 4);
     }
 
     /** True when this build carries the model in its assets. */
@@ -111,7 +119,8 @@ public final class Dinov3Encoder {
         options.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT);
         OrtSession session = env.createSession(new File(dir, MODEL_FILES[0]).getAbsolutePath(), options);
 
-        Dinov3Encoder encoder = new Dinov3Encoder(env, session, readPreprocessor(context.getAssets()));
+        Dinov3Encoder encoder = new Dinov3Encoder(env, session, readPreprocessor(context.getAssets()),
+                readModelConfig(context.getAssets()));
         Log.i(TAG, MODEL_ID + " loaded in " + (System.currentTimeMillis() - started) + "ms");
         return encoder;
     }
@@ -160,6 +169,62 @@ public final class Dinov3Encoder {
         }
     }
 
+    /** Patch size and register-token count from the model's config.json. */
+    private static ModelConfig readModelConfig(AssetManager assets) {
+        try (Reader reader = new InputStreamReader(assets.open(ASSET_DIR + "/" + MODEL_CONFIG),
+                StandardCharsets.UTF_8)) {
+            ModelConfig cfg = new Gson().fromJson(reader, ModelConfig.class);
+            return cfg != null ? cfg : new ModelConfig();
+        } catch (IOException | RuntimeException e) {
+            return new ModelConfig();
+        }
+    }
+
+    /**
+     * Runs the model on the whole photo at an aspect-preserving size whose
+     * longest side is about `longSide` px, and returns the patch-token grid
+     * RegionDetector needs to find the product. DINOv3 uses rotary position
+     * embeddings, so any multiple of the patch size is a valid input.
+     */
+    @WorkerThread
+    @NonNull
+    public synchronized RegionDetector.Grid patchGrid(@NonNull Bitmap bitmap, int longSide) throws OrtException {
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
+        float scale = (float) longSide / Math.max(w, h);
+        int gw = Math.max(2, Math.round(w * scale / patchSize));
+        int gh = Math.max(2, Math.round(h * scale / patchSize));
+        int[] pixels = new int[w * h];
+        bitmap.getPixels(pixels, 0, w, 0, 0, w, h);
+        float[] input = preprocessor.resized(gw * patchSize, gh * patchSize).toTensor(pixels, w, h);
+
+        long[] shape = {1, 3, (long) gh * patchSize, (long) gw * patchSize};
+        float[] patches;
+        int dim;
+        try (OnnxTensor tensor = OnnxTensor.createTensor(env, FloatBuffer.wrap(input), shape);
+             OrtSession.Result result = session.run(
+                     Collections.singletonMap(inputName, tensor),
+                     Collections.singleton("last_hidden_state"))) {
+            float[][] tokens = ((float[][][]) result.get(0).getValue())[0];
+            if (tokens.length != prefixTokens + gw * gh) {
+                throw new IllegalStateException("Unexpected token count " + tokens.length + " for " + gw + "x" + gh);
+            }
+            dim = tokens[0].length;
+            patches = new float[gw * gh * dim];
+            for (int i = 0; i < gw * gh; i++) {
+                System.arraycopy(tokens[prefixTokens + i], 0, patches, i * dim, dim);
+            }
+        }
+
+        int cw = gw * RegionDetector.PIXELS_PER_PATCH;
+        int ch = gh * RegionDetector.PIXELS_PER_PATCH;
+        Bitmap small = Bitmap.createScaledBitmap(bitmap, cw, ch, true);
+        int[] argb = new int[cw * ch];
+        small.getPixels(argb, 0, cw, 0, 0, cw, ch);
+        if (small != bitmap) small.recycle();
+        return new RegionDetector.Grid(patches, gw, gh, dim, argb);
+    }
+
     /**
      * The L2-normalised global descriptor (`pooler_output`, the normed CLS
      * token) of an opaque bitmap. Runs are serialised: one inference already
@@ -188,6 +253,13 @@ public final class Dinov3Encoder {
             }
             return vector;
         }
+    }
+
+    /** Gson mapping for the fields of config.json used here. */
+    @SuppressWarnings("unused")
+    private static final class ModelConfig {
+        Integer patch_size;
+        Integer num_register_tokens;
     }
 
     /** Gson mapping for the fields of preprocessor_config.json used here. */

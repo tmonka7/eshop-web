@@ -173,6 +173,13 @@ export default {
     emptyTitle: '没有找到相似的商品',
     emptyMessage: '请尝试在纯色背景下拍摄单个商品的清晰照片。',
     unavailable: '图片搜索暂不可用。',
+    regionLabel: '搜索区域。方向键移动，Shift + 方向键调整大小。',
+    regionAuto: '正在搜索绿色框中的商品。',
+    regionAdjusted: '正在搜索您选择的区域。',
+    regionNone: '未识别出单个商品，将搜索整张照片。在照片上拖动即可框选商品。',
+    regionHint: '框的位置不对？拖动可移动，拖动四角可调整大小，也可以重新框选。',
+    resetRegion: '使用自动识别区域',
+    wholePhoto: '搜索整张照片',
   },
 
   sort: {
