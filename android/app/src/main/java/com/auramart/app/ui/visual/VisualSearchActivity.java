@@ -29,7 +29,6 @@ import com.auramart.app.data.model.Models.Cart;
 import com.auramart.app.data.model.Models.Product;
 import com.auramart.app.data.model.Models.SearchRegion;
 import com.auramart.app.data.model.Models.VectorSearchRequest;
-import com.auramart.app.data.model.Models.VisualSearchStatus;
 import com.auramart.app.data.model.Models.WishlistToggle;
 import com.auramart.app.data.repository.Repo;
 import com.auramart.app.databinding.ActivityVisualSearchBinding;
@@ -40,6 +39,7 @@ import com.auramart.app.util.RegionDetector;
 import com.auramart.app.util.RegionDetector.Box;
 import com.auramart.app.util.SearchPhotos;
 import com.auramart.app.util.Ui;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -88,41 +88,28 @@ public class VisualSearchActivity extends AppCompatActivity implements ProductAd
     private static final String CACHE_DIR = "visual-search";
     private static final String TAG = "VisualSearch";
 
-    /** Once the API reports image search available, it stays so for this process. */
-    private static boolean knownAvailable;
-
     /** @param source SOURCE_CAMERA or SOURCE_GALLERY to open that picker straight away. */
     public static Intent intent(@NonNull Context context, @Nullable String source) {
         return new Intent(context, VisualSearchActivity.class).putExtra(EXTRA_SOURCE, source);
     }
 
     /**
-     * Runs `onAvailable` if image search can work: the server has its model
-     * loaded, or this app can compute vectors in the server's vector space
-     * itself. Callers use it to reveal their camera buttons.
+     * The camera button next to a search box: asks whether to take a photo or
+     * pick one from the gallery, then opens this screen on that picker. The
+     * button is always shown; if image search is unavailable, this screen
+     * says so after the photo is chosen.
      */
-    public static void whenAvailable(@NonNull Context context, @NonNull Runnable onAvailable) {
-        boolean bundled = Dinov3Encoder.isBundled(context);
-        if (knownAvailable) {
-            onAvailable.run();
-            return;
-        }
-        Repo.call(Repo.api().visualSearchStatus(), new Repo.OnResult<VisualSearchStatus>() {
-            @Override
-            public void onSuccess(VisualSearchStatus data, String message) {
-                boolean onDevice = data != null && data.enabled && bundled
-                        && Dinov3Encoder.MODEL_ID.equals(data.model);
-                if (data != null && (data.available || onDevice)) {
-                    knownAvailable = true;
-                    onAvailable.run();
-                }
-            }
-
-            @Override
-            public void onError(String message) {
-                // Leave the buttons hidden; text search still works.
-            }
-        });
+    public static void chooseSource(@NonNull Context context) {
+        String[] sources = {
+                context.getString(R.string.visual_search_camera),
+                context.getString(R.string.visual_search_gallery),
+        };
+        new MaterialAlertDialogBuilder(context)
+                .setTitle(R.string.visual_search_title)
+                .setItems(sources, (dialog, which) -> context.startActivity(
+                        intent(context, which == 0 ? SOURCE_CAMERA : SOURCE_GALLERY)))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     private ActivityVisualSearchBinding b;

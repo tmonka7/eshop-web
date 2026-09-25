@@ -51,8 +51,7 @@
             android:background="@drawable/bg_qty_stepper"
             android:src="@drawable/ic_camera"
             app:tint="@color/ink_700"
-            android:contentDescription="@string/visual_search_open"
-            android:visibility="gone" />
+            android:contentDescription="@string/visual_search_open" />
 
         <ImageView
             android:id="@+id/sortButton"

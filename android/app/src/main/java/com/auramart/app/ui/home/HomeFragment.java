@@ -92,11 +92,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.Listener {
         b.bestSellerList.setAdapter(bestSellerAdapter);
 
         b.searchBar.setOnClickListener(v -> openList(null, null, true));
-        b.visualSearchIcon.setOnClickListener(v ->
-                startActivity(VisualSearchActivity.intent(requireContext(), null)));
-        VisualSearchActivity.whenAvailable(requireContext(), () -> {
-            if (b != null) b.visualSearchIcon.setVisibility(View.VISIBLE);
-        });
+        b.visualSearchIcon.setOnClickListener(v -> VisualSearchActivity.chooseSource(requireContext()));
         b.seeAllCategories.setOnClickListener(v ->
                 requireMainActivity().selectTab(MainActivity.TAB_CATEGORIES));
         b.seeAllFeatured.setOnClickListener(v -> openList(null, getString(R.string.title_featured), false, true));

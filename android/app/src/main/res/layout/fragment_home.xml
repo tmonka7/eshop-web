@@ -54,7 +54,7 @@
                         android:text="@string/search_hint"
                         style="@style/Text.Secondary" />
 
-                    <!-- shown once the API confirms image search is available -->
+                    <!-- search by image: asks for camera or gallery -->
                     <ImageView
                         android:id="@+id/visualSearchIcon"
                         android:layout_width="36dp"
@@ -64,8 +64,7 @@
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:src="@drawable/ic_camera"
                         app:tint="@color/ink_700"
-                        android:contentDescription="@string/visual_search_open"
-                        android:visibility="gone" />
+                        android:contentDescription="@string/visual_search_open" />
                 </LinearLayout>
 
                 <ImageView

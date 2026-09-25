@@ -105,11 +105,7 @@ public class ProductListActivity extends AppCompatActivity implements ProductAda
         });
 
         b.sortButton.setOnClickListener(v -> showSortDialog());
-        b.visualSearchButton.setOnClickListener(v ->
-                startActivity(VisualSearchActivity.intent(this, null)));
-        VisualSearchActivity.whenAvailable(this, () -> {
-            if (!isDestroyed()) b.visualSearchButton.setVisibility(View.VISIBLE);
-        });
+        b.visualSearchButton.setOnClickListener(v -> VisualSearchActivity.chooseSource(this));
         b.swipeRefresh.setOnRefreshListener(() -> reload(true));
 
         b.productList.addOnScrollListener(new androidx.recyclerview.widget.RecyclerView.OnScrollListener() {

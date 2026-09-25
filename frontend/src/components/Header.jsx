@@ -25,7 +25,6 @@ export default function Header() {
   const [term, setTerm] = useState(searchParams.get('search') || '');
   const [suggestions, setSuggestions] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [visualSearch, setVisualSearch] = useState(false);
   const menuRef = useRef(null);
   const photoRef = useRef(null);
 
@@ -37,14 +36,6 @@ export default function Header() {
       .categories({ parent: 'root' })
       .then((res) => setCategories(res.data.slice(0, 9)))
       .catch(() => setCategories([]));
-  }, []);
-
-  // The camera button only appears when the API has the DINOv3 model loaded.
-  useEffect(() => {
-    catalogApi
-      .visualSearchStatus()
-      .then((res) => setVisualSearch(Boolean(res.data?.available)))
-      .catch(() => setVisualSearch(false));
   }, []);
 
   // Debounced type-ahead against the product list endpoint.
@@ -120,7 +111,7 @@ export default function Header() {
           </Link>
 
           <form
-            className={`search ${visualSearch ? 'has-camera' : ''}`}
+            className="search has-camera"
             onSubmit={submitSearch}
             role="search"
           >
@@ -131,20 +122,18 @@ export default function Header() {
               placeholder={t('header.searchPlaceholder')}
               aria-label={t('header.searchAria')}
             />
-            {visualSearch ? (
-              <>
-                <button
-                  type="button"
-                  className="search-camera"
-                  onClick={() => photoRef.current?.click()}
-                  aria-label={t('header.searchByImage')}
-                  title={t('header.searchByImage')}
-                >
-                  <Camera size={17} />
-                </button>
-                <input ref={photoRef} type="file" accept="image/*" hidden onChange={searchByPhoto} />
-              </>
-            ) : null}
+            {/* Always shown; on phones the file picker offers the camera or the gallery.
+                If image search is unavailable, the results page says so. */}
+            <button
+              type="button"
+              className="search-camera"
+              onClick={() => photoRef.current?.click()}
+              aria-label={t('header.searchByImage')}
+              title={t('header.searchByImage')}
+            >
+              <Camera size={17} />
+            </button>
+            <input ref={photoRef} type="file" accept="image/*" hidden onChange={searchByPhoto} />
             <button type="submit" aria-label={t('common.search')}><Search size={16} /></button>
 
             {suggestions.length > 0 ? (
