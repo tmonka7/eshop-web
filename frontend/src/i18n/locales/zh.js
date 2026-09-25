@@ -177,6 +177,7 @@ export default {
     regionAuto: '正在搜索绿色框中的商品。',
     regionAdjusted: '正在搜索您选择的区域。',
     regionNone: '未识别出单个商品，将搜索整张照片。在照片上拖动即可框选商品。',
+    regionUnsupported: '服务器暂不支持自动识别商品，将搜索整张照片。在照片上拖动即可框选商品。',
     regionHint: '框的位置不对？拖动可移动，拖动四角可调整大小，也可以重新框选。',
     resetRegion: '使用自动识别区域',
     wholePhoto: '搜索整张照片',

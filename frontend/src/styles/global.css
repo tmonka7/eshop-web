@@ -355,6 +355,14 @@ ul { margin: 0; padding: 0; list-style: none; }
 .region-handle-sw { left: 0; top: 100%; cursor: nesw-resize; }
 .region-handle-w { left: 0; top: 50%; cursor: ew-resize; }
 .region-frame.is-disabled .region-handle { display: none; }
+.region-box.at-left :is(.region-handle-nw, .region-handle-w, .region-handle-sw) { margin-left: 0; }
+.region-box.at-right :is(.region-handle-ne, .region-handle-e, .region-handle-se) { margin-left: -14px; }
+.region-box.at-top :is(.region-handle-nw, .region-handle-n, .region-handle-ne) { margin-top: 0; }
+.region-box.at-bottom :is(.region-handle-sw, .region-handle-s, .region-handle-se) { margin-top: -14px; }
+@media (hover: none) {
+  .region-box.at-right :is(.region-handle-ne, .region-handle-e, .region-handle-se) { margin-left: -22px; }
+  .region-box.at-bottom :is(.region-handle-sw, .region-handle-s, .region-handle-se) { margin-top: -22px; }
+}
 @media (hover: none) { .region-handle { width: 22px; height: 22px; margin: -11px 0 0 -11px; } }
 @keyframes region-glow {
   0%, 100% { box-shadow: 0 0 0 9999px rgba(11, 31, 20, 0.38), 0 0 8px 1px rgba(34, 197, 94, 0.7), inset 0 0 6px rgba(34, 197, 94, 0.45); }

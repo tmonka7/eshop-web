@@ -21,6 +21,31 @@ function dragBox(start, mode, dx, dy) {
   return { x, y, w: x2 - x, h: y2 - y };
 }
 
+/** How close (px) to an edge of the box a press still grabs that edge. */
+const EDGE_SLOP = 12;
+/** Fraction under which a box edge counts as lying on the photo's edge. */
+const AT_EDGE = 0.01;
+
+/**
+ * The resize mode ('n', 'se', ...) for a press at (px, py) near an edge or
+ * corner of `box` (all in pixels of the frame), or null if it is not near one.
+ * A box that fills the photo has its handles on the frame's clipped, rounded
+ * edge, so this keeps it resizable from anywhere along its sides.
+ */
+function edgeAt(box, px, py, width, height) {
+  const l = box.x * width;
+  const t = box.y * height;
+  const r = (box.x + box.w) * width;
+  const b = (box.y + box.h) * height;
+  if (px < l - EDGE_SLOP || px > r + EDGE_SLOP || py < t - EDGE_SLOP || py > b + EDGE_SLOP) return null;
+  const v = (Math.abs(py - t) <= EDGE_SLOP ? 'n' : '') + (Math.abs(py - b) <= EDGE_SLOP ? 's' : '');
+  const h = (Math.abs(px - l) <= EDGE_SLOP ? 'w' : '') + (Math.abs(px - r) <= EDGE_SLOP ? 'e' : '');
+  // A tiny box can be within reach of both opposite edges: take the nearer.
+  const mode = (v.length > 1 ? (Math.abs(py - t) < Math.abs(py - b) ? 'n' : 's') : v)
+    + (h.length > 1 ? (Math.abs(px - l) < Math.abs(px - r) ? 'w' : 'e') : h);
+  return mode || null;
+}
+
 const sameBox = (a, b) => a && b && ['x', 'y', 'w', 'h'].every((k) => Math.abs(a[k] - b[k]) < 1e-4);
 
 /**
@@ -56,6 +81,11 @@ export default function RegionSelector({ src, alt, region, onChange, disabled, l
     e.stopPropagation();
     const rect = frameRef.current.getBoundingClientRect();
     let from = box || { x: 0, y: 0, w: 1, h: 1 };
+    if (mode === 'draw' && box) {
+      // A press on the photo just outside or inside an edge resizes rather than redraws.
+      const near = edgeAt(box, e.clientX - rect.left, e.clientY - rect.top, rect.width, rect.height);
+      if (near) mode = near; // eslint-disable-line no-param-reassign
+    }
     if (mode === 'draw') {
       // A fresh box anchored where the pointer went down, grown from its SE corner.
       const px = clamp((e.clientX - rect.left) / rect.width, 0, 1 - MIN);
@@ -114,7 +144,15 @@ export default function RegionSelector({ src, alt, region, onChange, disabled, l
       <img src={src} alt={alt} draggable={false} />
       {box ? (
         <div
-          className={`region-box ${drag.current ? 'is-dragging' : ''}`}
+          className={[
+            'region-box',
+            drag.current ? 'is-dragging' : '',
+            // Handles on the photo's edge are pulled inside so they stay visible and grabbable.
+            box.x < AT_EDGE ? 'at-left' : '',
+            box.y < AT_EDGE ? 'at-top' : '',
+            box.x + box.w > 1 - AT_EDGE ? 'at-right' : '',
+            box.y + box.h > 1 - AT_EDGE ? 'at-bottom' : '',
+          ].filter(Boolean).join(' ')}
           style={style}
           role="group"
           tabIndex={disabled ? -1 : 0}

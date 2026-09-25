@@ -8,6 +8,34 @@ import { Camera, Search, Upload } from '../components/Icons';
 import { useI18n } from '../i18n';
 
 const WHOLE_PHOTO = { x: 0, y: 0, w: 1, h: 1 };
+/** Longest side of an area cropped in the browser; the model sees 224 px. */
+const CROP_MAX_SIDE = 1024;
+
+/**
+ * The part of the photo inside `box` (fractions of the upright image) as a
+ * JPEG file. Used when the API does not take a `box` itself (an API from
+ * before product-area detection), so a chosen area is still what gets searched.
+ */
+async function cropPhoto(url, box) {
+  const img = new Image();
+  img.src = url;
+  await img.decode(); // natural size and drawing follow the EXIF orientation
+  const sx = box.x * img.naturalWidth;
+  const sy = box.y * img.naturalHeight;
+  const sw = Math.max(1, box.w * img.naturalWidth);
+  const sh = Math.max(1, box.h * img.naturalHeight);
+  const scale = Math.min(1, CROP_MAX_SIDE / Math.max(sw, sh));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(sw * scale));
+  canvas.height = Math.max(1, Math.round(sh * scale));
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fff'; // JPEG has no alpha: transparent areas become white, as on the server
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.92));
+  if (!blob) throw new Error('crop failed');
+  return new File([blob], 'area.jpg', { type: 'image/jpeg' });
+}
 
 /**
  * Search by photo. The header's camera button hands the picked file over in
@@ -34,6 +62,9 @@ export default function VisualSearch() {
   // The area searched last (from the API), and the one the shopper chose, if any.
   const [region, setRegion] = useState(null);
   const [userBox, setUserBox] = useState(null);
+  // False once the API has answered without a `region`: it neither detects the
+  // product nor takes a box, so chosen areas are cropped here instead.
+  const [apiRegions, setApiRegions] = useState(true);
 
   // A photo picked with the header's camera button arrives in history state.
   // This runs on every such navigation, not only on mount: picking a second
@@ -60,16 +91,28 @@ export default function VisualSearch() {
   // Re-runs on a language change so product names come back translated, and
   // whenever the shopper settles on a different search area.
   useEffect(() => {
-    if (!file) return undefined;
+    if (!file || !preview) return undefined;
     let alive = true;
     setLoading(true);
     setError(null);
-    catalogApi
-      .visualSearch(file, { limit: 24 }, userBox)
-      .then((res) => {
+    const manual = userBox ? { ...userBox, auto: false, found: true } : null;
+    const searchCrop = async () => {
+      const area = await cropPhoto(preview, userBox);
+      return catalogApi.visualSearch(area, { limit: 24, detect: false });
+    };
+    (async () => {
+      if (userBox && !apiRegions) return { res: await searchCrop(), shown: manual };
+      const res = await catalogApi.visualSearch(file, { limit: 24 }, userBox);
+      if (res.region) return { res, shown: res.region, regions: true };
+      // No region: the API ignored `box` too, so search the chosen area again as a crop.
+      if (userBox) return { res: await searchCrop(), shown: manual, regions: false };
+      return { res, shown: { ...WHOLE_PHOTO, auto: true, found: false, unsupported: true }, regions: false };
+    })()
+      .then(({ res, shown, regions }) => {
         if (!alive) return;
+        if (regions !== undefined) setApiRegions(regions);
         setResults(res.data);
-        setRegion(res.region || null);
+        setRegion(shown);
       })
       .catch((err) => {
         if (!alive) return;
@@ -80,7 +123,9 @@ export default function VisualSearch() {
     return () => {
       alive = false;
     };
-  }, [file, locale, userBox]);
+    // apiRegions is read, not watched: learning it must not repeat the search.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [file, preview, locale, userBox]);
 
   const accept = useCallback((picked) => {
     if (picked && picked.type.startsWith('image/')) setFile(picked);
@@ -143,21 +188,25 @@ export default function VisualSearch() {
             ) : null}
             {region ? (
               <p className={`region-note ${region.auto && !region.found ? 'is-warn' : ''}`}>
-                {region.auto
-                  ? t(region.found ? 'visualSearch.regionAuto' : 'visualSearch.regionNone')
-                  : t('visualSearch.regionAdjusted')}
+                {!region.auto
+                  ? t('visualSearch.regionAdjusted')
+                  : t(region.unsupported
+                    ? 'visualSearch.regionUnsupported'
+                    : region.found ? 'visualSearch.regionAuto' : 'visualSearch.regionNone')}
               </p>
             ) : null}
             {region ? (
               <div className="region-actions">
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm"
-                  onClick={() => setUserBox(null)}
-                  disabled={!userBox || loading}
-                >
-                  {t('visualSearch.resetRegion')}
-                </button>
+                {apiRegions ? (
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => setUserBox(null)}
+                    disabled={!userBox || loading}
+                  >
+                    {t('visualSearch.resetRegion')}
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   className="btn btn-ghost btn-sm"

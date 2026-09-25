@@ -178,6 +178,7 @@ export default {
     regionAuto: 'Searching the product in the green box.',
     regionAdjusted: 'Searching the area you selected.',
     regionNone: 'No single product stood out, so the whole photo is searched. Drag on the photo to draw a box around the product.',
+    regionUnsupported: 'Automatic product detection is not available on the server, so the whole photo is searched. Drag on the photo to draw a box around the product.',
     regionHint: 'Box in the wrong place? Drag it to move it, pull a corner to resize it, or draw a new one.',
     resetRegion: 'Use detected area',
     wholePhoto: 'Search whole photo',
