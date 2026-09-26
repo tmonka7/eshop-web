@@ -12,6 +12,7 @@
     "dev": "nodemon src/server.js",
     "seed": "node src/seed/seed.js",
     "model:fetch": "node src/scripts/fetch-model.js",
+    "model:sam2": "node src/scripts/fetch-model.js --sam2",
     "visual:reindex": "node src/scripts/reindex-visual.js",
     "lint": "eslint src --ext .js",
     "test": "node --test test/"

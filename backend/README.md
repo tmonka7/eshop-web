@@ -54,6 +54,8 @@ Five more customers exist (`sarah@`, `mike@`, `emily@`, `david@`, `anna@` `examp
 | `VISUAL_SEARCH_FETCH_REMOTE`  | `false`                             | also embed images hosted on other sites  |
 | `VISUAL_SEARCH_DETECT`    | `true`                                  | find the product area (green box) first  |
 | `VISUAL_SEARCH_DETECT_SIDE` | `448`                                 | longest side used for area detection     |
+| `VISUAL_SEARCH_SAM2`      | `true`                                  | fit the box to the product with SAM2     |
+| `VISUAL_SEARCH_SAM2_DIR`  | `ml/sam2.1-hiera-tiny`                  | SAM2 model folder                        |
 
 ## Image search (DINOv3)
 
@@ -65,16 +67,29 @@ the CPU from `ml/`, with no network access, so it works on an air-gapped host. S
 ### Product area (green box)
 
 Before embedding, the API finds the product inside the photo and embeds only that area, for
-shoppers' photos and catalogue images alike. It needs no extra model: `src/services/regionDetect.js`
-scores DINOv3's own patch tokens by how unlike the image border they are, sharpened by colour
-distance from the border, and takes the bounding box of the strongest connected blob. The clients
+shoppers' photos and catalogue images alike. It works in two steps:
+
+1. **Which object** - `src/services/regionDetect.js` scores DINOv3's own patch tokens by how
+   unlike the image border they are, sharpened by colour distance from the border, and picks the
+   strongest connected blob: a rough box (16 px patches) and its strongest point.
+2. **Its outline** - `src/services/sam2.service.js` prompts SAM2.1 (Hiera-tiny) with that box
+   and point. SAM2 segments the object, and the box around its mask becomes the product area.
+   On 60 test composites this raised the mean overlap with the true product box from 0.68 to 0.81
+   (plain backgrounds 0.82 -> 0.94), at about 2 s extra per photo on a CPU. Without the SAM2 files,
+   or with `VISUAL_SEARCH_SAM2=false`, the rough box is used; nothing else changes.
+
+The search response's `region.method` says which one produced the box (`sam2`, `dinov3` or
+`manual`). Switching SAM2 on or off changes the detector id, so the catalogue is re-detected once
+at the next start. The clients
 draw it as a glowing green box that the user can move or resize; the search then runs on that box
 (`box` field). Admins can adjust the box per catalogue image (`imageRegions`, saved as manual and
-kept on re-indexing). The Android app runs the same algorithm on the phone
-(`util/RegionDetector.java`).
+kept on re-indexing). The Android app runs step 1 on the phone (`util/RegionDetector.java`);
+when the API reports a `segmenter` in `GET /products/visual-search/status`, the app lets the
+API find the area instead, so its boxes match the storefront's.
 
 ```bash
 npm run model:fetch       # once, on a connected machine: downloads + verifies the model
+npm run model:sam2        # also SAM2.1 for the product outline (74 MB)
 npm run visual:reindex    # (re)extract missing vectors; add -- --force to redo all
 npm run model:android     # (repo root) bundle the same model into the Android app
 ```

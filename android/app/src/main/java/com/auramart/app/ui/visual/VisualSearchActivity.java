@@ -29,6 +29,7 @@ import com.auramart.app.data.model.Models.Cart;
 import com.auramart.app.data.model.Models.Product;
 import com.auramart.app.data.model.Models.SearchRegion;
 import com.auramart.app.data.model.Models.VectorSearchRequest;
+import com.auramart.app.data.model.Models.VisualSearchStatus;
 import com.auramart.app.data.model.Models.WishlistToggle;
 import com.auramart.app.data.repository.Repo;
 import com.auramart.app.databinding.ActivityVisualSearchBinding;
@@ -73,6 +74,11 @@ import retrofit2.Call;
  * it. If the box is wrong the user moves or resizes it (RegionSelectorView)
  * and the search runs again on the new area. On the upload path the server
  * detects the area instead and returns it, or searches the box the user drew.
+ *
+ * When the server traces products with SAM2 (status `segmenter`), a new photo
+ * always takes the upload path, so the box fits the product's outline and
+ * matches the storefront's; a box the user then adjusts is searched on the
+ * phone again.
  */
 public class VisualSearchActivity extends AppCompatActivity implements ProductAdapter.Listener {
 
@@ -87,6 +93,14 @@ public class VisualSearchActivity extends AppCompatActivity implements ProductAd
     private static final int RESULT_LIMIT = 24;
     private static final String CACHE_DIR = "visual-search";
     private static final String TAG = "VisualSearch";
+
+    /**
+     * Whether the server fits the green box with SAM2 (null until known, once
+     * per process). Its box is tighter than the phone's patch-grid detection,
+     * so new photos are then uploaded and the server finds the product.
+     */
+    @Nullable
+    private static volatile Boolean serverSegments;
 
     /** @param source SOURCE_CAMERA or SOURCE_GALLERY to open that picker straight away. */
     public static Intent intent(@NonNull Context context, @Nullable String source) {
@@ -170,6 +184,7 @@ public class VisualSearchActivity extends AppCompatActivity implements ProductAd
         showMessage(R.string.visual_search_intro_title, getString(R.string.visual_search_intro));
         // Load the bundled model while the shopper is still picking a photo.
         worker.execute(() -> Dinov3Encoder.get(getApplicationContext()));
+        checkServerSegmenter();
 
         if (savedInstanceState != null) {
             float[] saved = savedInstanceState.getFloatArray(STATE_MANUAL_REGION);
@@ -228,6 +243,22 @@ public class VisualSearchActivity extends AppCompatActivity implements ProductAd
                 .build());
     }
 
+    /** Asks once per process whether the server traces products with SAM2. */
+    private static void checkServerSegmenter() {
+        if (serverSegments != null) return;
+        Repo.call(Repo.api().visualSearchStatus(), new Repo.OnResult<VisualSearchStatus>() {
+            @Override
+            public void onSuccess(VisualSearchStatus data, String message) {
+                serverSegments = data != null && data.available && data.segmenter != null;
+            }
+
+            @Override
+            public void onError(String message) {
+                // Unknown: keep detecting on the phone, and ask again next time.
+            }
+        });
+    }
+
     /** An image shared from another app ("Share > ShopWorld"). */
     @Nullable
     private static Uri sharedImage(Intent intent) {
@@ -284,7 +315,10 @@ public class VisualSearchActivity extends AppCompatActivity implements ProductAd
                     photo = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length);
                     if (photo == null) throw new IOException("Unreadable " + queryFile());
                 }
-                Dinov3Encoder encoder = Dinov3Encoder.get(this);
+                // With SAM2 on the server, a photo without a user box goes up
+                // as it is: the server finds the product and returns the box.
+                boolean serverFinds = manual == null && Boolean.TRUE.equals(serverSegments);
+                Dinov3Encoder encoder = serverFinds ? null : Dinov3Encoder.get(this);
                 if (encoder != null) {
                     found = detectOnDevice(encoder, photo);
                     vector = embedOnDevice(encoder, photo, manual != null ? manual : usable(found));

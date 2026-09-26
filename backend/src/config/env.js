@@ -49,6 +49,14 @@ const env = {
     detect: bool(process.env.VISUAL_SEARCH_DETECT, true),
     // Longest side, in pixels, the photo is scaled to for detection.
     detectSide: int(process.env.VISUAL_SEARCH_DETECT_SIDE, 448),
+    // SAM2 traces the detected product's outline so the box follows its real
+    // edges. Used when its files are present; see sam2.service.js.
+    sam2: {
+      enabled: bool(process.env.VISUAL_SEARCH_SAM2, true),
+      dir: path.resolve(BACKEND_ROOT, process.env.VISUAL_SEARCH_SAM2_DIR || 'ml/sam2.1-hiera-tiny'),
+      encoderFile: process.env.VISUAL_SEARCH_SAM2_ENCODER || 'vision_encoder_quantized.onnx',
+      decoderFile: process.env.VISUAL_SEARCH_SAM2_DECODER || 'prompt_encoder_mask_decoder.onnx',
+    },
   },
   seed: {
     adminEmail: process.env.SEED_ADMIN_EMAIL || 'admin@auramart.com',

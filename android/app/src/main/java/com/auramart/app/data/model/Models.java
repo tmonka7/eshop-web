@@ -254,6 +254,11 @@ public final class Models {
         public boolean available;
         /** Network the server indexed with, e.g. "dinov3-vits16/model.onnx". */
         public String model;
+        /**
+         * Set when the server traces the product's outline with SAM2 (e.g.
+         * "sam2.1-hiera-tiny/vision_encoder_quantized.onnx"); null otherwise.
+         */
+        public String segmenter;
     }
 
     /** POST products/visual-search/vector: a feature vector computed on the phone. */

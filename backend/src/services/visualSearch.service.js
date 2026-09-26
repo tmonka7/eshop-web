@@ -25,8 +25,9 @@ const Product = require('../models/Product');
 const ProductEmbedding = require('../models/ProductEmbedding');
 const { UPLOAD_ROOT } = require('../middleware/upload');
 const dinov3 = require('./dinov3.service');
+const sam2 = require('./sam2.service');
 const {
-  detectRegion, sanitizeBox, sameBox, DETECTOR_ID, PIXELS_PER_PATCH,
+  detectRegion, sanitizeBox, sameBox, DETECTOR_ID, PIXELS_PER_PATCH, WHOLE_IMAGE_COVERAGE,
 } = require('./regionDetect');
 
 const REMOTE_TIMEOUT_MS = 10000;
@@ -66,18 +67,41 @@ async function loadImage(src) {
 
 const FULL_IMAGE = Object.freeze({ x: 0, y: 0, w: 1, h: 1 });
 
-/** Identifies how automatic regions are made right now ('none' when detection is off). */
+/**
+ * Identifies how automatic regions are made right now: 'none' when detection
+ * is off, the DINOv3 detector, or DINOv3 + SAM2. Stored with every product,
+ * so switching SAM2 on or off re-detects the catalogue once.
+ */
 function detectorId() {
-  return env.visualSearch.detect ? DETECTOR_ID : 'none';
+  if (!env.visualSearch.detect) return 'none';
+  return sam2.usable() ? DETECTOR_ID + '+' + sam2.modelId() : DETECTOR_ID;
 }
 
 /**
- * Finds the product in a decoded image.
- * @returns {Promise<{x,y,w,h,coverage,found}|null>} null when detection is off
+ * Finds the product in a decoded image: DINOv3 decides which object is the
+ * product, then SAM2 (when available) traces it and the box follows its
+ * outline. On any SAM2 problem the DINOv3 box is used as it is.
+ * @returns {Promise<{x,y,w,h,coverage,found,method}|null>} null when detection is off
  */
 async function locate(image) {
   if (!env.visualSearch.detect) return null;
-  return detectRegion(await dinov3.patchGrid(image, env.visualSearch.detectSide, PIXELS_PER_PATCH));
+  const rough = detectRegion(await dinov3.patchGrid(image, env.visualSearch.detectSide, PIXELS_PER_PATCH));
+  const { peak, ...region } = rough;
+  // Nothing stood out: the whole photo is searched, there is nothing to trace.
+  if (!rough.found || !sam2.usable()) return { ...region, method: 'dinov3' };
+  try {
+    const traced = await sam2.segment(image, { box: rough, point: peak });
+    if (traced) {
+      const coverage = Math.round(traced.w * traced.h * 10000) / 10000;
+      return {
+        x: traced.x, y: traced.y, w: traced.w, h: traced.h,
+        coverage, found: coverage < WHOLE_IMAGE_COVERAGE, method: 'sam2',
+      };
+    }
+  } catch (_err) {
+    // Logged once by sam2.service; usable() is false from now on.
+  }
+  return { ...region, method: 'dinov3' };
 }
 
 /** The box to embed for an automatic region: the detection, or the whole image if nothing stood out. */
@@ -408,7 +432,14 @@ async function search(buffer, { box, detect = true, ...options } = {}) {
   return {
     hits,
     region: {
-      x: region.x, y: region.y, w: region.w, h: region.h, auto: region.auto, found: region.found,
+      x: region.x,
+      y: region.y,
+      w: region.w,
+      h: region.h,
+      auto: region.auto,
+      found: region.found,
+      // 'sam2' (traced outline), 'dinov3' (patch box) or 'manual'
+      method: region.auto ? region.method || 'dinov3' : 'manual',
     },
   };
 }
@@ -461,9 +492,16 @@ async function status({ detailed = false } = {}) {
     ...model,
     available: model.enabled && model.filesPresent && !model.error,
     detector: detectorId(),
+    segmenter: sam2.usable() ? sam2.modelId() : null,
   };
-  // `model` lets on-device clients check their bundled network matches ours.
-  if (!detailed) return { enabled: base.enabled, available: base.available, model: base.model };
+  // `model` lets on-device clients check their bundled network matches ours;
+  // `segmenter` tells the Android app the server's boxes are SAM2-traced, so
+  // it lets the server find the product instead of doing it on the phone.
+  if (!detailed) {
+    return {
+      enabled: base.enabled, available: base.available, model: base.model, segmenter: base.segmenter,
+    };
+  }
 
   const [vectors, products, byStatus] = await Promise.all([
     ProductEmbedding.countDocuments({ model: model.model }),
@@ -472,6 +510,7 @@ async function status({ detailed = false } = {}) {
   ]);
   return {
     ...base,
+    sam2: sam2.status(),
     vectors,
     products,
     byStatus: Object.fromEntries(byStatus.map((s) => [s._id || VISUAL_INDEX_STATUS.PENDING, s.count])),
@@ -486,6 +525,9 @@ async function status({ detailed = false } = {}) {
  */
 async function warmUp() {
   if (!env.visualSearch.enabled) return;
+  // Settle whether SAM2 works before choosing what to re-index: the detector
+  // id (and so which products count as stale) depends on it.
+  if (env.visualSearch.detect && sam2.usable()) await sam2.load().catch(() => {});
   try {
     if (env.visualSearch.indexOnBoot) {
       const { started, job: j } = await reindexAll({ onlyPending: true });
@@ -500,6 +542,7 @@ async function warmUp() {
 
 module.exports = {
   detectForImage,
+  locate,
   detectorId,
   indexProduct,
   indexProductSafely,

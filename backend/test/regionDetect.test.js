@@ -2,7 +2,9 @@
 /* Unit tests for the product-area detector (no model needed): `npm test`. */
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { detectRegion, sanitizeBox, sameBox, PIXELS_PER_PATCH } = require('../src/services/regionDetect');
+const {
+  detectRegion, boxFromMask, sanitizeBox, sameBox, PIXELS_PER_PATCH,
+} = require('../src/services/regionDetect');
 
 /**
  * A gw x gh grid whose patches inside `box` (in patch units) carry one feature
@@ -46,6 +48,12 @@ test('finds a product on a plain background', () => {
   assert.deepEqual([region.x, region.y, region.w, region.h], [0.25, 0.2667, 0.3, 0.3333]);
 });
 
+test('the peak point, which prompts SAM2, lies on the product', () => {
+  const { x, y, w, h, peak } = detectRegion(syntheticGrid(20, 15, { x: 5, y: 4, w: 6, h: 5 }));
+  assert.ok(peak.x > x && peak.x < x + w, 'peak.x inside the box');
+  assert.ok(peak.y > y && peak.y < y + h, 'peak.y inside the box');
+});
+
 test('uses the feature cue when the colours are identical', () => {
   const region = detectRegion(syntheticGrid(16, 16, { x: 9, y: 2, w: 4, h: 9 }, { sameColour: true }));
   assert.deepEqual([region.x, region.y, region.w, region.h], [0.5625, 0.125, 0.25, 0.5625]);
@@ -83,4 +91,30 @@ test('sameBox tolerates rounding only', () => {
   assert.equal(sameBox({ x: 0.1, y: 0.2, w: 0.3, h: 0.4 }, { x: 0.1004, y: 0.2, w: 0.3, h: 0.4 }), true);
   assert.equal(sameBox({ x: 0.1, y: 0.2, w: 0.3, h: 0.4 }, { x: 0.12, y: 0.2, w: 0.3, h: 0.4 }), false);
   assert.equal(sameBox(null, { x: 0, y: 0, w: 1, h: 1 }), false);
+});
+
+/** A width x height mask (logits: +1 object, -1 background) with the given filled rectangles. */
+function maskOf(width, height, rects) {
+  const m = new Float32Array(width * height).fill(-1);
+  for (const [x0, y0, w, h] of rects) {
+    for (let y = y0; y < y0 + h; y += 1) for (let x = x0; x < x0 + w; x += 1) m[y * width + x] = 1;
+  }
+  return m;
+}
+
+test('boxFromMask bounds the object and ignores small specks', () => {
+  // Object 40x20 at (10, 30); a 2x2 speck far away is < 10% of it.
+  const box = boxFromMask(maskOf(100, 100, [[10, 30, 40, 20], [90, 90, 2, 2]]), 100, 100);
+  assert.deepEqual([box.x, box.y, box.w, box.h], [0.1, 0.3, 0.4, 0.2]);
+  assert.equal(box.area, 0.08);
+});
+
+test('boxFromMask keeps comparable separate parts', () => {
+  // A cup body and its handle seen as two pieces: both belong in the box.
+  const box = boxFromMask(maskOf(100, 100, [[10, 10, 30, 30], [50, 20, 10, 10]]), 100, 100);
+  assert.deepEqual([box.x, box.y, box.w, box.h], [0.1, 0.1, 0.5, 0.3]);
+});
+
+test('boxFromMask returns null for an empty mask', () => {
+  assert.equal(boxFromMask(maskOf(8, 8, []), 8, 8), null);
 });

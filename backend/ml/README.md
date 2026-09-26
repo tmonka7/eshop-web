@@ -49,6 +49,28 @@ The app must use exactly the server's network (`dinov3-vits16/model.onnx`, fp32)
 switches models, it answers the app's vector requests with HTTP 409, and the app falls back to
 uploading the photo.
 
+## SAM2 for the product outline
+
+The green box around the product is refined by [SAM2.1](https://github.com/facebookresearch/sam2)
+(Hiera-tiny, Apache-2.0). DINOv3 decides which object is the product, and SAM2 traces its outline.
+
+```
+ml/sam2.1-hiera-tiny/
+├── vision_encoder_quantized.onnx(+_data)        int8 image encoder (52 MB)
+├── prompt_encoder_mask_decoder.onnx(+_data)     fp32 prompt/mask decoder (21 MB)
+├── preprocessor_config.json, config.json
+└── LICENSE                                      Apache-2.0
+```
+
+Source: [`onnx-community/sam2.1-hiera-tiny-ONNX`](https://huggingface.co/onnx-community/sam2.1-hiera-tiny-ONNX).
+Fetch it with `npm run model:sam2`, which checks each file's SHA-256. The int8 encoder boxes the
+product as accurately as the fp32 one (mean IoU 0.805 vs 0.800 on the test composites) at a
+third of the size. Each file stays under GitHub's 100 MB limit, so the folder can be committed
+like the DINOv3 one. If the folder is missing, the API uses the DINOv3 box alone.
+
+The Android app does not bundle SAM2 (74 MB, several seconds per photo on a phone). It uses the
+server's SAM2 box when the server has one.
+
 ## Other variants
 
 | Command                                          | Size   | Notes                                    |

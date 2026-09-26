@@ -296,5 +296,5 @@ function status() {
 }
 
 module.exports = {
-  load, decode, embed, patchGrid, modelId, status, ModelUnavailableError,
+  load, decode, resizeRaw, embed, patchGrid, modelId, status, ModelUnavailableError,
 };

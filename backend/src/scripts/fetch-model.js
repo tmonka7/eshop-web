@@ -9,6 +9,7 @@
  *   npm run model:fetch -- --variant quantized           # int8, ~4x smaller
  *   npm run model:fetch -- --model vitb16                # ViT-B/16, 768-d, slower
  *   npm run model:fetch -- --android                     # also copy into the Android app
+ *   npm run model:fetch -- --sam2                        # also SAM2.1 for the product outline
  *
  * Files already present with the right checksum are not downloaded again, so
  * `--android` also works offline once backend/ml is populated. The Android
@@ -65,6 +66,25 @@ const MODELS = {
   },
 };
 
+/**
+ * SAM2.1 Hiera-tiny, which traces the detected product's outline (sam2.service.js).
+ * The int8 image encoder (52 MB) is as accurate as fp32 for this task and fits
+ * in a git repository; the prompt decoder stays fp32 (21 MB).
+ */
+const SAM2 = {
+  repo: 'onnx-community/sam2.1-hiera-tiny-ONNX',
+  dir: 'sam2.1-hiera-tiny',
+  weights: {
+    'vision_encoder_quantized.onnx': '8800fdd04b9045cb6060ba8962b83c78ce9bb0976da8f030afa073467a888524',
+    'vision_encoder_quantized.onnx_data': 'ea1f677596dc82cef0dc317d78135d892f4b26e20a4439f899aa58d84965b324',
+    'prompt_encoder_mask_decoder.onnx': '874414704c5d686db7d206a35f6e15d26563d50c8c4468fccc6739bd7e491dcf',
+    'prompt_encoder_mask_decoder.onnx_data': 'e9874d900dd4134ed60eab1e97910327c2419e0b2954485d8fd6e7f1a1470f47',
+  },
+  configFiles: ['config.json', 'preprocessor_config.json'],
+  // The ONNX repo has no licence file; SAM2 is Apache-2.0 upstream.
+  license: 'https://raw.githubusercontent.com/facebookresearch/sam2/main/LICENSE',
+};
+
 // Small text files, stored without LFS hashes.
 const CONFIG_FILES = ['config.json', 'preprocessor_config.json', 'LICENSE.md'];
 
@@ -91,6 +111,41 @@ async function download(url, target) {
   fs.renameSync(tmp, target);
 }
 
+/** Downloads each weight file unless already present with the right checksum. */
+async function fetchWeights(base, dest, weights) {
+  for (const [file, expected] of Object.entries(weights)) {
+    const target = path.join(dest, file);
+    if (fs.existsSync(target) && (await sha256(target)) === expected) {
+      console.log('[model] ' + file + ' already present, checksum ok');
+      continue;
+    }
+    console.log('[model] downloading onnx/' + file + ' ...');
+    await download(base + 'onnx/' + file, target);
+    const actual = await sha256(target);
+    if (actual !== expected) {
+      fs.unlinkSync(target);
+      throw new Error(file + ' checksum mismatch: expected ' + expected + ', got ' + actual);
+    }
+    console.log('[model] ' + file + ' checksum ok');
+  }
+}
+
+async function fetchSam2() {
+  const dest = path.resolve(__dirname, '../../ml', SAM2.dir);
+  fs.mkdirSync(dest, { recursive: true });
+  const base = ENDPOINT + '/' + SAM2.repo + '/resolve/main/';
+  for (const file of SAM2.configFiles) {
+    if (fs.existsSync(path.join(dest, file))) continue;
+    console.log('[model] ' + SAM2.dir + '/' + file);
+    await download(base + file, path.join(dest, file));
+  }
+  if (!fs.existsSync(path.join(dest, 'LICENSE'))) await download(SAM2.license, path.join(dest, 'LICENSE'));
+  await fetchWeights(base, dest, SAM2.weights);
+  console.log('');
+  console.log('  SAM2 ready in ' + dest + ' (Apache-2.0, see LICENSE)');
+  console.log('');
+}
+
 async function run() {
   const modelKey = arg('model', 'vits16');
   const variantKey = arg('variant', 'fp32');
@@ -109,21 +164,7 @@ async function run() {
     await download(base + file, path.join(dest, file));
   }
 
-  for (const [file, expected] of Object.entries(weights)) {
-    const target = path.join(dest, file);
-    if (fs.existsSync(target) && (await sha256(target)) === expected) {
-      console.log('[model] ' + file + ' already present, checksum ok');
-      continue;
-    }
-    console.log('[model] downloading onnx/' + file + ' ...');
-    await download(base + 'onnx/' + file, target);
-    const actual = await sha256(target);
-    if (actual !== expected) {
-      fs.unlinkSync(target);
-      throw new Error(file + ' checksum mismatch: expected ' + expected + ', got ' + actual);
-    }
-    console.log('[model] ' + file + ' checksum ok');
-  }
+  await fetchWeights(base, dest, weights);
 
   const modelFile = Object.keys(weights).find((f) => f.endsWith('.onnx'));
   console.log('');
@@ -134,6 +175,7 @@ async function run() {
   console.log('');
 
   if (process.argv.includes('--android')) copyToAndroid(dest, modelKey, variantKey);
+  if (process.argv.includes('--sam2')) await fetchSam2();
 }
 
 /** Bundles the verified model into the Android app (app/src/main/assets/model). */

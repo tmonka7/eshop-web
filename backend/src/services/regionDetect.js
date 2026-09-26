@@ -15,8 +15,14 @@
  * score = norm(feature * (0.3 + 0.7 * colour)). Patches above
  * max(Otsu, 0.55 * max) form the mask; the connected component with the most
  * centre-weighted score is the product, and its bounding box is returned in
- * image fractions (0..1). The same algorithm runs on Android
- * (util/RegionDetector.java); keep the two in step.
+ * image fractions (0..1), with the component's strongest point (`peak`).
+ * The same box algorithm runs on Android (util/RegionDetector.java); keep the
+ * two in step.
+ *
+ * On the server the box and peak then prompt SAM2 (sam2.service.js), which
+ * traces the object's outline; boxFromMask() turns that mask into the final
+ * box. The DINOv3 box alone is patch-quantised and often cuts into or spills
+ * past the object; SAM2 fixes the edges, DINOv3 picks which object.
  *
  * Pure functions only - no I/O - so it can be unit tested with plain arrays.
  */
@@ -187,7 +193,9 @@ function label(mask, gw, gh) {
 /**
  * @param {{ patches: Float32Array, gw: number, gh: number, dim: number, rgb: Uint8Array }} input
  *   patches: gw*gh patch tokens row-major; rgb: (gw*8)x(gh*8) RGB pixels.
- * @returns {{ x: number, y: number, w: number, h: number, coverage: number, found: boolean }}
+ * @returns {{ x: number, y: number, w: number, h: number, coverage: number, found: boolean,
+ *   peak: { x: number, y: number } }} peak: centre of the patch with the highest
+ *   3x3-smoothed score inside the chosen component - a point on the product
  */
 function detectRegion({ patches, gw, gh, dim, rgb }) {
   const feature = featureCue(patches, gw, gh, dim);
@@ -203,7 +211,7 @@ function detectRegion({ patches, gw, gh, dim, rgb }) {
   const threshold = Math.max(otsu(score), REL_THRESHOLD * max);
   const mask = Uint8Array.from(score, (v) => (v >= threshold ? 1 : 0));
   const { labels, count } = label(mask, gw, gh);
-  if (!count) return { x: 0, y: 0, w: 1, h: 1, coverage: 1, found: false };
+  if (!count) return { x: 0, y: 0, w: 1, h: 1, coverage: 1, found: false, peak: { x: 0.5, y: 0.5 } };
 
   // Prefer the component with the most score, weighted towards the centre.
   const weight = new Float64Array(count + 1);
@@ -231,7 +239,83 @@ function detectRegion({ patches, gw, gh, dim, rgb }) {
   }
   const box = { x: x0 / gw, y: y0 / gh, w: (x1 + 1 - x0) / gw, h: (y1 + 1 - y0) / gh };
   const coverage = box.w * box.h;
-  return { ...roundBox(box), coverage: round4(coverage), found: coverage < WHOLE_IMAGE_COVERAGE };
+  return {
+    ...roundBox(box),
+    coverage: round4(coverage),
+    found: coverage < WHOLE_IMAGE_COVERAGE,
+    peak: peakOf(score, labels, bestLabel, gw, gh),
+  };
+}
+
+/**
+ * Centre of the component's patch with the highest 3x3 mean score. The
+ * smoothing keeps the point off thin or noisy spots, so it lands well inside
+ * the product - SAM2 then segments the object under it.
+ */
+function peakOf(score, labels, target, gw, gh) {
+  let best = -1;
+  let at = 0;
+  for (let i = 0; i < labels.length; i += 1) {
+    if (labels[i] !== target) continue;
+    const x = i % gw;
+    const y = Math.floor(i / gw);
+    let sum = 0;
+    for (let dy = -1; dy <= 1; dy += 1) {
+      for (let dx = -1; dx <= 1; dx += 1) {
+        const nx = x + dx;
+        const ny = y + dy;
+        // Outside the grid counts as 0, which nudges the point away from the photo edge.
+        if (nx >= 0 && ny >= 0 && nx < gw && ny < gh) sum += score[ny * gw + nx];
+      }
+    }
+    if (sum > best) {
+      best = sum;
+      at = i;
+    }
+  }
+  return { x: round4(((at % gw) + 0.5) / gw), y: round4((Math.floor(at / gw) + 0.5) / gh) };
+}
+
+/** Parts of a mask smaller than this share of its largest part are dropped as specks. */
+const MIN_MASK_PART = 0.1;
+
+/**
+ * Bounding box (image fractions) of a segmentation mask. Separate parts
+ * smaller than MIN_MASK_PART of the largest one are ignored, so stray specks
+ * elsewhere in the photo do not stretch the box; comparable parts - a handle
+ * seen apart from its cup - are kept.
+ * @param {ArrayLike<number>} mask width*height values, > 0 = object (e.g. logits)
+ * @returns {{x,y,w,h,area}|null} area: kept pixels / all pixels; null if empty
+ */
+function boxFromMask(mask, width, height) {
+  const on = Uint8Array.from(mask, (v) => (v > 0 ? 1 : 0));
+  const { labels, count } = label(on, width, height);
+  if (!count) return null;
+  const size = new Float64Array(count + 1);
+  for (const l of labels) if (l) size[l] += 1;
+  let largest = 0;
+  for (let l = 1; l <= count; l += 1) largest = Math.max(largest, size[l]);
+
+  let x0 = width;
+  let y0 = height;
+  let x1 = -1;
+  let y1 = -1;
+  let area = 0;
+  for (let i = 0; i < labels.length; i += 1) {
+    const l = labels[i];
+    if (!l || size[l] < MIN_MASK_PART * largest) continue;
+    const x = i % width;
+    const y = Math.floor(i / width);
+    x0 = Math.min(x0, x);
+    y0 = Math.min(y0, y);
+    x1 = Math.max(x1, x);
+    y1 = Math.max(y1, y);
+    area += 1;
+  }
+  return {
+    ...roundBox({ x: x0 / width, y: y0 / height, w: (x1 + 1 - x0) / width, h: (y1 + 1 - y0) / height }),
+    area: round4(area / (width * height)),
+  };
 }
 
 const round4 = (v) => Math.round(v * 10000) / 10000;
@@ -275,6 +359,8 @@ function sameBox(a, b) {
 
 module.exports = {
   detectRegion,
+  boxFromMask,
+  WHOLE_IMAGE_COVERAGE,
   sanitizeBox,
   sameBox,
   DETECTOR_ID,
