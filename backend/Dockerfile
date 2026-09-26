@@ -12,6 +12,11 @@ ENV ONNXRUNTIME_NODE_INSTALL=skip
 COPY package*.json .npmrc ./
 RUN npm ci --omit=dev || npm install --omit=dev
 
+# FAISS index for image search, installed on its own because it may fail: it
+# downloads a prebuilt binary at install time. Without it the API falls back
+# to a JavaScript scan (see src/services/vectorIndex.js).
+RUN npm run faiss:install || echo "faiss-node not installed: image search will use the JavaScript scan"
+
 # Includes ml/ - the DINOv3 model is baked into the image, so the container
 # needs no network access at runtime.
 COPY . .

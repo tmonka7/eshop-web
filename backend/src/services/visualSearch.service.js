@@ -189,10 +189,13 @@ async function getIndex() {
     // background rebuild nobody waits on from being an unhandled rejection.
     building.catch((err) => console.error('[visual] index rebuild failed:', err.message));
   }
-  // Answer from the previous index while the new one builds (an HNSW build
-  // over a large catalogue takes seconds). Removed or deactivated products are
-  // dropped again when the hits are loaded, and new ones appear once it lands.
-  return usable ? cache : building;
+  // A large HNSW graph takes seconds to build, so meanwhile answer from the
+  // previous one: removed or deactivated products are dropped again when the
+  // hits are loaded, and new ones appear once it lands. The exact index
+  // rebuilds quickly, and an empty one (built at boot before indexing
+  // finished) must never be served, so otherwise wait for the fresh index.
+  const serveStale = usable && cache.index.backend === 'faiss-hnsw' && cache.index.rows > 0;
+  return serveStale ? cache : building;
 }
 
 /* -------------------------------- indexing -------------------------------- */
@@ -534,17 +537,21 @@ async function warmUp() {
   // Settle whether SAM2 works before choosing what to re-index: the detector
   // id (and so which products count as stale) depends on it.
   if (env.visualSearch.detect && sam2.usable()) await sam2.load().catch(() => {});
+  let pending = null;
   try {
     if (env.visualSearch.indexOnBoot) {
-      const { started, job: j } = await reindexAll({ onlyPending: true });
+      const { started, job: j, done } = await reindexAll({ onlyPending: true });
       if (started && j.total) console.log('[visual] indexing ' + j.total + ' pending product(s) in the background');
+      if (started) pending = done;
     } else {
       await dinov3.load();
     }
   } catch (err) {
     console.warn('[visual] image search unavailable: ' + err.message);
   }
-  // Build the search index now rather than on the first shopper's search.
+  // Build the search index now rather than on the first shopper's search,
+  // but only once the pending products are in it.
+  await pending;
   getIndex().catch(() => {});
 }
 

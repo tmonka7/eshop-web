@@ -92,9 +92,12 @@ or restart the API. Search only compares vectors from the model that is currentl
   MongoDB 6 Community has no vector index, so the API loads the vectors into an in-memory FAISS
   index (`faiss-node`, inner product): exact `IndexFlatIP` below `VISUAL_SEARCH_ANN_HNSW_MIN_ROWS`
   image vectors, approximate `HNSW32,Flat` above. It is rebuilt in the background after changes,
-  and searches use the previous index until the new one is ready. `faiss-node` is an optional
-  dependency. If it cannot be installed (for example offline, because its install downloads a
-  prebuilt binary), the API falls back to a JavaScript scan and logs a warning.
+  and searches use the previous index until the new one is ready. `faiss-node` is not in
+  `package.json`, because a failed optional install crashes some npm versions. Install it with
+  `npm run faiss:install` (the Dockerfile does this). Run it again after any `npm install` or
+  `npm ci`, which remove it. It needs a prebuilt binary (Linux x64/arm64, macOS; none for
+  Windows) downloaded from GitHub at install time. Without it the API falls back to a JavaScript
+  scan and logs a warning.
 - **Preprocessing** matches `DINOv3ViTImageProcessor`: a plain resize to 224×224 (bilinear),
   scaling to [0, 1], then ImageNet mean and std. Transparent images are flattened onto white. The
   descriptor is `pooler_output`, the normalised CLS token.
