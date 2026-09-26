@@ -49,6 +49,15 @@ const env = {
     detect: bool(process.env.VISUAL_SEARCH_DETECT, true),
     // Longest side, in pixels, the photo is scaled to for detection.
     detectSide: int(process.env.VISUAL_SEARCH_DETECT_SIDE, 448),
+    // FAISS nearest-neighbour index (see vectorIndex.js). mode: 'auto' (exact
+    // below hnswMinRows image vectors, HNSW from there), 'flat', 'hnsw', or
+    // 'off' for the plain JavaScript scan.
+    ann: {
+      mode: (process.env.VISUAL_SEARCH_ANN || 'auto').toLowerCase(),
+      hnswMinRows: int(process.env.VISUAL_SEARCH_ANN_HNSW_MIN_ROWS, 50000),
+      // Graph links per node: higher is more accurate, larger and slower to build.
+      hnswM: int(process.env.VISUAL_SEARCH_ANN_HNSW_M, 32),
+    },
     // SAM2 traces the detected product's outline so the box follows its real
     // edges. Used when its files are present; see sam2.service.js.
     sam2: {

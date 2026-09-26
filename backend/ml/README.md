@@ -89,8 +89,12 @@ or restart the API. Search only compares vectors from the model that is currentl
   outcome is recorded in `product.visualIndex`, which the admin panel shows.
 - **Search**: `POST /api/v1/products/visual-search` (multipart field `image`) embeds the photo and
   ranks active products by cosine similarity. Each product is scored by its best-matching image.
-  MongoDB 6 Community has no vector index, so the API keeps the vectors in an in-memory matrix
-  that it rebuilds lazily after changes. A full scan takes milliseconds at catalogue scale.
+  MongoDB 6 Community has no vector index, so the API loads the vectors into an in-memory FAISS
+  index (`faiss-node`, inner product): exact `IndexFlatIP` below `VISUAL_SEARCH_ANN_HNSW_MIN_ROWS`
+  image vectors, approximate `HNSW32,Flat` above. It is rebuilt in the background after changes,
+  and searches use the previous index until the new one is ready. `faiss-node` is an optional
+  dependency. If it cannot be installed (for example offline, because its install downloads a
+  prebuilt binary), the API falls back to a JavaScript scan and logs a warning.
 - **Preprocessing** matches `DINOv3ViTImageProcessor`: a plain resize to 224×224 (bilinear),
   scaling to [0, 1], then ImageNet mean and std. Transparent images are flattened onto white. The
   descriptor is `pooler_output`, the normalised CLS token.

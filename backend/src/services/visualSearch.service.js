@@ -13,9 +13,9 @@
  * override it - shoppers per search, admins per catalogue image.
  *
  * MongoDB 6 Community has no vector index, so search runs over an in-memory
- * matrix built from the collection. It is rebuilt lazily after any write,
- * which is cheap at catalogue scale: 10k products x 3 images x 384 dims is
- * ~46 MB, and a full scan takes a few milliseconds.
+ * FAISS index (vectorIndex.js) built from the collection: exact for small
+ * catalogues, HNSW once it grows. It is rebuilt in the background after any
+ * write; searches keep using the previous index until the new one is ready.
  */
 const fs = require('fs/promises');
 const path = require('path');
@@ -26,6 +26,7 @@ const ProductEmbedding = require('../models/ProductEmbedding');
 const { UPLOAD_ROOT } = require('../middleware/upload');
 const dinov3 = require('./dinov3.service');
 const sam2 = require('./sam2.service');
+const { buildVectorIndex } = require('./vectorIndex');
 const {
   detectRegion, sanitizeBox, sameBox, DETECTOR_ID, PIXELS_PER_PATCH, WHOLE_IMAGE_COVERAGE,
 } = require('./regionDetect');
@@ -122,9 +123,9 @@ async function detectForImage(src) {
 
 /* ------------------------------ in-memory index --------------------------- */
 
-// Bumped on every write; the cached matrix is stale when the two differ.
+// Bumped on every write; the cached index is stale when the two differ.
 let generation = 0;
-let cache = null; // { generation, model, dim, matrix, rowProduct, productIds }
+let cache = null; // { generation, model, index } - index from vectorIndex.js
 let building = null;
 
 function invalidate() {
@@ -165,12 +166,16 @@ async function buildIndex(model) {
     rowProduct[i] = row.product;
   });
 
-  return { generation: startedGeneration, model, dim, matrix, rowProduct, productIds };
+  const index = await buildVectorIndex({ dim, matrix, rowProduct, productIds });
+  console.log('[visual] ' + index.backend + ' index: ' + index.rows + ' vectors, '
+    + index.products + ' products, built in ' + index.buildMs + ' ms');
+  return { generation: startedGeneration, model, index };
 }
 
 async function getIndex() {
   const model = dinov3.modelId();
-  if (cache && cache.generation === generation && cache.model === model) return cache;
+  const usable = cache && cache.model === model;
+  if (usable && cache.generation === generation) return cache;
   if (!building) {
     building = buildIndex(model)
       .then((built) => {
@@ -180,8 +185,14 @@ async function getIndex() {
       .finally(() => {
         building = null;
       });
+    // Callers that await `building` still see a failure; this only keeps a
+    // background rebuild nobody waits on from being an unhandled rejection.
+    building.catch((err) => console.error('[visual] index rebuild failed:', err.message));
   }
-  return building;
+  // Answer from the previous index while the new one builds (an HNSW build
+  // over a large catalogue takes seconds). Removed or deactivated products are
+  // dropped again when the hits are loaded, and new ones appear once it lands.
+  return usable ? cache : building;
 }
 
 /* -------------------------------- indexing -------------------------------- */
@@ -458,30 +469,16 @@ async function searchVector(vector, { limit = 24, minScore = env.visualSearch.mi
   if (!norm) return [];
   for (let i = 0; i < query.length; i += 1) query[i] /= norm;
 
-  const index = await getIndex();
-  if (!index.rowProduct.length) return [];
+  const { index } = await getIndex();
+  if (!index.rows) return [];
   if (index.dim !== query.length) {
     const err = new Error('Expected a ' + index.dim + '-d vector, got ' + query.length);
     err.code = 'DIMENSION_MISMATCH';
     throw err;
   }
 
-  const { dim, matrix, rowProduct, productIds } = index;
-  const best = new Float32Array(productIds.length).fill(-Infinity);
-  for (let row = 0; row < rowProduct.length; row += 1) {
-    let dot = 0;
-    const offset = row * dim;
-    for (let k = 0; k < dim; k += 1) dot += matrix[offset + k] * query[k];
-    const p = rowProduct[row];
-    if (dot > best[p]) best[p] = dot;
-  }
-
-  const ranked = [];
-  for (let p = 0; p < best.length; p += 1) {
-    if (best[p] >= minScore) ranked.push({ productId: productIds[p], score: best[p] });
-  }
-  ranked.sort((a, b) => b.score - a.score);
-  return ranked.slice(0, limit).map((r) => ({ ...r, score: Math.round(r.score * 10000) / 10000 }));
+  return index.searchProducts(query, { limit, minScore })
+    .map((r) => ({ ...r, score: Math.round(r.score * 10000) / 10000 }));
 }
 
 /* --------------------------------- status --------------------------------- */
@@ -515,6 +512,15 @@ async function status({ detailed = false } = {}) {
     products,
     byStatus: Object.fromEntries(byStatus.map((s) => [s._id || VISUAL_INDEX_STATUS.PENDING, s.count])),
     job: { ...job },
+    // The search index currently served; null until the first search builds it.
+    index: cache && {
+      backend: cache.index.backend,
+      rows: cache.index.rows,
+      products: cache.index.products,
+      builtAt: cache.index.builtAt,
+      buildMs: cache.index.buildMs,
+      stale: cache.generation !== generation,
+    },
   };
 }
 
@@ -538,6 +544,8 @@ async function warmUp() {
   } catch (err) {
     console.warn('[visual] image search unavailable: ' + err.message);
   }
+  // Build the search index now rather than on the first shopper's search.
+  getIndex().catch(() => {});
 }
 
 module.exports = {

@@ -56,6 +56,9 @@ Five more customers exist (`sarah@`, `mike@`, `emily@`, `david@`, `anna@` `examp
 | `VISUAL_SEARCH_DETECT_SIDE` | `448`                                 | longest side used for area detection     |
 | `VISUAL_SEARCH_SAM2`      | `true`                                  | fit the box to the product with SAM2     |
 | `VISUAL_SEARCH_SAM2_DIR`  | `ml/sam2.1-hiera-tiny`                  | SAM2 model folder                        |
+| `VISUAL_SEARCH_ANN`       | `auto`                                  | FAISS index: `auto`, `flat`, `hnsw`, `off` |
+| `VISUAL_SEARCH_ANN_HNSW_MIN_ROWS` | `50000`                         | `auto` switches to HNSW at this many vectors |
+| `VISUAL_SEARCH_ANN_HNSW_M`| `32`                                    | HNSW links per node                      |
 
 ## Image search (DINOv3)
 
